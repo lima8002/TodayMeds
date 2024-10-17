@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { SplashScreen, Stack } from "expo-router";
+import { router, SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import GlobalProvider from "../context/GlobalProvider";
 import { StatusBar } from "expo-status-bar";
@@ -26,12 +26,12 @@ function RootLayout() {
   }
 
   return (
-    <GlobalProvider>
+    <GlobalProvider route={router}>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="+not-found" />
+        <Stack.Screen name="(auth)" />
       </Stack>
     </GlobalProvider>
   );

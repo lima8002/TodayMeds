@@ -25,7 +25,7 @@ const GlobalProvider = ({ children }) => {
         setIsLoggedIn(true);
         setUser(credentials);
         fetchAllData(credentials.email);
-        router.replace("/home");
+        router.replace("(tabs)/home");
       } else {
         console.log("User is signed out");
         // Perform actions for signed-out user
