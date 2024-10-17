@@ -11,10 +11,10 @@ const NotFound = () => {
         backgroundColor: "#fff",
       }}
     >
-      <Image
-        source={require("@/assets/images/logo.png")}
+      {/* <Image
+        source={require("@/assets/images/main-logo.png")}
         style={{ width: "100%", height: 150 }}
-      />
+      /> */}
     </View>
   );
 };
