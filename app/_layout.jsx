@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { router, SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
-import GlobalProvider from "../context/GlobalProvider";
+import GlobalProvider, { useGlobalContext } from "../context/GlobalProvider";
 import { StatusBar } from "expo-status-bar";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -26,14 +27,17 @@ function RootLayout() {
   }
 
   return (
-    <GlobalProvider route={router}>
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="+not-found" />
-        <Stack.Screen name="(auth)" />
-      </Stack>
-    </GlobalProvider>
+    <ActionSheetProvider>
+      <GlobalProvider>
+        <StatusBar style="dark" />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(auth)" />
+
+          {/* <Stack.Screen name="+not-found" /> */}
+        </Stack>
+      </GlobalProvider>
+    </ActionSheetProvider>
   );
 }
 
