@@ -9,7 +9,7 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-utils/FirebaseCredentials.jsx
+utils/FirebaseCredentials.js
 
 # macOS
 .DS_Store
