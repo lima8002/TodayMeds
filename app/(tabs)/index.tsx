@@ -1,31 +1,8 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-// Sample data (replace this with your actual data source)
-const medications = [
-  {
-    id: "1",
-    name: "Aspirin",
-    dosage: "500mg",
-    frequency: "Once daily",
-    time: "8:00 AM",
-  },
-  {
-    id: "2",
-    name: "Lisinopril",
-    dosage: "10mg",
-    frequency: "Twice daily",
-    time: "9:00 AM, 9:00 PM",
-  },
-  {
-    id: "3",
-    name: "Metformin",
-    dosage: "1000mg",
-    frequency: "With meals",
-    time: "Breakfast, Dinner",
-  },
-];
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "expo-router";
 
 const MedicationItem = ({ item }) => (
   <View style={styles.medicationItem}>
@@ -38,6 +15,25 @@ const MedicationItem = ({ item }) => (
 );
 
 export default function MainScreen() {
+  const [medications, setMedications] = useState([]);
+
+  const fetchMedications = useCallback(async () => {
+    try {
+      const medicationsJSON = await AsyncStorage.getItem("medications");
+      if (medicationsJSON) {
+        setMedications(JSON.parse(medicationsJSON));
+      }
+    } catch (error) {
+      console.error("Error fetching medications:", error);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchMedications();
+    }, [fetchMedications])
+  );
+
   const renderItem = useCallback(
     ({ item }) => <MedicationItem item={item} />,
     []
@@ -46,11 +42,15 @@ export default function MainScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>TodayMeds</Text>
-      <FlatList
-        data={medications}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-      />
+      {medications.length > 0 ? (
+        <FlatList
+          data={medications}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+        />
+      ) : (
+        <Text style={styles.placeholderText}>No medications found.</Text>
+      )}
     </SafeAreaView>
   );
 }
@@ -84,5 +84,11 @@ const styles = StyleSheet.create({
   },
   medicationInfo: {
     fontFamily: "outfit",
+  },
+  placeholderText: {
+    fontSize: 16,
+    fontFamily: "outfit",
+    textAlign: "center",
+    color: "#888",
   },
 });
