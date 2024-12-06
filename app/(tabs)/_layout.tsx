@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { Stack, Tabs } from "expo-router";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export default function TabLayout() {
@@ -7,20 +7,25 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
-          tabBarLabelStyle: { fontFamily: "outfit" },
+          title: "Today",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <IconSymbol name="calendar" color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="add"
+        name="medications"
         options={{
-          title: "Add Medication",
-          tabBarLabelStyle: { fontFamily: "outfit" },
+          title: "Medications",
+          tabBarIcon: ({ color }) => <IconSymbol name="pill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="agenda"
+        options={{
+          title: "Agenda",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="plus.circle.fill" color={color} />
+            <IconSymbol name="list.bullet" color={color} />
           ),
         }}
       />

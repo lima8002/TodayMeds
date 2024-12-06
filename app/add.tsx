@@ -1,4 +1,8 @@
+add.tsx;
+import DatePicker from "react-native-date-picker";
+import { Checkbox } from "react-native-paper";
 import React, { useState } from "react";
+import { useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -10,29 +14,22 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import { Checkbox } from "react-native-paper";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 export default function AddMedicationScreen() {
   const [name, setName] = useState("");
   const [dosage, setDosage] = useState("");
   const [frequency, setFrequency] = useState("");
-  const [time, setTime] = useState("");
+  const [dateTime, setDateTime] = useState(new Date());
   const [quantity, setQuantity] = useState("");
-  const [startDate, setStartDate] = useState("");
   const [withFoodWater, setWithFoodWater] = useState(false);
+  const [openDateTimePicker, setOpenDateTimePicker] = useState(false);
+
   const router = useRouter();
-  const tabBarHeight = useBottomTabBarHeight();
-  const insets = useSafeAreaInsets();
 
   const handleAddMedication = async () => {
-    if (name && dosage && frequency && time && quantity && startDate) {
+    if (name && dosage && frequency && dateTime && quantity) {
       try {
         // Get existing medications
         const existingMedicationsJSON = await AsyncStorage.getItem(
@@ -48,9 +45,8 @@ export default function AddMedicationScreen() {
           name,
           dosage,
           frequency,
-          time,
+          dateTime: dateTime.toISOString(),
           quantity,
-          startDate,
           withFoodWater,
         };
         medications.push(newMedication);
@@ -83,29 +79,33 @@ export default function AddMedicationScreen() {
     }
   };
 
+  const newMedication = {
+    id: Date.now().toString(),
+    name,
+    dosage,
+    frequency: `Every ${frequency} hours`,
+    dateTime: dateTime.toISOString(),
+    quantity,
+    withFoodWater,
+  };
+
   const resetForm = () => {
     setName("");
     setDosage("");
     setFrequency("");
-    setTime("");
+    setDateTime(new Date());
     setQuantity("");
-    setStartDate("");
     setWithFoodWater(false);
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      <Text style={styles.title}>Add Medication</Text>
+    <SafeAreaView style={styles.container} edges={["left", "right"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
-        // keyboardVerticalOffset={-insets.bottom}
       >
         <ScrollView
-          contentContainerStyle={[
-            styles.scrollView,
-            { paddingBottom: tabBarHeight - insets.bottom },
-          ]}
+          contentContainerStyle={styles.scrollView}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.card}>
@@ -128,39 +128,50 @@ export default function AddMedicationScreen() {
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Frequency</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g., Once daily"
-                value={frequency}
-                onChangeText={setFrequency}
-              />
+              <Text style={styles.label}>Frequency (hours)</Text>
+              <View style={styles.frequencyContainer}>
+                <TextInput
+                  style={[styles.input, styles.frequencyInput]}
+                  placeholder="e.g., 8"
+                  value={frequency.toString()}
+                  onChangeText={(text) => {
+                    const num = parseInt(text);
+                    setFrequency(isNaN(num) ? "" : num);
+                  }}
+                  keyboardType="numeric"
+                />
+              </View>
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Time</Text>
-              <TextInput
+              <Text style={styles.label}>Date and Time</Text>
+              <TouchableOpacity
                 style={styles.input}
-                placeholder="e.g., 8:00 AM"
-                value={time}
-                onChangeText={setTime}
+                onPress={() => setOpenDateTimePicker(true)}
+              >
+                <Text style={styles.text}>{dateTime.toLocaleString()}</Text>
+              </TouchableOpacity>
+              <DatePicker
+                modal
+                open={openDateTimePicker}
+                date={dateTime}
+                minuteInterval={15}
+                onConfirm={(date) => {
+                  setOpenDateTimePicker(false);
+                  setDateTime(date);
+                }}
+                onCancel={() => {
+                  setOpenDateTimePicker(false);
+                }}
+                mode="datetime"
               />
             </View>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Quantity</Text>
               <TextInput
                 style={styles.input}
-                placeholder="e.g., 30 tablets"
+                placeholder="e.g., 30"
                 value={quantity}
                 onChangeText={setQuantity}
-              />
-            </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Start Date</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g., 2023-05-15"
-                value={startDate}
-                onChangeText={setStartDate}
               />
             </View>
             <View style={styles.checkboxContainer}>
@@ -210,13 +221,13 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "white",
-    borderRadius: 15,
+    borderRadius: 10,
     padding: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowRadius: 4,
+    elevation: 3,
   },
   inputGroup: {
     marginBottom: 20,
@@ -236,6 +247,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "outfit-regular",
     backgroundColor: "#f9f9f9",
+  },
+  text: {
+    paddingTop: 15,
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -259,5 +273,34 @@ const styles = StyleSheet.create({
     color: "white",
     fontFamily: "outfit-bold",
     fontSize: 18,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  frequencyContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  frequencyInput: {
+    flex: 1,
+    marginRight: 10,
   },
 });

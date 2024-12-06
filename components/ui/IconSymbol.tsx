@@ -13,7 +13,9 @@ const MAPPING = {
   "house.fill": "home",
   "plus.circle.fill": "add-circle",
   gear: "settings",
-  // Add more mappings as needed
+  calendar: "event",
+  pill: "local-pharmacy",
+  "list.bullet": "list",
 };
 
 export type IconSymbolName = keyof typeof MAPPING;
