@@ -75,7 +75,7 @@ export default function MainScreen() {
   );
 
   const handleAddMedication = () => {
-    router.push("/add");
+    router.push("/(meds)/add");
   };
 
   const handleMarkAsTaken = (dose: DoseSchedule) => {
