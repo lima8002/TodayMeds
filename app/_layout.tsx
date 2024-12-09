@@ -6,7 +6,7 @@ import { StatusBar } from "expo-status-bar";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
+  const [fontsLoaded, error] = useFonts({
     outfit: require("../assets/fonts/Outfit-Regular.ttf"),
     "outfit-medium": require("../assets/fonts/Outfit-Medium.ttf"),
     "outfit-bold": require("../assets/fonts/Outfit-Bold.ttf"),
@@ -14,15 +14,13 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (error) throw error;
-  }, [error]);
 
-  useEffect(() => {
-    if (loaded) {
+    if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [fontsLoaded, error]);
 
-  if (!loaded) {
+  if (!fontsLoaded && !error) {
     return null;
   }
 
