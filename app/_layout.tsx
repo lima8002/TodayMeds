@@ -3,11 +3,6 @@ import { SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 
-export const unstable_settings = {
-  initialRouteName: "(tabs)",
-};
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -17,7 +12,6 @@ export default function RootLayout() {
     "outfit-bold": require("../assets/fonts/Outfit-Bold.ttf"),
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -39,15 +33,10 @@ function RootLayoutNav() {
   return (
     <>
       <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        {/* <Stack.Screen
-          name="add"
-          options={{
-            presentation: "modal",
-            title: "Add Medication",
-            headerShown: true,
-          }}
-        /> */}
+        <Stack.Screen name="(meds)" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="dark" />
     </>

@@ -1,4 +1,3 @@
-add.tsx;
 import DatePicker from "react-native-date-picker";
 import { Checkbox } from "react-native-paper";
 import React, { useState } from "react";

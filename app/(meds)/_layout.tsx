@@ -2,11 +2,11 @@ import { Stack } from "expo-router";
 export default function MedsLayout() {
   return (
     <>
-      <Stack>
+      <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen
           name="add"
           options={{
-            presentation: "fullScreenModal",
+            presentation: "modal",
             title: "Add Medication",
             headerShown: true,
           }}
