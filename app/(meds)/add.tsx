@@ -1,5 +1,3 @@
-import DatePicker from "react-native-date-picker";
-import { Checkbox } from "react-native-paper";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import {
@@ -11,6 +9,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Modal,
   ScrollView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,6 +17,9 @@ import CustomHeader from "@/components/ui/CustomHeader";
 import CustomFloatButton from "@/components/ui/CustomFloatButton";
 import CustomButton from "@/components/ui/CustomButton";
 import { Colors } from "@/constants/Colors";
+import DatePicker from "react-native-date-picker";
+import { Picker } from "@react-native-picker/picker";
+import { Checkbox } from "react-native-paper";
 
 export default function AddMedicationScreen() {
   const [name, setName] = useState("");
@@ -29,6 +31,9 @@ export default function AddMedicationScreen() {
   const [openDateTimePicker, setOpenDateTimePicker] = useState(false);
   const [selectedDosage, setSelectedDosage] = useState<string | null>(null);
   const [otherDosage, setOtherDosage] = useState("");
+
+  const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
+  const [tempFrequency, setTempFrequency] = useState("");
 
   const router = useRouter();
 
@@ -117,6 +122,7 @@ export default function AddMedicationScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.card}>
+            {/* Medication Name */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Medication Name</Text>
               <TextInput
@@ -126,6 +132,8 @@ export default function AddMedicationScreen() {
                 onChangeText={setName}
               />
             </View>
+
+            {/* Pill/Tablet per Intake */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Pill/Tablet per Intake</Text>
               <View style={styles.dosageContainer}>
@@ -161,8 +169,9 @@ export default function AddMedicationScreen() {
                       <Text
                         style={[
                           styles.dosageOptionText,
-                          selectedDosage === option &&
-                            styles.selectedDosageOptionText,
+                          selectedDosage === option
+                            ? styles.selectedDosageOptionText
+                            : null,
                         ]}
                       >
                         {option}
@@ -180,21 +189,72 @@ export default function AddMedicationScreen() {
                 />
               )}
             </View>
+
+            {/* Frequency */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Frequency (hours)</Text>
-              <View style={styles.frequencyContainer}>
-                <TextInput
-                  style={[styles.input, styles.frequencyInput]}
-                  placeholder="e.g., 8"
-                  value={frequency.toString()}
-                  onChangeText={(text) => {
-                    const num = parseInt(text);
-                    setFrequency(isNaN(num) ? "" : num);
-                  }}
-                  keyboardType="numeric"
-                />
-              </View>
+              <Text style={styles.label}>Frequency Hours</Text>
+              <TouchableOpacity
+                style={styles.input}
+                onPress={() => setShowFrequencyPicker(true)}
+              >
+                {frequency ? (
+                  <Text style={styles.pickerText}>
+                    Every {frequency} hour{parseInt(frequency) > 1 ? "s" : ""}
+                  </Text>
+                ) : (
+                  <Text style={styles.pickerTextDisabled}>
+                    e.g., Every 4 hours
+                  </Text>
+                )}
+              </TouchableOpacity>
             </View>
+
+            <Modal
+              visible={showFrequencyPicker}
+              transparent={true}
+              animationType="slide"
+            >
+              <View style={styles.modalPickerContainer}>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={tempFrequency}
+                    onValueChange={(itemValue) => setTempFrequency(itemValue)}
+                    style={styles.picker}
+                  >
+                    <Picker.Item label="Select frequency" value="" />
+                    {[...Array(24)].map((_, i) => (
+                      <Picker.Item
+                        key={i + 1}
+                        label={`Every ${i + 1} hour${i === 0 ? "" : "s"}`}
+                        value={(i + 1).toString()}
+                      />
+                    ))}
+                  </Picker>
+                  <View style={styles.buttonPickerContainer}>
+                    <TouchableOpacity
+                      style={[styles.button, styles.cancelButton]}
+                      onPress={() => setShowFrequencyPicker(false)}
+                    >
+                      <Text style={styles.buttonText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.button, styles.confirmButton]}
+                      onPress={() => {
+                        if (tempFrequency != null) {
+                          setFrequency(tempFrequency);
+                        }
+                        setShowFrequencyPicker(false);
+                      }}
+                    >
+                      <Text style={styles.buttonText}>Confirm</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </Modal>
+
+            {/* Date and Time */}
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Date and Time</Text>
               <TouchableOpacity
@@ -218,8 +278,10 @@ export default function AddMedicationScreen() {
                 mode="datetime"
               />
             </View>
+
+            {/* Box Quantity */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Quantity</Text>
+              <Text style={styles.label}>Box Quantity</Text>
               <TextInput
                 style={styles.input}
                 placeholder="e.g., 30"
@@ -227,6 +289,8 @@ export default function AddMedicationScreen() {
                 onChangeText={setQuantity}
               />
             </View>
+
+            {/* Take with food/water */}
             <View style={styles.checkboxContainer}>
               <View style={styles.checkboxBorder}>
                 <Checkbox
@@ -240,6 +304,8 @@ export default function AddMedicationScreen() {
                 <Text style={styles.checkboxLabel}>Take with food/water</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Add Medication Button */}
             <CustomButton text="Add Medication" onPress={handleAddMedication} />
           </View>
         </ScrollView>
@@ -368,10 +434,11 @@ const styles = StyleSheet.create({
   dosageOption: {
     width: "48%",
     borderWidth: 1,
-    borderColor: Colors.LIGHTGRAY,
+    borderColor: Colors.BORDERDISABLED,
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
+    backgroundColor: Colors.BACKGROUNDDISABLED,
   },
   selectedDosageOption: {
     borderColor: Colors.TERTIARY,
@@ -404,9 +471,59 @@ const styles = StyleSheet.create({
     fontFamily: "outfit-medium",
   },
   selectedDosageOptionText: {
-    color: Colors.PRIMARY,
+    color: "black",
   },
   otherDosageInput: {
     marginTop: 10,
+  },
+  picker: {
+    height: 50,
+    width: "100%",
+  },
+
+  modalPickerContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  pickerContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  pickerText: {
+    fontSize: 16,
+    color: "#333",
+    paddingTop: 14,
+    fontFamily: "outfit",
+  },
+  pickerTextDisabled: {
+    fontSize: 16,
+    color: Colors.DARKGRAY,
+    paddingTop: 14,
+    fontFamily: "outfit",
+  },
+  buttonPickerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  buttonPicker: {
+    padding: 10,
+    borderRadius: 5,
+    width: "45%",
+  },
+  cancelButton: {
+    backgroundColor: "#ccc",
+  },
+  confirmButton: {
+    backgroundColor: Colors.PRIMARY,
+  },
+  buttonPickerText: {
+    color: "white",
+    textAlign: "center",
+    fontSize: 16,
+    fontFamily: "outfit-medium",
   },
 });
