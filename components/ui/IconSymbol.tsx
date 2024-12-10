@@ -16,6 +16,7 @@ const MAPPING = {
   calendar: "event",
   pill: "local-pharmacy",
   "list.bullet": "list",
+  xmark: "close",
 };
 
 export type IconSymbolName = keyof typeof MAPPING;
@@ -45,7 +46,7 @@ function IconSymbolIOS({ name, size = 24, color, style }: IconSymbolProps) {
   );
 }
 
-export function IconSymbol({ name, size = 24, color, style }: IconSymbolProps) {
+export function IconSymbol({ name, size, color, style }: IconSymbolProps) {
   if (Platform.OS === "ios") {
     return (
       <IconSymbolIOS name={name} size={size} color={color} style={style} />

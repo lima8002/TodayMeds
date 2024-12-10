@@ -8,7 +8,6 @@ export default function MedsLayout() {
           options={{
             presentation: "modal",
             title: "Add Medication",
-            headerShown: true,
           }}
         />
       </Stack>

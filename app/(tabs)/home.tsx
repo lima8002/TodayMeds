@@ -10,8 +10,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Colors } from "@/constants/Colors";
+import CustomFloatButton from "@/components/ui/CustomFloatButton";
 
 export default function MainScreen() {
   const router = useRouter();
@@ -28,13 +28,11 @@ export default function MainScreen() {
     }
   }, []);
 
-  const handleAddMedication = () => {
-    router.push("/add");
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>{greeting}</Text>
+    <View style={styles.container}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>{greeting}</Text>
+      </View>
       <ScrollView style={styles.scrollView}>
         <View style={styles.contentContainer}>
           <Text style={styles.textMainTitle}>Today's Agenda</Text>
@@ -48,18 +46,21 @@ export default function MainScreen() {
           </View>
         </View>
       </ScrollView>
-      <TouchableOpacity style={styles.addButton} onPress={handleAddMedication}>
-        <IconSymbol name="plus.circle.fill" size={56} color="#007AFF" />
-      </TouchableOpacity>
-    </SafeAreaView>
+      <CustomFloatButton />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  titleContainer: {
     backgroundColor: Colors.LOGO_BACKGROUND,
     overflow: "hidden",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    paddingTop: "15%",
   },
   title: {
     paddingHorizontal: 20,
@@ -74,20 +75,11 @@ const styles = StyleSheet.create({
     paddingBottom: "3%",
   },
   scrollView: {
-    flex: 1,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    // backgroundColor: "#fff",
   },
   contentContainer: {
     padding: 20,
   },
-  addButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-  },
-
   dayCard: {
     width: "17%",
   },

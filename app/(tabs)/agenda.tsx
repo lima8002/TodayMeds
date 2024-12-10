@@ -1,13 +1,12 @@
+import CustomHeader from "@/components/ui/CustomHeader";
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AgendaScreen() {
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Agenda</Text>
-      {/* Add your agenda or schedule management UI here */}
-    </SafeAreaView>
+    <View>
+      <CustomHeader title={"Agenda"} />
+    </View>
   );
 }
 

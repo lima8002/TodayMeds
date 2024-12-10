@@ -1,5 +1,6 @@
 import { Stack, Tabs } from "expo-router";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Colors } from "@/constants/Colors";
 
 export default function TabLayout() {
   return (
@@ -7,6 +8,7 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarLabelStyle: { fontFamily: "outfit", fontSize: 12 },
+        tabBarActiveTintColor: Colors.LOGO_BACKGROUND,
       }}
     >
       <Tabs.Screen
@@ -14,7 +16,7 @@ export default function TabLayout() {
         options={{
           title: "TodayMeds",
           tabBarIcon: ({ color }) => (
-            <IconSymbol name="calendar" color={color} />
+            <IconSymbol size={24} name="calendar" color={color} />
           ),
         }}
       />
@@ -22,7 +24,9 @@ export default function TabLayout() {
         name="medications"
         options={{
           title: "Medications",
-          tabBarIcon: ({ color }) => <IconSymbol name="pill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={24} name="pill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -30,7 +34,7 @@ export default function TabLayout() {
         options={{
           title: "Agenda",
           tabBarIcon: ({ color }) => (
-            <IconSymbol name="list.bullet" color={color} />
+            <IconSymbol size={24} name="list.bullet" color={color} />
           ),
         }}
       />
@@ -39,7 +43,7 @@ export default function TabLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="gear" color={color} />
+            <IconSymbol size={24} name="gear" color={color} />
           ),
         }}
       />

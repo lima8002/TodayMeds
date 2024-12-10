@@ -13,8 +13,11 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomHeader from "@/components/ui/CustomHeader";
+import CustomFloatButton from "@/components/ui/CustomFloatButton";
+import CustomButton from "@/components/ui/CustomButton";
+import { Colors } from "@/constants/Colors";
 
 export default function AddMedicationScreen() {
   const [name, setName] = useState("");
@@ -24,11 +27,15 @@ export default function AddMedicationScreen() {
   const [quantity, setQuantity] = useState("");
   const [withFoodWater, setWithFoodWater] = useState(false);
   const [openDateTimePicker, setOpenDateTimePicker] = useState(false);
+  const [selectedDosage, setSelectedDosage] = useState<string | null>(null);
+  const [otherDosage, setOtherDosage] = useState("");
 
   const router = useRouter();
 
   const handleAddMedication = async () => {
-    if (name && dosage && frequency && dateTime && quantity) {
+    const finalDosage =
+      selectedDosage === "Other" ? otherDosage : selectedDosage;
+    if (name && finalDosage && frequency && dateTime && quantity) {
       try {
         // Get existing medications
         const existingMedicationsJSON = await AsyncStorage.getItem(
@@ -42,7 +49,7 @@ export default function AddMedicationScreen() {
         const newMedication = {
           id: Date.now().toString(),
           name,
-          dosage,
+          dosage: finalDosage,
           frequency,
           dateTime: dateTime.toISOString(),
           quantity,
@@ -98,7 +105,9 @@ export default function AddMedicationScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right"]}>
+    <View style={styles.container}>
+      <CustomHeader title="Add Medication" />
+      <CustomFloatButton type="CLOSE" />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
@@ -118,13 +127,58 @@ export default function AddMedicationScreen() {
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Dosage</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g., 500mg"
-                value={dosage}
-                onChangeText={setDosage}
-              />
+              <Text style={styles.label}>Pill/Tablet per Intake</Text>
+              <View style={styles.dosageContainer}>
+                {["1", "2", "3", "Other"].map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.dosageOption,
+                      selectedDosage === option && styles.selectedDosageOption,
+                    ]}
+                    onPress={() => {
+                      if (selectedDosage === option) {
+                        setSelectedDosage(null);
+                      } else {
+                        setSelectedDosage(option);
+                        if (option !== "Other") {
+                          setOtherDosage("");
+                        }
+                      }
+                    }}
+                  >
+                    <View style={styles.checkboxWrapper}>
+                      <View
+                        style={[
+                          styles.checkbox,
+                          selectedDosage === option && styles.checkedCheckbox,
+                        ]}
+                      >
+                        {selectedDosage === option && (
+                          <View style={styles.checkboxInner} />
+                        )}
+                      </View>
+                      <Text
+                        style={[
+                          styles.dosageOptionText,
+                          selectedDosage === option &&
+                            styles.selectedDosageOptionText,
+                        ]}
+                      >
+                        {option}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {selectedDosage === "Other" && (
+                <TextInput
+                  style={[styles.input, styles.otherDosageInput]}
+                  placeholder="e.g., 5"
+                  value={otherDosage}
+                  onChangeText={setOtherDosage}
+                />
+              )}
             </View>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Frequency (hours)</Text>
@@ -174,26 +228,23 @@ export default function AddMedicationScreen() {
               />
             </View>
             <View style={styles.checkboxContainer}>
-              <Checkbox
-                status={withFoodWater ? "checked" : "unchecked"}
-                onPress={() => setWithFoodWater(!withFoodWater)}
-              />
+              <View style={styles.checkboxBorder}>
+                <Checkbox
+                  status={withFoodWater ? "checked" : "unchecked"}
+                  onPress={() => setWithFoodWater(!withFoodWater)}
+                />
+              </View>
               <TouchableOpacity
                 onPress={() => setWithFoodWater(!withFoodWater)}
               >
                 <Text style={styles.checkboxLabel}>Take with food/water</Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleAddMedication}
-            >
-              <Text style={styles.buttonText}>Add Medication</Text>
-            </TouchableOpacity>
+            <CustomButton text="Add Medication" onPress={handleAddMedication} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -255,6 +306,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
+  checkboxBorder: {
+    borderWidth: Platform.OS === "ios" ? 1 : 0,
+    borderColor: Colors.LIGHTGRAY,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
   checkboxLabel: {
     marginLeft: 8,
     fontSize: 16,
@@ -301,5 +358,55 @@ const styles = StyleSheet.create({
   frequencyInput: {
     flex: 1,
     marginRight: 10,
+  },
+
+  dosageContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+  },
+  dosageOption: {
+    width: "48%",
+    borderWidth: 1,
+    borderColor: Colors.LIGHTGRAY,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  selectedDosageOption: {
+    borderColor: Colors.TERTIARY,
+  },
+  checkboxWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: Colors.LIGHTGRAY,
+    marginRight: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkedCheckbox: {
+    borderColor: Colors.TERTIARY,
+  },
+  checkboxInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: Colors.PRIMARY,
+  },
+  dosageOptionText: {
+    color: Colors.DARKGRAY,
+    fontFamily: "outfit-medium",
+  },
+  selectedDosageOptionText: {
+    color: Colors.PRIMARY,
+  },
+  otherDosageInput: {
+    marginTop: 10,
   },
 });

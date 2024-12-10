@@ -1,13 +1,12 @@
+import CustomHeader from "@/components/ui/CustomHeader";
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
-      {/* Add settings options here */}
-    </SafeAreaView>
+    <View>
+      <CustomHeader title={"Settings"} />
+    </View>
   );
 }
 
