@@ -3,7 +3,12 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarLabelStyle: { fontFamily: "outfit", fontSize: 12 },
+      }}
+    >
       <Tabs.Screen
         name="home"
         options={{
@@ -33,7 +38,6 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: "Settings",
-          tabBarLabelStyle: { fontFamily: "outfit" },
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="gear" color={color} />
           ),

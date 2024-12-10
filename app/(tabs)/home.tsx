@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -34,7 +35,19 @@ export default function MainScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>{greeting}</Text>
-      <View style={styles.subContainer}></View>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.contentContainer}>
+          <Text style={styles.textMainTitle}>Today's Agenda</Text>
+          <View style={styles.dayCard}>
+            <View style={styles.cardTop}>
+              <Text style={styles.dayTitle}>TUE</Text>
+            </View>
+            <View style={styles.cardBottom}>
+              <Text style={styles.dayDate}>10</Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
       <TouchableOpacity style={styles.addButton} onPress={handleAddMedication}>
         <IconSymbol name="plus.circle.fill" size={56} color="#007AFF" />
       </TouchableOpacity>
@@ -45,75 +58,64 @@ export default function MainScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    paddingTop: "15%",
     backgroundColor: Colors.LOGO_BACKGROUND,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
     overflow: "hidden",
   },
-  subContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
   title: {
+    paddingHorizontal: 20,
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "Outfit-Bold",
     marginBottom: 20,
     color: "#fff",
   },
-  doseItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
+  textMainTitle: {
+    fontFamily: "outfit-medium",
+    fontSize: 20,
+    paddingBottom: "3%",
   },
-  doseTime: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginRight: 15,
-    color: "#007AFF",
-  },
-  doseDetails: {
+  scrollView: {
     flex: 1,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
-  doseMedication: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-  },
-  doseInstructions: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 5,
-  },
-  markAsTakenButton: {
-    backgroundColor: "#007AFF",
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  markAsTakenText: {
-    color: "white",
-    fontWeight: "500",
-  },
-  emptyText: {
-    textAlign: "center",
-    fontSize: 16,
-    color: "#666",
-    marginTop: 20,
+  contentContainer: {
+    padding: 20,
   },
   addButton: {
     position: "absolute",
     bottom: 20,
     right: 20,
+  },
+
+  dayCard: {
+    width: "17%",
+  },
+
+  cardTop: {
+    backgroundColor: Colors.TERTIARY,
+    borderWidth: 0.6,
+    borderColor: Colors.GRAY,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+  },
+  cardBottom: {
+    backgroundColor: "#fff",
+    borderWidth: 0.6,
+    borderColor: Colors.GRAY,
+    borderBottomLeftRadius: 14,
+    borderBottomRightRadius: 14,
+  },
+  dayDate: {
+    fontFamily: "outfit-medium",
+    fontSize: 28,
+    color: Colors.PRIMARY,
+    alignSelf: "center",
+  },
+  dayTitle: {
+    fontFamily: "outfit-medium",
+    fontSize: 18,
+    color: "white",
+    alignSelf: "center",
   },
 });
