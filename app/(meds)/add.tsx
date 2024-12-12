@@ -22,20 +22,29 @@ import { Picker } from "@react-native-picker/picker";
 import { Checkbox } from "react-native-paper";
 
 export default function AddMedicationScreen() {
-  const [name, setName] = useState("");
-  const [dosage, setDosage] = useState("");
-  const [frequency, setFrequency] = useState("");
+  const [name, setName] = useState<string | null>(null);
+  const [dosage, setDosage] = useState<string | null>(null);
+  const [frequency, setFrequency] = useState<string | null>(null);
   const [dateTime, setDateTime] = useState(new Date());
-  const [quantity, setQuantity] = useState("");
-  const [withFoodWater, setWithFoodWater] = useState(false);
-  const [openDateTimePicker, setOpenDateTimePicker] = useState(false);
-  const [selectedDosage, setSelectedDosage] = useState<string | null>(null);
-  const [otherDosage, setOtherDosage] = useState("");
+  const [formattedDT, setFormattedDT] = useState<boolean | null>(false);
 
-  const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
-  const [tempFrequency, setTempFrequency] = useState("");
+  const [quantity, setQuantity] = useState<string | null>(null);
+  const [withFoodWater, setWithFoodWater] = useState<boolean | null>(false);
+  const [openDateTimePicker, setOpenDateTimePicker] = useState<boolean | null>(
+    false
+  );
+  const [selectedDosage, setSelectedDosage] = useState<string | null>(null);
+  const [otherDosage, setOtherDosage] = useState<string | null>(null);
+
+  const [showFrequencyPicker, setShowFrequencyPicker] = useState<
+    boolean | null
+  >(false);
+  const [tempFrequency, setTempFrequency] = useState<string | null>(null);
 
   const router = useRouter();
+
+  let minutes = Math.round(dateTime.getMinutes() / 15) * 15;
+  dateTime.setMinutes(minutes);
 
   const handleAddMedication = async () => {
     const finalDosage =
@@ -107,6 +116,7 @@ export default function AddMedicationScreen() {
     setDateTime(new Date());
     setQuantity("");
     setWithFoodWater(false);
+    setFormattedDT(false);
   };
 
   return (
@@ -128,6 +138,7 @@ export default function AddMedicationScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Enter medication name"
+                placeholderTextColor={Colors.DARKGRAY}
                 value={name}
                 onChangeText={setName}
               />
@@ -198,13 +209,11 @@ export default function AddMedicationScreen() {
                 onPress={() => setShowFrequencyPicker(true)}
               >
                 {frequency ? (
-                  <Text style={styles.pickerText}>
+                  <Text style={styles.text}>
                     Every {frequency} hour{parseInt(frequency) > 1 ? "s" : ""}
                   </Text>
                 ) : (
-                  <Text style={styles.pickerTextDisabled}>
-                    e.g., Every 4 hours
-                  </Text>
+                  <Text style={styles.textDisabled}>e.g., Every 4 hours</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -261,7 +270,17 @@ export default function AddMedicationScreen() {
                 style={styles.input}
                 onPress={() => setOpenDateTimePicker(true)}
               >
-                <Text style={styles.text}>{dateTime.toLocaleString()}</Text>
+                <Text style={formattedDT ? styles.text : styles.textDisabled}>
+                  {formattedDT ? null : "e.g., "}
+                  {dateTime.toLocaleString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  })}
+                </Text>
               </TouchableOpacity>
               <DatePicker
                 modal
@@ -271,9 +290,11 @@ export default function AddMedicationScreen() {
                 onConfirm={(date) => {
                   setOpenDateTimePicker(false);
                   setDateTime(date);
+                  setFormattedDT(true);
                 }}
                 onCancel={() => {
                   setOpenDateTimePicker(false);
+                  setFormattedDT(false);
                 }}
                 mode="datetime"
               />
@@ -285,6 +306,7 @@ export default function AddMedicationScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="e.g., 30"
+                placeholderTextColor={Colors.DARKGRAY}
                 value={quantity}
                 onChangeText={setQuantity}
               />
@@ -361,11 +383,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 15,
     fontSize: 16,
-    fontFamily: "outfit-regular",
+    fontFamily: "outfit",
     backgroundColor: "#f9f9f9",
-  },
-  text: {
-    paddingTop: 15,
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -492,13 +511,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
-  pickerText: {
+  text: {
     fontSize: 16,
     color: "#333",
     paddingTop: 14,
     fontFamily: "outfit",
   },
-  pickerTextDisabled: {
+  textDisabled: {
     fontSize: 16,
     color: Colors.DARKGRAY,
     paddingTop: 14,
