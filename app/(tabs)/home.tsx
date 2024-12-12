@@ -15,7 +15,7 @@ import CustomFloatButton from "@/components/ui/CustomFloatButton";
 
 export default function MainScreen() {
   const router = useRouter();
-  const [greeting, setGreeting] = useState("");
+  const [greeting, setGreeting] = useState<string | null>(null);
 
   useEffect(() => {
     const currentHour = new Date().getHours();
