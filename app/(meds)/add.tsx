@@ -444,7 +444,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
   },
-
   dosageContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
