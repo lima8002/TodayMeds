@@ -60,7 +60,7 @@ function RootLayoutNav() {
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(meds)" />
+        <Stack.Screen name="(modals)" />
       </Stack>
       <StatusBar style="dark" />
     </>

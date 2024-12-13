@@ -10,6 +10,13 @@ export default function MedsLayout() {
             title: "Add Medication",
           }}
         />
+        <Stack.Screen
+          name="edit"
+          options={{
+            presentation: "modal",
+            title: "Edit Medication",
+          }}
+        />
       </Stack>
     </>
   );
