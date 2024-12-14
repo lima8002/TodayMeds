@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
     elevation: 6,
     shadowRadius: 15,
     shadowOffset: { width: 1, height: 13 },
+    backgroundColor: "white",
   },
   container_QUATERNARY: {
     backgroundColor: "white",

@@ -16,11 +16,12 @@ const CustomFloatButton: React.FC<CustomFloatButtonProps> = ({
       router.push("/add");
     };
     return (
-      <TouchableOpacity style={styles.addButton} onPress={handleAddMedication}>
+      <TouchableOpacity onPress={handleAddMedication}>
         <IconSymbol
           name="plus.circle.fill"
           size={56}
           color={Colors.LOGO_BACKGROUND}
+          style={styles.addButton}
         />
       </TouchableOpacity>
     );
@@ -50,9 +51,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 20,
     right: 20,
-    width: 56,
-    height: 56,
-
     borderRadius: 28,
     backgroundColor: "#fff",
     // Shadow for iOS
