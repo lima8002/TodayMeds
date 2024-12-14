@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/Colors";
+import DayCard from "@/components/meds/DayCard";
 import CustomFloatButton from "@/components/ui/CustomFloatButton";
 
 export default function MainScreen() {
@@ -35,14 +36,7 @@ export default function MainScreen() {
       <ScrollView style={styles.scrollView}>
         <View style={styles.contentContainer}>
           <Text style={styles.textMainTitle}>Today's Agenda</Text>
-          <View style={styles.dayCard}>
-            <View style={styles.cardTop}>
-              <Text style={styles.dayTitle}>TUE</Text>
-            </View>
-            <View style={styles.cardBottom}>
-              <Text style={styles.dayDate}>10</Text>
-            </View>
-          </View>
+          <DayCard day="TUE" date="10" />
         </View>
       </ScrollView>
       <CustomFloatButton />
@@ -78,35 +72,5 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-  },
-  dayCard: {
-    width: "17%",
-  },
-
-  cardTop: {
-    backgroundColor: Colors.TERTIARY,
-    borderWidth: 0.6,
-    borderColor: Colors.GRAY,
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
-  },
-  cardBottom: {
-    backgroundColor: "#fff",
-    borderWidth: 0.6,
-    borderColor: Colors.GRAY,
-    borderBottomLeftRadius: 14,
-    borderBottomRightRadius: 14,
-  },
-  dayDate: {
-    fontFamily: "outfit-medium",
-    fontSize: 28,
-    color: Colors.PRIMARY,
-    alignSelf: "center",
-  },
-  dayTitle: {
-    fontFamily: "outfit-medium",
-    fontSize: 18,
-    color: "white",
-    alignSelf: "center",
   },
 });

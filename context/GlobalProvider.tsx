@@ -17,12 +17,16 @@ interface UserDB {
 interface MedsDB {
   id: string;
   email: string;
-  medication: string;
+  name: string;
   dosage: string;
   frequency: string;
-  startDate: string;
-  startTime: string;
-  intake: any[];
+  dateTime: string;
+  quantity: string;
+  withFoodWater: boolean;
+  intake: {
+    dateTime: string;
+    taken: boolean;
+  }[];
 }
 
 interface GlobalContextType {
@@ -35,8 +39,13 @@ interface GlobalContextType {
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   medications: MedsDB[];
-  addMedication: (medication: Omit<MedsDB, "id">) => void;
+  addMedication: (medication: Omit<MedsDB, "id" | "intake">) => void;
   updateMedication: (id: string, medication: Partial<MedsDB>) => void;
+  getAllIntakes: () => {
+    dateTime: string;
+    medicationName: string;
+    taken: boolean;
+  }[];
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -86,22 +95,68 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     }
   };
 
-  const addMedication = (medication: Omit<MedsDB, "id">) => {
+  const addMedication = (medication: Omit<MedsDB, "id" | "intake">) => {
     const newMedication: MedsDB = {
       ...medication,
       id: Date.now().toString(),
+      intake: calculateIntakeArray(medication),
     };
     const updatedMedications = [...medications, newMedication];
     setMedications(updatedMedications);
     saveMedications(updatedMedications);
   };
 
+  const calculateIntakeArray = (medication: Omit<MedsDB, "id" | "intake">) => {
+    const intake: { dateTime: string; taken: boolean }[] = [];
+    const startDateTime = new Date(medication.dateTime);
+    const frequencyHours = parseInt(medication.frequency);
+    const totalDoses = parseInt(medication.quantity);
+
+    for (let i = 0; i < totalDoses; i++) {
+      const intakeDateTime = new Date(
+        startDateTime.getTime() + i * frequencyHours * 60 * 60 * 1000
+      );
+      intake.push({
+        dateTime: intakeDateTime.toISOString(),
+        taken: false,
+      });
+    }
+
+    return intake;
+  };
+
   const updateMedication = (id: string, updatedMedication: Partial<MedsDB>) => {
-    const updatedMedications = medications.map((med) =>
-      med.id === id ? { ...med, ...updatedMedication } : med
-    );
+    const updatedMedications = medications.map((med) => {
+      if (med.id === id) {
+        const updatedMed = { ...med, ...updatedMedication };
+        if (
+          updatedMedication.dateTime ||
+          updatedMedication.frequency ||
+          updatedMedication.quantity
+        ) {
+          updatedMed.intake = calculateIntakeArray(updatedMed);
+        }
+        return updatedMed;
+      }
+      return med;
+    });
     setMedications(updatedMedications);
     saveMedications(updatedMedications);
+  };
+
+  const getAllIntakes = () => {
+    return medications
+      .flatMap((med) =>
+        med.intake.map((intake) => ({
+          dateTime: intake.dateTime,
+          medicationName: med.name,
+          taken: intake.taken,
+        }))
+      )
+      .sort(
+        (a, b) =>
+          new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+      );
   };
 
   const contextValue: GlobalContextType = {
@@ -116,6 +171,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     medications,
     addMedication,
     updateMedication,
+    getAllIntakes,
   };
 
   return (

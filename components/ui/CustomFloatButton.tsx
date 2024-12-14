@@ -50,6 +50,21 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 20,
     right: 20,
+    width: 56,
+    height: 56,
+
+    borderRadius: 28,
+    backgroundColor: "#fff",
+    // Shadow for iOS
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    // Shadow for Android
+    elevation: 5,
   },
 
   closeButton: {

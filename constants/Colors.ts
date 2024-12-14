@@ -12,6 +12,7 @@ export const Colors = {
   LIGHTGRAY: "#E5E5EA",
   ICON_BG: "#f4e5fc",
   DARKGRAY: "#C1C1C3",
+  BORDERGRAY: "#e0e0e0",
   BORDERDISABLED: "#E7E7E7",
   BACKGROUNDDISABLED: "#F9F9F9",
 };
