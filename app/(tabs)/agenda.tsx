@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import CustomHeader from "@/components/ui/CustomHeader";
@@ -8,26 +8,52 @@ import { Colors } from "@/constants/Colors";
 const AgendaScreen = () => {
   const { getAllIntakes } = useGlobalContext();
   const allIntakes = getAllIntakes();
+  const flatListRef = useRef<FlatList>(null);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   const groupedIntakes = useMemo(() => {
-    const grouped = allIntakes.reduce((acc, intake) => {
-      const date = new Date(intake.dateTime).toDateString();
-      if (!acc[date]) {
-        acc[date] = [];
-      }
-      acc[date].push(intake);
-      return acc;
-    }, {});
+    const grouped: Record<string, Intake[]> = allIntakes.reduce(
+      (acc, intake) => {
+        const date = new Date(intake.dateTime).toDateString();
+        if (!acc[date]) {
+          acc[date] = [];
+        }
+        acc[date].push(intake);
+        return acc;
+      },
+      {} as Record<string, Intake[]>
+    );
 
     return Object.entries(grouped)
       .map(([date, intakes]) => ({
         date,
         intakes,
       }))
-      .sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort from earliest to latest
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [allIntakes]);
 
-  const renderIntakeItem = (item) => (
+  useEffect(() => {
+    if (!hasScrolled && groupedIntakes.length > 0) {
+      const currentDate = new Date().toDateString();
+      const currentDayIndex = groupedIntakes.findIndex(
+        (item) => new Date(item.date).toDateString() === currentDate
+      );
+
+      const indexToScrollTo =
+        currentDayIndex !== -1 ? currentDayIndex : groupedIntakes.length - 1;
+
+      setTimeout(() => {
+        flatListRef.current?.scrollToIndex({
+          index: indexToScrollTo,
+          animated: true,
+          viewPosition: 0,
+        });
+        setHasScrolled(true);
+      }, 100);
+    }
+  }, [groupedIntakes, hasScrolled]);
+
+  const renderIntakeItem = (item: Intake) => (
     <View style={styles.intakeItem}>
       <Text style={styles.intakeTime}>
         {new Date(item.dateTime).toLocaleTimeString([], {
@@ -47,7 +73,11 @@ const AgendaScreen = () => {
     </View>
   );
 
-  const renderDayCard = ({ item }) => {
+  const renderDayCard = ({
+    item,
+  }: {
+    item: { date: string; intakes: Intake[] };
+  }) => {
     const date = new Date(item.date);
     const day = date
       .toLocaleDateString("en-US", { weekday: "short" })
@@ -74,9 +104,19 @@ const AgendaScreen = () => {
     <View style={styles.container}>
       <CustomHeader title="Agenda" />
       <FlatList
+        ref={flatListRef}
         data={groupedIntakes}
         renderItem={renderDayCard}
         keyExtractor={(item) => item.date}
+        onScrollToIndexFailed={(info) => {
+          const wait = new Promise((resolve) => setTimeout(resolve, 500));
+          wait.then(() => {
+            flatListRef.current?.scrollToIndex({
+              index: info.index,
+              animated: true,
+            });
+          });
+        }}
       />
     </View>
   );
