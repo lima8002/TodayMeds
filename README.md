@@ -27,6 +27,8 @@ You can start developing by editing the files inside the **app** directory. This
 
 ## You need to configure Firebase
 
+Fer authentication purposes, Firebase was used. You need to create a Firebase project and configure it for your app.
+
 ## Learn more
 
 To learn more about developing your project with Expo, look at the following resources:
