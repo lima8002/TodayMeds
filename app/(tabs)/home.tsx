@@ -71,9 +71,7 @@ export default function MainScreen() {
               {todayIntakes.length > 0 ? (
                 todayIntakes.map(renderIntakeItem)
               ) : (
-                <Text style={styles.noIntakesText}>
-                  No medications scheduled for today
-                </Text>
+                <Text style={styles.noIntakesText}>No scheduled for today</Text>
               )}
             </View>
           </View>
@@ -117,13 +115,13 @@ const styles = StyleSheet.create({
   textMainTitle: {
     fontFamily: "outfit-medium",
     fontSize: 20,
-    paddingBottom: "3%",
+    padding: 10,
   },
   scrollView: {
     // backgroundColor: "#fff",
   },
   contentContainer: {
-    padding: 20,
+    padding: 10,
   },
   todayAgenda: {
     flexDirection: "row",
@@ -187,7 +185,11 @@ const styles = StyleSheet.create({
     color: "red",
   },
   noIntakesText: {
-    fontStyle: "italic",
+    // fontStyle: "italic",
+    fontFamily: "outfit",
     color: "#888",
+    paddingVertical: 32,
+    paddingRight: 20,
+    textAlign: "center",
   },
 });

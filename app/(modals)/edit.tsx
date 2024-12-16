@@ -1,44 +1,33 @@
-import React, { useContext, useEffect, useState } from "react";
-import { View, StyleSheet, Alert } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import CustomHeader from "@/components/ui/CustomHeader";
+import React from "react";
+import { View, StyleSheet, Text } from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { useGlobalContext } from "../../context/GlobalProvider";
+import MedicationForm from "../../components/meds/MedicationForm";
+import CustomHeader from "../../components/ui/CustomHeader";
+import { Colors } from "@/constants/Colors";
 import CustomFloatButton from "@/components/ui/CustomFloatButton";
-import MedicationForm from "@/components/meds/MedicationForm";
-import { GlobalContext } from "@/context/GlobalProvider";
 
-export default function EditMedicationScreen() {
-  const router = useRouter();
+const EditMedicationScreen = () => {
   const { id } = useLocalSearchParams();
-  const { medications, updateMedication } = useContext(GlobalContext);
-  const [medication, setMedication] = useState(null);
+  console.log(id);
+  const { medications, updateMedication } = useGlobalContext();
 
-  useEffect(() => {
-    const med = medications.find((m) => m.id === id);
-    if (med) {
-      setMedication(med);
-    } else {
-      Alert.alert("Error", "Medication not found");
-      router.back();
-    }
-  }, [id, medications]);
+  const medication = medications.find((med) => med.id === id);
 
-  const handleEditMedication = (medicationData: any) => {
-    updateMedication(id, medicationData);
-    Alert.alert(
-      "Medication Updated",
-      "Your medication has been successfully updated!",
-      [
-        {
-          text: "OK",
-          onPress: () => {
-            router.back();
-          },
-        },
-      ]
-    );
+  const handleSubmit = (updatedMedication) => {
+    // updateMedication(id, updatedMedication);
+    // Navigate back or show success message
   };
 
-  if (!medication) return null;
+  console.log(medications);
+
+  if (!medication) {
+    return (
+      <View>
+        <Text>Medication not found</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -46,16 +35,18 @@ export default function EditMedicationScreen() {
       <CustomFloatButton type="CLOSE" />
       <MedicationForm
         initialValues={medication}
-        onSubmit={handleEditMedication}
+        onSubmit={handleSubmit}
         submitButtonText="Update Medication"
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: Colors.BACKGROUND,
   },
 });
+
+export default EditMedicationScreen;

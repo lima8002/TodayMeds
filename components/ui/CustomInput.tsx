@@ -1,58 +1,47 @@
 import React from "react";
 import {
-  View,
-  Text,
   TextInput,
   StyleSheet,
-  Platform,
+  View,
   ViewStyle,
   TextStyle,
 } from "react-native";
-import { Control, Controller, RegisterOptions } from "react-hook-form";
+import { Colors } from "../../constants/Colors";
 
 interface CustomInputProps {
-  control: Control<any>;
-  name: string;
-  rules?: RegisterOptions;
-  placeholder?: string;
-  secureTextEntry?: boolean;
+  placeholder: string;
+  value: string;
+  onChangeText: (text: string) => void;
   style?: ViewStyle;
-  inputStyle?: TextStyle;
+  textStyle?: TextStyle;
+  keyboardType?:
+    | "default"
+    | "number-pad"
+    | "decimal-pad"
+    | "numeric"
+    | "email-address"
+    | "phone-pad";
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
-  control,
-  name,
-  rules = {},
   placeholder,
-  secureTextEntry,
+  value,
+  onChangeText,
   style,
-  inputStyle,
+  textStyle,
+  keyboardType = "default",
 }) => {
   return (
-    <Controller
-      control={control}
-      name={name}
-      rules={rules}
-      render={({
-        field: { value, onChange, onBlur },
-        fieldState: { error },
-      }) => (
-        <>
-          <View style={[styles.container, style, error && styles.errorStyles]}>
-            <TextInput
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              placeholder={placeholder}
-              style={[styles.input, inputStyle]}
-              secureTextEntry={secureTextEntry}
-            />
-          </View>
-          {error && <Text style={styles.text}>{error.message || "Error"}</Text>}
-        </>
-      )}
-    />
+    <View style={[styles.container, style]}>
+      <TextInput
+        style={[styles.input, textStyle]}
+        placeholder={placeholder}
+        placeholderTextColor={Colors.DARKGRAY}
+        value={value}
+        onChangeText={onChangeText}
+        keyboardType={keyboardType}
+      />
+    </View>
   );
 };
 
@@ -60,24 +49,16 @@ export default CustomInput;
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
-    backgroundColor: "white",
-    borderColor: "#e8e8e8",
-    borderWidth: 1,
-    borderRadius: 15,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    marginVertical: 5,
-  },
-  errorStyles: {
-    borderColor: "red",
-  },
-  text: {
-    color: "red",
-    alignSelf: "flex-start",
+    marginBottom: 10,
   },
   input: {
-    fontFamily: "outfit",
+    height: 50,
+    borderColor: Colors.BORDERGRAY,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 15,
     fontSize: 16,
+    fontFamily: "outfit",
+    backgroundColor: Colors.BACKGROUNDDISABLED,
   },
 });

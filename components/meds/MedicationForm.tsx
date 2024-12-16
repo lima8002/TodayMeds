@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   TouchableOpacity,
   Modal,
@@ -12,8 +11,9 @@ import {
 import DatePicker from "react-native-date-picker";
 import { Picker } from "@react-native-picker/picker";
 import { Checkbox } from "react-native-paper";
-import { Colors } from "@/constants/Colors";
-import CustomButton from "@/components/ui/CustomButton";
+import { Colors } from "../../constants/Colors";
+import CustomButton from "../ui/CustomButton";
+import CustomInput from "../ui/CustomInput";
 
 interface MedicationFormProps {
   initialValues?: {
@@ -43,7 +43,9 @@ export default function MedicationForm({
   const [withFoodWater, setWithFoodWater] = useState(
     initialValues?.withFoodWater || false
   );
-  const [formattedDT, setFormattedDT] = useState(!!initialValues?.dateTime);
+  const [formattedDT, setFormattedDT] = useState(
+    !!initialValues?.dateTime || ""
+  );
 
   const [openDateTimePicker, setOpenDateTimePicker] = useState(false);
   const [selectedDosage, setSelectedDosage] = useState<string | null>(null);
@@ -60,40 +62,22 @@ export default function MedicationForm({
         setOtherDosage(initialValues.dosage);
       }
     }
+    console.log(initialValues);
   }, [initialValues]);
 
   const handleSubmit = () => {
     const finalDosage =
       selectedDosage === "Other" ? otherDosage : selectedDosage;
     const medicationData = {
+      id: Date.now().toString(),
       name,
       dosage: finalDosage,
       frequency,
-      dateTime: dateTime.toISOString(),
+      dateTime: dateTime,
       quantity,
       withFoodWater,
     };
     onSubmit(medicationData);
-  };
-
-  const newMedication = {
-    id: Date.now().toString(),
-    name,
-    dosage,
-    frequency: `Every ${frequency} hours`,
-    dateTime: dateTime.toISOString(),
-    quantity,
-    withFoodWater,
-  };
-
-  const resetForm = () => {
-    setName("");
-    setDosage("");
-    setFrequency("");
-    setDateTime(new Date());
-    setQuantity("");
-    setWithFoodWater(false);
-    setFormattedDT(false);
   };
 
   return (
@@ -105,10 +89,8 @@ export default function MedicationForm({
         {/* Medication Name */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Medication Name</Text>
-          <TextInput
-            style={styles.input}
+          <CustomInput
             placeholder="Enter medication name"
-            placeholderTextColor={Colors.DARKGRAY}
             value={name}
             onChangeText={setName}
           />
@@ -162,11 +144,11 @@ export default function MedicationForm({
             ))}
           </View>
           {selectedDosage === "Other" && (
-            <TextInput
-              style={[styles.input, styles.otherDosageInput]}
+            <CustomInput
               placeholder="e.g., 5"
-              value={otherDosage}
+              value={otherDosage || ""}
               onChangeText={setOtherDosage}
+              keyboardType="numeric"
             />
           )}
         </View>
@@ -260,11 +242,20 @@ export default function MedicationForm({
             onConfirm={(date) => {
               setOpenDateTimePicker(false);
               setDateTime(date);
-              setFormattedDT(true);
+              setFormattedDT(
+                date.toLocaleString("en-GB", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })
+              );
             }}
             onCancel={() => {
               setOpenDateTimePicker(false);
-              setFormattedDT(false);
+              setFormattedDT("");
             }}
             mode="datetime"
           />
@@ -273,12 +264,11 @@ export default function MedicationForm({
         {/* Box Quantity */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Box Quantity</Text>
-          <TextInput
-            style={styles.input}
+          <CustomInput
             placeholder="e.g., 30"
-            placeholderTextColor={Colors.DARKGRAY}
             value={quantity}
             onChangeText={setQuantity}
+            keyboardType="numeric"
           />
         </View>
 
@@ -312,7 +302,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flexGrow: 1,
-    paddingHorizontal: 20,
+    // paddingHorizontal: 20,
     paddingTop: "1.5%",
   },
   title: {
@@ -332,6 +322,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    marginHorizontal: 10,
+    marginVertical: 10,
   },
   inputGroup: {
     marginBottom: 20,

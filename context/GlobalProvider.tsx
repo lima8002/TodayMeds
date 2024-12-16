@@ -125,23 +125,12 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     return intake;
   };
 
-  const updateMedication = (id: string, updatedMedication: Partial<MedsDB>) => {
-    const updatedMedications = medications.map((med) => {
-      if (med.id === id) {
-        const updatedMed = { ...med, ...updatedMedication };
-        if (
-          updatedMedication.dateTime ||
-          updatedMedication.frequency ||
-          updatedMedication.quantity
-        ) {
-          updatedMed.intake = calculateIntakeArray(updatedMed);
-        }
-        return updatedMed;
-      }
-      return med;
-    });
+  const updateMedication = async (id: string, updatedMedication: MedsDB) => {
+    const updatedMedications = medications.map((med) =>
+      med.id === id ? { ...med, ...updatedMedication } : med
+    );
     setMedications(updatedMedications);
-    saveMedications(updatedMedications);
+    await saveMedications(updatedMedications);
   };
 
   const getAllIntakes = () => {

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import { Colors } from "@/constants/Colors";
 
 interface DayCardProps {
@@ -22,14 +22,13 @@ const DayCard: React.FC<DayCardProps> = ({ day, date }) => {
 
 const styles = StyleSheet.create({
   dayCard: {
-    width: 60,
+    width: Platform.OS === "ios" ? 76 : 66,
     elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     borderRadius: 14,
-    // Add these properties for iOS shadow
     backgroundColor: "white", // Needed for iOS shadow to work
     overflow: "visible", // Allows the shadow to be visible outside the component
   },
@@ -37,21 +36,24 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.TERTIARY,
     borderWidth: 0.6,
     borderColor: Colors.BORDERGRAY,
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
   cardBottom: {
     backgroundColor: "#fff",
     borderWidth: 0.6,
     borderColor: Colors.BORDERGRAY,
-    borderBottomLeftRadius: 14,
-    borderBottomRightRadius: 14,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
   dayDate: {
     fontFamily: "outfit-medium",
     fontSize: 28,
     color: Colors.PRIMARY,
     alignSelf: "center",
+    textShadowColor: "rgba(0, 0, 0, 0.25)",
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 4,
   },
   dayTitle: {
     fontFamily: "outfit-medium",
