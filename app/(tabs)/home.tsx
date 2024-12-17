@@ -1,16 +1,42 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import { Colors } from "@/constants/Colors";
 import DayCard from "@/components/meds/DayCard";
 import CustomFloatButton from "@/components/ui/CustomFloatButton";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import CustomButton from "@/components/ui/CustomButton";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+
+interface Medication {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+  dateTime: string;
+  quantity: string;
+  withFoodWater: boolean;
+}
+
+interface Intake {
+  dateTime: string;
+  medicationName: string;
+  taken: boolean;
+}
 
 export default function MainScreen() {
   const [greeting, setGreeting] = useState<string | null>(null);
   const { getAllIntakes } = useGlobalContext();
-  const allIntakes = getAllIntakes();
+  const allIntakes: Intake[] = getAllIntakes();
+  const { medications } = useGlobalContext();
+  const router = useRouter();
 
   const todayIntakes = useMemo(() => {
     const today = new Date().toDateString();
@@ -40,7 +66,7 @@ export default function MainScreen() {
         })}
       </Text>
       <View style={styles.intakeDetails}>
-        <Text style={styles.medicationName}>{item.medicationName}</Text>
+        <Text style={styles.intakeMedName}>{item.medicationName}</Text>
         <Text
           style={[styles.status, item.taken ? styles.taken : styles.notTaken]}
         >
@@ -50,12 +76,32 @@ export default function MainScreen() {
     </View>
   );
 
+  const renderMedicationItem = ({ item }: { item: Medication }) => (
+    <TouchableOpacity
+      style={styles.medicationItem}
+      onPress={() => router.push(`/(modals)/edit?id=${item.id}`)}
+    >
+      <View style={styles.medicationContent}>
+        <Text style={styles.medicationName}>{item.name}</Text>
+        <Text style={styles.medicationDetails}>Dosage: {item.dosage}</Text>
+        <Text style={styles.medicationDetails}>
+          Frequency: {item.frequency}
+        </Text>
+        <Text style={styles.medicationDetails}>Quantity: {item.quantity}</Text>
+        <Text style={styles.medicationDetails}>
+          With Food/Water: {item.withFoodWater ? "Yes" : "No"}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={24} color={Colors.PRIMARY} />
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{greeting}</Text>
       </View>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView style={styles.container}>
         <View style={styles.contentContainer}>
           <Text style={styles.textMainTitle}>Today's Agenda</Text>
           <View style={styles.todayAgenda}>
@@ -75,7 +121,7 @@ export default function MainScreen() {
               )}
             </View>
           </View>
-          <CustomButton
+          {/* <CustomButton
             text="View Agenda"
             type="SECONDARY"
             otherStyles={{
@@ -85,8 +131,20 @@ export default function MainScreen() {
               alignSelf: "center",
             }}
             onPress={() => router.navigate("/agenda")}
-          />
+          /> */}
+        </View>
+        <View style={styles.container}>
           <Text style={styles.textMainTitle}>Your Medication</Text>
+          <FlatList
+            data={medications}
+            renderItem={renderMedicationItem}
+            keyExtractor={(item) => item.id}
+            ListEmptyComponent={
+              <Text style={styles.emptyListText}>
+                No medications added yet.
+              </Text>
+            }
+          />
         </View>
       </ScrollView>
       <CustomFloatButton />
@@ -168,7 +226,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  medicationName: {
+  intakeMedName: {
     fontFamily: "outfit",
     fontSize: 14,
     flex: 1,
@@ -191,5 +249,44 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
     paddingRight: 20,
     textAlign: "center",
+  },
+
+  medicationItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "white",
+    padding: 15,
+    marginVertical: 5,
+    marginHorizontal: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  medicationContent: {
+    flex: 1,
+  },
+  medicationName: {
+    fontSize: 18,
+
+    color: Colors.PRIMARY,
+    fontFamily: "outfit-bold",
+    marginBottom: 5,
+  },
+  medicationDetails: {
+    fontSize: 14,
+    color: "#000",
+    marginTop: 2,
+    fontFamily: "outfit",
+  },
+  emptyListText: {
+    textAlign: "center",
+    marginTop: 50,
+    fontSize: 16,
+    color: Colors.EMPTYLIST,
+    fontFamily: "outfit",
   },
 });

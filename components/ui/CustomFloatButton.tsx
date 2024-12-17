@@ -19,7 +19,7 @@ const CustomFloatButton: React.FC<CustomFloatButtonProps> = ({
       <TouchableOpacity onPress={handleAddMedication}>
         <IconSymbol
           name="plus.circle.fill"
-          size={56}
+          size={50}
           color={Colors.LOGO_BACKGROUND}
           style={styles.addButton}
         />

@@ -9,7 +9,6 @@ import CustomFloatButton from "@/components/ui/CustomFloatButton";
 
 const EditMedicationScreen = () => {
   const { id } = useLocalSearchParams();
-  console.log(id);
   const { medications, updateMedication } = useGlobalContext();
 
   const medication = medications.find((med) => med.id === id);
@@ -18,8 +17,6 @@ const EditMedicationScreen = () => {
     // updateMedication(id, updatedMedication);
     // Navigate back or show success message
   };
-
-  console.log(medications);
 
   if (!medication) {
     return (
@@ -45,7 +42,7 @@ const EditMedicationScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.BACKGROUND,
+    backgroundColor: Colors.BACKGROUNDDISABLED,
   },
 });
 
