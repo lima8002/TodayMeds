@@ -149,6 +149,7 @@ export default function MedicationForm({
               value={otherDosage || ""}
               onChangeText={setOtherDosage}
               keyboardType="numeric"
+              style={{ paddingTop: 15 }}
             />
           )}
         </View>
@@ -408,12 +409,13 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   dosageOption: {
-    width: "48%",
+    height: 50,
+    width: "24%",
     borderWidth: 1,
     borderColor: Colors.BORDERDISABLED,
-    borderRadius: 5,
+    borderRadius: 10,
     padding: 10,
-    marginBottom: 10,
+
     backgroundColor: Colors.BACKGROUNDDISABLED,
   },
   selectedDosageOption: {
@@ -429,7 +431,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2,
     borderColor: Colors.LIGHTGRAY,
-    marginRight: 10,
+    marginRight: 5,
+    marginTop: 3,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -443,6 +446,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.PRIMARY,
   },
   dosageOptionText: {
+    marginTop: 3,
     color: Colors.DARKGRAY,
     fontFamily: "outfit-medium",
   },
@@ -471,13 +475,13 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     color: "#333",
-    paddingTop: 14,
+    paddingTop: 12,
     fontFamily: "outfit",
   },
   textDisabled: {
     fontSize: 16,
     color: Colors.DARKGRAY,
-    paddingTop: 14,
+    paddingTop: 12,
     fontFamily: "outfit",
   },
   buttonPickerContainer: {

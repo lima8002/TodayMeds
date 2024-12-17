@@ -15,4 +15,5 @@ export const Colors = {
   BORDERGRAY: "#e0e0e0",
   BORDERDISABLED: "#E7E7E7",
   BACKGROUNDDISABLED: "#F9F9F9",
+  EMPTYLIST: "#888",
 };

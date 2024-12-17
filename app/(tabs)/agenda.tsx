@@ -117,6 +117,11 @@ const AgendaScreen = () => {
             });
           });
         }}
+        ListEmptyComponent={
+          <Text style={styles.emptyListText}>
+            No scheduled medications yet.
+          </Text>
+        }
       />
     </View>
   );
@@ -188,6 +193,13 @@ const styles = StyleSheet.create({
   },
   notTaken: {
     color: "red",
+  },
+  emptyListText: {
+    textAlign: "center",
+    marginTop: 50,
+    fontSize: 16,
+    color: Colors.EMPTYLIST,
+    fontFamily: "outfit",
   },
 });
 

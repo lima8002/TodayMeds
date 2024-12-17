@@ -185,9 +185,9 @@ const styles = StyleSheet.create({
     color: "red",
   },
   noIntakesText: {
-    // fontStyle: "italic",
+    fontSize: 16,
     fontFamily: "outfit",
-    color: "#888",
+    color: Colors.EMPTYLIST,
     paddingVertical: 32,
     paddingRight: 20,
     textAlign: "center",

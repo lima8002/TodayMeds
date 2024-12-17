@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 50,
     fontSize: 16,
-    color: Colors.DARKGRAY,
+    color: Colors.EMPTYLIST,
     fontFamily: "outfit",
   },
 });
