@@ -1,4 +1,11 @@
-import { StyleSheet, TouchableOpacity, Platform } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  Image,
+  useWindowDimensions,
+} from "react-native";
 import React from "react";
 import { router } from "expo-router";
 import { IconSymbol } from "./IconSymbol";
@@ -11,19 +18,26 @@ interface CustomFloatButtonProps {
 const CustomFloatButton: React.FC<CustomFloatButtonProps> = ({
   type = "ADD",
 }) => {
+  const { width } = useWindowDimensions();
   if (type === "ADD") {
     const handleAddMedication = () => {
       router.push("/add");
     };
     return (
-      <TouchableOpacity onPress={handleAddMedication}>
-        <IconSymbol
-          name="plus.circle.fill"
-          size={50}
-          color={Colors.LOGO_BACKGROUND}
-          style={styles.addButton}
-        />
-      </TouchableOpacity>
+      <View style={{ flex: 1, position: "absolute" }}>
+        <TouchableOpacity
+          onPress={handleAddMedication}
+          style={{ right: width * 0.05 }}
+          // className="flex absolute items-center justify-center bg-black rounded-full w-12 h-12"
+        >
+          <Image
+            source={require("@/assets/icons/plus.png")}
+            tintColor={"#5E75CA"}
+            resizeMode="contain"
+            className="size-6"
+          />
+        </TouchableOpacity>
+      </View>
     );
   }
 
@@ -33,11 +47,11 @@ const CustomFloatButton: React.FC<CustomFloatButtonProps> = ({
     };
     return (
       <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-        <IconSymbol
-          name="xmark"
-          size={Platform.OS === "ios" ? 24 : 32}
-          color={Colors.PRIMARY}
-          style={Platform.OS === "ios" ? { marginTop: 10 } : { marginTop: 0 }}
+        <Image
+          source={require("@/assets/icons/xmark.png")}
+          tintColor={"#5E75CA"}
+          resizeMode="contain"
+          className="size-6"
         />
       </TouchableOpacity>
     );

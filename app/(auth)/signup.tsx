@@ -10,10 +10,10 @@ import {
 import { useForm, SubmitHandler } from "react-hook-form";
 import { router } from "expo-router";
 
-import CustomInput from "../../components/ui/CustomInput";
-import CustomButton from "../../components/ui/CustomButton";
-import EMAIL_REGEX from "../../constants/EmailRegex";
-import { CreateUser } from "../../utils/FirebaseHelper";
+import CustomInput from "@/components/ui/CustomInput";
+import CustomButton from "@/components/ui/CustomButton";
+import EMAIL_REGEX from "@/constants/EmailRegex";
+import { CreateUser } from "@/utils/FirebaseHelper";
 
 interface SignUpFormData {
   name: string;

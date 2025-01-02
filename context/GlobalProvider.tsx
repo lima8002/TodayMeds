@@ -6,6 +6,7 @@ import React, {
   ReactNode,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthenticatedUser, SignOutUser } from "@/utils/FirebaseHelper";
 
 interface UserDB {
   email: string;
@@ -38,6 +39,7 @@ interface GlobalContextType {
   setUserDB: React.Dispatch<React.SetStateAction<UserDB | null>>;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  letUserSignOut: () => void;
   medications: MedsDB[];
   addMedication: (medication: Omit<MedsDB, "id" | "intake">) => void;
   updateMedication: (id: string, medication: Partial<MedsDB>) => void;
@@ -49,14 +51,6 @@ interface GlobalContextType {
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
-
-export const useGlobalContext = (): GlobalContextType => {
-  const context = useContext(GlobalContext);
-  if (context === undefined) {
-    throw new Error("useGlobalContext must be used within a GlobalProvider");
-  }
-  return context;
-};
 
 interface GlobalProviderProps {
   children: ReactNode;
@@ -70,8 +64,45 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [medications, setMedications] = useState<MedsDB[]>([]);
 
   useEffect(() => {
-    loadMedications();
-  }, []);
+    if (!isLoggedIn) {
+      getUserAuth();
+      if (user) {
+        loadMedications();
+      }
+    }
+    if (!user) {
+      setIsLoggedIn(false);
+    }
+  }, [!isLoggedIn]);
+
+  const getUserAuth = (): void => {
+    try {
+      const unsubscriber = AuthenticatedUser((authUser) => {
+        if (!authUser) {
+          setUser(null);
+          setIsLoggedIn(false);
+        } else {
+          if (authUser) {
+            setUser(authUser);
+            setIsLoggedIn(true);
+          }
+        }
+        setIsLoading(false);
+        return () => unsubscriber();
+      });
+    } catch (error) {
+      console.error("Error loading medications:", error);
+    }
+  };
+
+  const letUserSignOut = (): void => {
+    try {
+      SignOutUser();
+      setIsLoading(true);
+    } catch (error) {
+      console.error("Error loading medications:", error);
+    }
+  };
 
   const loadMedications = async () => {
     try {
@@ -157,6 +188,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     setUserDB,
     isLoading,
     setIsLoading,
+    letUserSignOut,
     medications,
     addMedication,
     updateMedication,
@@ -168,6 +200,14 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       {children}
     </GlobalContext.Provider>
   );
+};
+
+export const useGlobalContext = (): GlobalContextType => {
+  const context = useContext(GlobalContext);
+  if (context === undefined) {
+    throw new Error("useGlobalContext must be used within a GlobalProvider");
+  }
+  return context;
 };
 
 export default GlobalProvider;

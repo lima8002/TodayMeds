@@ -1,9 +1,9 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import { useGlobalContext } from "../../context/GlobalProvider";
-import MedicationForm from "../../components/meds/MedicationForm";
-import CustomHeader from "../../components/ui/CustomHeader";
+import { useGlobalContext } from "@/context/GlobalProvider";
+import MedicationForm from "@/components/meds/MedicationForm";
+import CustomHeader from "@/components/ui/CustomHeader";
 import { Colors } from "@/constants/Colors";
 import CustomFloatButton from "@/components/ui/CustomFloatButton";
 

@@ -12,9 +12,9 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import { router } from "expo-router";
 
-import CustomButton from "../../components/ui/CustomButton";
-import CustomInput from "../../components/ui/CustomInput";
-import EMAIL_REGEX from "../../constants/EmailRegex";
+import CustomButton from "@/components/ui/CustomButton";
+import CustomInput from "@/components/ui/CustomInput";
+import EMAIL_REGEX from "@/constants/EmailRegex";
 
 interface PasswordResetFormData {
   email: string;

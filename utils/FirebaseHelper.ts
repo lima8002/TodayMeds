@@ -6,12 +6,17 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
   User,
+  signOut,
 } from "firebase/auth";
 
 export const AuthenticatedUser = (
   credentials: (user: User | null) => void
 ): (() => void) => {
   return onAuthStateChanged(FirebaseConfig.auth, credentials);
+};
+
+export const SignOutUser = async (): Promise<void> => {
+  await signOut(FirebaseConfig.auth);
 };
 
 export const SignInUser = async (

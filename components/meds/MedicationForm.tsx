@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  TextInput,
   StyleSheet,
   TouchableOpacity,
   Modal,
@@ -89,7 +90,7 @@ export default function MedicationForm({
         {/* Medication Name */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Medication Name</Text>
-          <CustomInput
+          <TextInput
             placeholder="Enter medication name"
             value={name}
             onChangeText={setName}
@@ -144,7 +145,7 @@ export default function MedicationForm({
             ))}
           </View>
           {selectedDosage === "Other" && (
-            <CustomInput
+            <TextInput
               placeholder="e.g., 5"
               value={otherDosage || ""}
               onChangeText={setOtherDosage}
@@ -265,7 +266,7 @@ export default function MedicationForm({
         {/* Box Quantity */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Box Quantity</Text>
-          <CustomInput
+          <TextInput
             placeholder="e.g., 30"
             value={quantity}
             onChangeText={setQuantity}

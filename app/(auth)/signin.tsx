@@ -10,12 +10,13 @@ import {
   Platform,
 } from "react-native";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useRouter } from "expo-router";
+import { Redirect, Slot, useRouter } from "expo-router";
 
-import CustomInput from "../../components/ui/CustomInput";
-import CustomButton from "../../components/ui/CustomButton";
-import EMAIL_REGEX from "../../constants/EmailRegex";
-import { SignInUser } from "../../utils/FirebaseHelper";
+import CustomInput from "@/components/ui/CustomInput";
+import CustomButton from "@/components/ui/CustomButton";
+import EMAIL_REGEX from "@/constants/EmailRegex";
+import { SignInUser } from "@/utils/FirebaseHelper";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface SignInFormData {
   email: string;
@@ -24,6 +25,7 @@ interface SignInFormData {
 
 const SignIn: React.FC = () => {
   const router = useRouter();
+  const { isLoading, isLoggedIn } = useGlobalContext();
 
   const {
     control,
@@ -33,94 +35,90 @@ const SignIn: React.FC = () => {
     setValue,
   } = useForm<SignInFormData>();
 
-  const onSignInPressed: SubmitHandler<SignInFormData> = (data) => {
-    SignInUser(data.email, data.password);
-  };
+  if (!isLoading && isLoggedIn) {
+    return <Redirect href="/" />;
+  } else {
+    return (
+      <ScrollView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.keyboardAvoidingView}
+        >
+          <View style={styles.containerLogo}>
+            <TouchableOpacity
+              onPress={() => {
+                setValue("email", "123@123.com");
+                setValue("password", "password");
+              }}
+            >
+              <Image
+                source={require("@/assets/images/logo.png")}
+                style={[
+                  styles.shadow,
+                  {
+                    width: 128,
+                    height: 128,
+                    marginLeft: 24,
+                    paddingBottom: 15,
+                    resizeMode: "contain",
+                  },
+                ]}
+              />
+            </TouchableOpacity>
+            <Text style={[styles.textLogo, styles.shadow]}>TodayMeds</Text>
 
-  const onForgotPasswordPressed = () => {
-    clearTextInput();
-    router.push("/password");
-  };
-
-  const onSingUpPressed = () => {
-    router.push("/signup");
-    clearTextInput();
-  };
-
-  const clearTextInput = () => {
-    reset();
-  };
-
-  const fillUser = () => {
-    setValue("email", "123@123.com");
-    setValue("password", "password");
-  };
-
-  return (
-    <ScrollView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoidingView}
-      >
-        <View style={styles.containerLogo}>
-          <TouchableOpacity onPress={fillUser}>
-            <Image
-              source={require("../../assets/images/logo.png")}
-              style={[
-                styles.shadow,
-                {
-                  width: 128,
-                  height: 128,
-                  marginLeft: 24,
-                  paddingBottom: 15,
-                  resizeMode: "contain",
-                },
-              ]}
+            <CustomInput
+              name="email"
+              placeholder="Email"
+              control={control}
+              rules={{
+                required: "Email is required",
+                pattern: { value: EMAIL_REGEX, message: "Email is invalid" },
+              }}
             />
-          </TouchableOpacity>
-          <Text style={[styles.textLogo, styles.shadow]}>TodayMeds</Text>
 
-          <CustomInput
-            name="email"
-            placeholder="Email"
-            control={control}
-            rules={{
-              required: "Email is required",
-              pattern: { value: EMAIL_REGEX, message: "Email is invalid" },
-            }}
-          />
+            <CustomInput
+              name="password"
+              placeholder="Password"
+              control={control}
+              rules={{
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password should be minimum 6 characters long",
+                },
+              }}
+              secureTextEntry
+            />
+            <CustomButton
+              text="Sign In"
+              onPress={handleSubmit(onSignInPressed)}
+            />
+            <CustomButton
+              text="Forgot Password?"
+              onPress={() => {
+                reset();
+                router.push("/password");
+              }}
+              type="TERTIARY"
+            />
+            <CustomButton
+              text="Don't have an account? Create one"
+              onPress={() => {
+                reset();
+                router.push("/signup");
+              }}
+              type="TERTIARY"
+            />
+          </View>
+        </KeyboardAvoidingView>
+      </ScrollView>
+    );
+  }
+};
 
-          <CustomInput
-            name="password"
-            placeholder="Password"
-            control={control}
-            rules={{
-              required: "Password is required",
-              minLength: {
-                value: 6,
-                message: "Password should be minimum 6 characters long",
-              },
-            }}
-            secureTextEntry
-          />
-          <CustomButton
-            text="Sign In"
-            onPress={handleSubmit(onSignInPressed)}
-          />
-          <CustomButton
-            text="Forgot Password?"
-            onPress={onForgotPasswordPressed}
-            type="TERTIARY"
-          />
-          <CustomButton
-            text="Don't have an account? Create one"
-            onPress={onSingUpPressed}
-            type="TERTIARY"
-          />
-        </View>
-      </KeyboardAvoidingView>
-    </ScrollView>
-  );
+const onSignInPressed: SubmitHandler<SignInFormData> = (data) => {
+  SignInUser(data.email, data.password);
 };
 
 export default SignIn;

@@ -1,21 +1,24 @@
 import CustomHeader from "@/components/ui/CustomHeader";
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { signOut } from "firebase/auth";
-import { auth } from "../../utils/FirebaseConfig";
+
+import { auth } from "@/utils/FirebaseConfig";
 import CustomButton from "@/components/ui/CustomButton";
-import { router } from "expo-router";
+import { router, Slot } from "expo-router";
+import { useGlobalContext } from "@/context/GlobalProvider";
+import { SignOutUser } from "@/utils/FirebaseHelper";
 
 export default function SettingsScreen() {
+  const { letUserSignOut } = useGlobalContext();
   return (
     <View>
       <CustomHeader title={"Settings"} />
 
       <View style={[styles.signoutBtn, styles.shadow]}>
         <CustomButton
-          style={{ width: "50%" }}
+          // style={{ width: "50%" }}
           text="Log Out"
-          onPress={() => signOut(auth)}
+          onPress={() => letUserSignOut()}
           type="SECONDARY"
         />
       </View>

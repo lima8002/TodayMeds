@@ -1,47 +1,54 @@
 import React from "react";
-import {
-  TextInput,
-  StyleSheet,
-  View,
-  ViewStyle,
-  TextStyle,
-} from "react-native";
-import { Colors } from "../../constants/Colors";
+import { TextInput, StyleSheet, View, Text, Platform } from "react-native";
+import { Controller, Control, RegisterOptions } from "react-hook-form";
+import { Colors } from "@/constants/Colors";
 
 interface CustomInputProps {
-  placeholder: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
-  keyboardType?:
-    | "default"
-    | "number-pad"
-    | "decimal-pad"
-    | "numeric"
-    | "email-address"
-    | "phone-pad";
+  control: Control<any>;
+  name: string;
+  rules?: RegisterOptions;
+  placeholder?: string;
+  secureTextEntry?: boolean;
+  onEditable?: boolean;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
+  control,
+  name,
+  rules = {},
   placeholder,
-  value,
-  onChangeText,
-  style,
-  textStyle,
-  keyboardType = "default",
+  secureTextEntry,
+  onEditable,
 }) => {
   return (
-    <View style={[styles.container, style]}>
-      <TextInput
-        style={[styles.input, textStyle]}
-        placeholder={placeholder}
-        placeholderTextColor={Colors.DARKGRAY}
-        value={value}
-        onChangeText={onChangeText}
-        keyboardType={keyboardType}
-      />
-    </View>
+    <Controller
+      control={control}
+      name={name}
+      rules={rules}
+      render={({
+        field: { value, onChange, onBlur },
+        fieldState: { error },
+      }) => (
+        <>
+          <View style={[styles.container, error ? styles.errorStyles : null]}>
+            <TextInput
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              placeholder={placeholder}
+              placeholderTextColor={"darkgray"}
+              style={styles.input}
+              secureTextEntry={secureTextEntry}
+              editable={onEditable}
+              keyboardType={"default"}
+            />
+          </View>
+          {error && error.message?.trim() ? (
+            <Text style={styles.text}>{error.message || "Error"}</Text>
+          ) : null}
+        </>
+      )}
+    />
   );
 };
 
@@ -49,16 +56,25 @@ export default CustomInput;
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 10,
+    width: "100%",
+    backgroundColor: "white",
+    height: Platform.OS === "ios" ? null : "10%",
+    borderColor: "#e8e8e8",
+    borderWidth: 1,
+    borderRadius: 15,
+    paddingVertical: Platform.OS === "ios" ? 14 : 0,
+    paddingHorizontal: 10,
+    marginVertical: 5,
+  },
+  errorStyles: {
+    borderColor: "red",
+  },
+  text: {
+    color: "red",
+    alignSelf: "flex-start",
   },
   input: {
-    height: 50,
-    borderColor: Colors.BORDERGRAY,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 16,
     fontFamily: "outfit",
-    backgroundColor: Colors.BACKGROUNDDISABLED,
+    fontSize: 16,
   },
 });

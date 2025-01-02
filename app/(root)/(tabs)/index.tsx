@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
+  Image,
   FlatList,
   TouchableOpacity,
 } from "react-native";
@@ -79,7 +79,7 @@ export default function MainScreen() {
   const renderMedicationItem = ({ item }: { item: Medication }) => (
     <TouchableOpacity
       style={styles.medicationItem}
-      onPress={() => router.push(`/(modals)/edit?id=${item.id}`)}
+      // onPress={() => router.push(`/(modals)/edit?id=${item.id}`)}
     >
       <View style={styles.medicationContent}>
         <Text style={styles.medicationName}>{item.name}</Text>
@@ -97,56 +97,70 @@ export default function MainScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>{greeting}</Text>
+    <View className="h-full">
+      <View className="bg-logo-background overflow-hidden rounded-b-2xl pt-20">
+        <Text className="px-3 text-2xl font-outfit-bold mb-5 text-white">
+          {greeting}
+        </Text>
       </View>
-      <ScrollView style={styles.container}>
-        <View style={styles.contentContainer}>
-          <Text style={styles.textMainTitle}>Today's Agenda</Text>
-          <View style={styles.todayAgenda}>
-            <View style={styles.dayCardContainer}>
-              <DayCard
-                day={new Date()
-                  .toLocaleDateString("en-US", { weekday: "short" })
-                  .toUpperCase()}
-                date={new Date().getDate().toString()}
-              />
-            </View>
-            <View style={styles.intakesList}>
-              {todayIntakes.length > 0 ? (
-                todayIntakes.map(renderIntakeItem)
-              ) : (
-                <Text style={styles.noIntakesText}>No scheduled for today</Text>
-              )}
-            </View>
+
+      <FlatList
+        data={medications}
+        renderItem={renderMedicationItem}
+        keyExtractor={(item) => item.id}
+        ListEmptyComponent={
+          <View className="flex justify-center items-center bg-white rounded-2xl m-3 py-3 pb-6 shadow-sm">
+            <Image
+              source={require("@/assets/images/no-meds.png")}
+              className="size-60 opacity-35"
+            />
+            <Text className="text-center mt-50 text-lg text-emptylist font-outfit opacity-35">
+              No medications added yet
+            </Text>
           </View>
-          {/* <CustomButton
-            text="View Agenda"
-            type="SECONDARY"
-            otherStyles={{
-              width: "60%",
-              marginTop: 20,
-              marginBottom: 10,
-              alignSelf: "center",
-            }}
-            onPress={() => router.navigate("/agenda")}
-          /> */}
-        </View>
-        <View style={styles.container}>
-          <Text style={styles.textMainTitle}>Your Medication</Text>
-          <FlatList
-            data={medications}
-            renderItem={renderMedicationItem}
-            keyExtractor={(item) => item.id}
-            ListEmptyComponent={
-              <Text style={styles.emptyListText}>
-                No medications added yet.
-              </Text>
-            }
-          />
-        </View>
-      </ScrollView>
+        }
+        ListHeaderComponent={
+          <View className="flex">
+            <Text className="font-outfit-medium text-xl px-3 mt-3">
+              Today's Agenda
+            </Text>
+            <View className="flex flex-row justify-center items-center bg-white rounded-2xl m-3 py-3 pb-6 shadow-sm">
+              <View style={styles.dayCardContainer}>
+                <DayCard
+                  day={new Date()
+                    .toLocaleDateString("en-US", { weekday: "short" })
+                    .toUpperCase()}
+                  date={new Date().getDate().toString()}
+                />
+              </View>
+              <View style={styles.intakesList}>
+                {todayIntakes.length > 0 ? (
+                  todayIntakes.map(renderIntakeItem)
+                ) : (
+                  <Text className="text-center text-lg text-emptylist font-outfit opacity-35">
+                    No scheduled for today
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            {/* <View className="flex-row justify-between"> */}
+            <Text className="font-outfit-medium text-xl px-3">
+              Your Medication
+            </Text>
+            <TouchableOpacity onPress={() => router.push("/add")}>
+              <Image
+                source={require("@/assets/icons/pills.png")}
+                width={60}
+                height={60}
+                resizeMode="contain"
+                style={{ marginBottom: 20, backgroundColor: "yellow" }}
+              />
+            </TouchableOpacity>
+            {/* </View> */}
+          </View>
+        }
+      />
       <CustomFloatButton />
     </View>
   );
