@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import CustomButton from "@/components/ui/CustomButton";
 import CustomInput from "@/components/ui/CustomInput";
 import EMAIL_REGEX from "@/constants/EmailRegex";
+import { Colors } from "@/constants/Colors";
 
 interface PasswordResetFormData {
   email: string;
@@ -92,20 +93,21 @@ export default PasswordReset;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
+    height: "100%",
   },
   keyboardAvoidingView: {
     flex: 1,
   },
   root: {
+    marginTop: "35%",
     alignItems: "center",
-    justifyContent: "center",
     paddingHorizontal: 30,
-    marginTop: "50%",
+    paddingVertical: 35,
   },
   title: {
     fontSize: 26,
     fontFamily: "outfit-medium",
-    color: "#051C60",
+    color: Colors.TEXT_TITLE,
     margin: 10,
   },
 });

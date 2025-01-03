@@ -78,7 +78,7 @@ export default function MainScreen() {
   const renderMedicationItem = ({ item }: { item: Medication }) => (
     <TouchableOpacity
       style={styles.medicationItem}
-      // onPress={() => router.push(`/(modals)/edit?id=${item.id}`)}
+      onPress={() => router.push(`/(modals)/${item.id}`)}
     >
       <View style={styles.medicationContent}>
         <Text style={styles.medicationName}>{item.name}</Text>
@@ -155,7 +155,12 @@ export default function MainScreen() {
                   {/* <Text className="text-sm text-gray-600 font-outfit">
                     Add Medication
                   </Text> */}
-                  <Entypo name="plus" size={26} color="black" />
+                  <Entypo
+                    name="plus"
+                    size={26}
+                    color="black"
+                    className="font-outfit-medium text-xl"
+                  />
                 </TouchableOpacity>
               </View>
             </View>

@@ -10,8 +10,8 @@ import {
   Platform,
 } from "react-native";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Redirect, Slot, useRouter } from "expo-router";
-
+import { Redirect, useRouter } from "expo-router";
+import { Colors } from "@/constants/Colors";
 import CustomInput from "@/components/ui/CustomInput";
 import CustomButton from "@/components/ui/CustomButton";
 import EMAIL_REGEX from "@/constants/EmailRegex";
@@ -53,19 +53,10 @@ const SignIn: React.FC = () => {
             >
               <Image
                 source={require("@/assets/images/logo.png")}
-                style={[
-                  styles.shadow,
-                  {
-                    width: 128,
-                    height: 128,
-                    marginLeft: 24,
-                    paddingBottom: 15,
-                    resizeMode: "contain",
-                  },
-                ]}
+                style={[styles.shadow, styles.imageLogo]}
               />
             </TouchableOpacity>
-            <Text style={[styles.textLogo, styles.shadow]}>TodayMeds</Text>
+            <Text style={styles.textLogo}>TodayMeds</Text>
 
             <CustomInput
               name="email"
@@ -126,13 +117,12 @@ export default SignIn;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    height: "100%",
+    flex: 1,
   },
   keyboardAvoidingView: {
     flex: 1,
   },
   containerLogo: {
-    backgroundColor: "#fff",
     marginTop: "35%",
     alignItems: "center",
     borderRadius: 5,
@@ -145,12 +135,22 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
-    elevation: 1,
+    elevation: 10,
+  },
+  imageLogo: {
+    width: 128,
+    height: 128,
+    marginLeft: 24,
+    paddingBottom: 15,
+    resizeMode: "contain",
   },
   textLogo: {
     fontFamily: "outfit-bold",
     fontSize: 35,
     marginVertical: 15,
-    color: "#172e74",
+    color: Colors.PRIMARY,
+    textShadowColor: Colors.SHADOW,
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 5,
   },
 });

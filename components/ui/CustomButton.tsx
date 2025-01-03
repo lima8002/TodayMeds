@@ -6,7 +6,6 @@ import {
   Platform,
   ViewStyle,
   TextStyle,
-  View,
 } from "react-native";
 import { Colors } from "../../constants/Colors";
 
@@ -41,10 +40,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       onPress={onPress}
       style={[
         styles.container,
-        otherTextStyles
-          ? { alignItems: "flex-start" }
-          : { alignItems: "center" },
-        styles[`container_${type}` as keyof typeof styles],
+        styles[`container_${type}`],
         bgColor ? { backgroundColor: bgColor } : {},
         otherStyles,
       ]}
@@ -71,34 +67,36 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 5,
     borderRadius: 15,
+    height: 46,
   },
   container_PRIMARY: {
-    // backgroundColor: '#192986',
     backgroundColor: Colors.LOGO_BACKGROUND,
   },
   container_SECONDARY: {
-    borderColor: "#3B71F3",
+    borderColor: Colors.LOGO_BACKGROUND,
     borderWidth: 1,
-    shadowColor: "rgba(0, 0, 0, 0.1)",
-    shadowOpacity: 0.8,
+    shadowColor: Colors.SHADOW,
     elevation: 6,
     shadowRadius: 15,
-    shadowOffset: { width: 1, height: 13 },
+    shadowOffset: { width: 1, height: 2 },
     backgroundColor: "white",
+  },
+  container_TERTIARY: {
+    backgroundColor: "#fff",
+    paddingBottom: -4,
   },
   container_QUATERNARY: {
     backgroundColor: "white",
-    height: Platform.OS === "ios" ? null : "10%",
     borderColor: Colors.LIGHTGRAY,
     borderWidth: 1,
     borderRadius: 15,
     paddingVertical: Platform.OS === "ios" ? 14 : 0,
     paddingHorizontal: 10,
     marginVertical: 5,
-    shadowColor: "rgba(0, 0, 0, 0.1)",
+    shadowColor: Colors.SHADOW,
   },
   container_ON: {
-    borderColor: "#3B71F3",
+    borderColor: Colors.PRIMARY_100,
     backgroundColor: "white",
     borderWidth: 2,
   },
@@ -108,38 +106,42 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   container_ALERT: {
-    borderColor: "#b30000",
-    backgroundColor: "#b30000",
+    borderColor: Colors.ALERT,
+    backgroundColor: Colors.ALERT,
     borderWidth: 2,
   },
   text: {
     fontFamily: "outfit-medium",
-    color: "white",
     fontSize: 16,
+    textAlign: "center",
+    padding: 2,
+  },
+  text_PRIMARY: {
+    color: "#fff",
   },
   text_SECONDARY: {
-    color: "#3B71F3",
+    color: Colors.PRIMARY_100,
   },
   text_TERTIARY: {
     color: Colors.GRAY,
   },
   text_QUATERNARY: {
     fontFamily: "outfit",
-    color: "Colors.GRAY",
+    color: Colors.GRAY,
   },
   text_ON: {
     fontSize: 14,
     fontFamily: "outfit",
-    color: "black",
+    color: "#000",
   },
   text_OFF: {
     fontSize: 14,
-    color: "lightgray",
+    color: Colors.GRAY,
     fontFamily: "outfit",
   },
   text_ALERT: {
     fontFamily: "outfit-bold",
-    color: "white",
+    color: "#fff",
     fontSize: 16,
   },
 });

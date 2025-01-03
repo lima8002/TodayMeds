@@ -57,24 +57,25 @@ export default CustomInput;
 const styles = StyleSheet.create({
   container: {
     width: "100%",
+    height: 46,
     backgroundColor: "white",
-    height: Platform.OS === "ios" ? null : "10%",
-    borderColor: "#e8e8e8",
+    borderColor: Colors.SHADOW,
     borderWidth: 1,
-    borderRadius: 15,
+    borderRadius: 16,
     paddingVertical: Platform.OS === "ios" ? 14 : 0,
     paddingHorizontal: 10,
     marginVertical: 5,
   },
   errorStyles: {
-    borderColor: "red",
+    borderColor: Colors.ALERT,
   },
   text: {
-    color: "red",
+    color: Colors.ALERT,
     alignSelf: "flex-start",
   },
   input: {
     fontFamily: "outfit",
     fontSize: 16,
+    marginTop: Platform.OS === "ios" ? 0 : 11,
   },
 });

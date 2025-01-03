@@ -14,6 +14,7 @@ import CustomInput from "@/components/ui/CustomInput";
 import CustomButton from "@/components/ui/CustomButton";
 import EMAIL_REGEX from "@/constants/EmailRegex";
 import { CreateUser } from "@/utils/FirebaseHelper";
+import { Colors } from "@/constants/Colors";
 
 interface SignUpFormData {
   name: string;
@@ -118,16 +119,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   root: {
+    marginTop: "35%",
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: "50%",
     paddingHorizontal: 30,
     paddingVertical: 35,
   },
   title: {
     fontSize: 26,
     fontFamily: "outfit-medium",
-    color: "#051C60",
+    color: Colors.TEXT_TITLE,
     margin: 10,
   },
 });

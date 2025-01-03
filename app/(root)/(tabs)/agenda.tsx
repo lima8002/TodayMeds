@@ -101,7 +101,7 @@ const AgendaScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex -max-h-screen-safe-offset-0">
       <CustomHeader title="Agenda" />
       <FlatList
         ref={flatListRef}
@@ -148,23 +148,23 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: "flex-start",
     alignItems: "center",
-    borderTopLeftRadius: 10,
-    borderBottomLeftRadius: 10,
+    // borderTopLeftRadius: 10,
+    // borderBottomLeftRadius: 10,
     backgroundColor: "#fff",
   },
   intakesList: {
     flex: 1,
     backgroundColor: "#fff",
-    borderTopRightRadius: 10,
-    borderBottomRightRadius: 10,
+    // borderTopRightRadius: 10,
+    // borderBottomRightRadius: 10,
   },
   intakeItem: {
     flexDirection: "row",
     alignItems: "center",
     padding: 13.5,
-    marginBottom: -1,
-    borderBottomWidth: 0.5,
-    borderBottomColor: Colors.BORDERGRAY,
+    // marginBottom: -1,
+    // borderBottomWidth: 0.5,
+    // borderBottomColor: Colors.BORDERGRAY,
   },
   intakeTime: {
     fontFamily: "outfit-medium",

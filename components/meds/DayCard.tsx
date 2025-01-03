@@ -22,33 +22,33 @@ const DayCard: React.FC<DayCardProps> = ({ day, date }) => {
 
 const styles = StyleSheet.create({
   dayCard: {
-    width: Platform.OS === "ios" ? 76 : 66,
+    width: Platform.OS === "ios" ? 45 : 45,
     elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     borderRadius: 14,
-    backgroundColor: "white", // Needed for iOS shadow to work
-    overflow: "visible", // Allows the shadow to be visible outside the component
+    backgroundColor: "white",
+    overflow: "visible",
   },
   cardTop: {
     backgroundColor: Colors.TERTIARY,
-    borderWidth: 0.6,
-    borderColor: Colors.BORDERGRAY,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.DARKGRAY,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
   cardBottom: {
     backgroundColor: "#fff",
-    borderWidth: 0.6,
-    borderColor: Colors.BORDERGRAY,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.DARKGRAY,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
   },
   dayDate: {
     fontFamily: "outfit-medium",
-    fontSize: 28,
+    fontSize: 16,
     color: Colors.PRIMARY,
     alignSelf: "center",
     textShadowColor: "rgba(0, 0, 0, 0.25)",
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   dayTitle: {
     fontFamily: "outfit-medium",
-    fontSize: 18,
+    fontSize: 16,
     color: "white",
     alignSelf: "center",
   },

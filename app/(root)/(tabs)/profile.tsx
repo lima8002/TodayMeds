@@ -8,11 +8,11 @@ import { router, Slot } from "expo-router";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { SignOutUser } from "@/utils/FirebaseHelper";
 
-export default function SettingsScreen() {
+export default function ProfileScreen() {
   const { letUserSignOut } = useGlobalContext();
   return (
     <View>
-      <CustomHeader title={"Settings"} />
+      <CustomHeader title={"Profile"} />
 
       <View style={[styles.signoutBtn, styles.shadow]}>
         <CustomButton

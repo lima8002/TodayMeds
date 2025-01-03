@@ -1,32 +1,25 @@
 import { Tabs } from "expo-router";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, Platform, StyleSheet } from "react-native";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import { HapticTab } from "@/components/ui/HapticTab";
+import TabBarBackground from "@/components/ui/TabBarBackground";
+import { Colors } from "@/constants/Colors";
 
 const TabIcon = ({
   focused,
   icon,
-  title,
-}: {
+}: // title,
+{
   focused: boolean;
   icon: any;
-  title: string;
+  // title: string;
 }) => (
-  <View className="flex-1 mt-3 flex flex-col items-center">
+  <View style={styles.container}>
     <Image
       source={icon}
-      tintColor={focused ? "#5E75CA" : "#8f8f8f"}
-      // resizeMode="cover"
-      // className="size-6"
-      // size={24}
+      tintColor={focused ? Colors.LOGO_BACKGROUND : Colors.GRAY}
+      style={styles.icon}
     />
-    <Text
-      className={`${
-        focused
-          ? "text-[#5E75CA] font-outfit-medium"
-          : "text-[#8f8f8f] font-outfit"
-      } text-xs w-full text-center mt-1`}
-    >
-      {title}
-    </Text>
   </View>
 );
 
@@ -35,48 +28,51 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarShowLabel: false,
-        tabBarStyle: {
-          backgroundColor: "white",
-          position: "absolute",
-          borderTopColor: "#00611FF1A",
-          borderTopWidth: 1,
-          minHeight: 70,
-        },
+        tabBarActiveTintColor: Colors.LOGO_BACKGROUND,
+        tabBarInactiveTintColor: Colors.GRAY,
+        tabBarLabelStyle: styles.text,
+        tabBarStyle: Platform.select({
+          ios: {
+            // Use a transparent background on iOS to show the blur effect
+            position: "absolute",
+          },
+          default: { size: { height: 0 } },
+        }),
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
+          title: "TodayMeds",
           tabBarIcon: ({ focused }) => (
             <TabIcon
-              icon={require("@/assets/icons/pills.png")}
               focused={focused}
-              title="TodayMeds"
+              icon={require("@/assets/icons/pills.png")}
             />
           ),
         }}
       />
+
       <Tabs.Screen
         name="agenda"
         options={{
+          title: "Agenda",
           tabBarIcon: ({ focused }) => (
             <TabIcon
-              icon={require("@/assets/icons/calendar.png")}
               focused={focused}
-              title="Agenda"
+              icon={require("@/assets/icons/calendar.png")}
             />
           ),
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="profile"
         options={{
+          title: "Profile",
           tabBarIcon: ({ focused }) => (
             <TabIcon
-              icon={require("@/assets/icons/person.png")}
               focused={focused}
-              title="Profile"
+              icon={require("@/assets/icons/person.png")}
             />
           ),
         }}
@@ -84,3 +80,23 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  icon: {
+    width: 28,
+    height: 28,
+    resizeMode: "contain",
+    marginTop: Platform.OS === "ios" ? 2 : 0,
+  },
+  text: {
+    fontSize: 11,
+    marginTop: Platform.OS === "ios" ? 4 : 0,
+    fontFamily: "outfit",
+    textAlign: "center",
+  },
+});

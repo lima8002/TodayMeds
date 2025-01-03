@@ -1,64 +1,44 @@
-import React from "react";
-import { Platform, OpaqueColorValue, StyleProp, ViewStyle } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { SymbolWeight } from "expo-symbols";
+import React from "react";
+import { OpaqueColorValue, StyleProp, ViewStyle } from "react-native";
 
-// Only import SymbolView if we're on iOS
-let SymbolView: any;
-if (Platform.OS === "ios") {
-  SymbolView = require("expo-symbols").SymbolView;
-}
-
-// Add your SFSymbol to MaterialIcons mappings here.
 const MAPPING = {
   "house.fill": "home",
   "plus.circle.fill": "add-circle",
   gear: "settings",
-  calendar: "event",
-  pill: "local-pharmacy",
+  calendar: "calendar-month",
+  pills: "medication",
   "list.bullet": "list",
   xmark: "close",
-};
+  "person.crop.circle.fill": "account-circle",
+} as Partial<
+  Record<
+    import("expo-symbols").SymbolViewProps["name"],
+    React.ComponentProps<typeof MaterialIcons>["name"]
+  >
+>;
 
 export type IconSymbolName = keyof typeof MAPPING;
 
-interface IconSymbolProps {
+export function IconSymbol({
+  name,
+  size = 24,
+  color,
+  style,
+}: {
   name: IconSymbolName;
   size?: number;
   color: string | OpaqueColorValue;
   style?: StyleProp<ViewStyle>;
-}
-
-function IconSymbolIOS({ name, size = 24, color, style }: IconSymbolProps) {
+  weight?: SymbolWeight;
+}) {
   return (
-    <SymbolView
-      weight="regular"
-      tintColor={color}
-      resizeMode="scaleAspectFit"
-      name={name}
-      style={[
-        {
-          width: size,
-          height: size,
-        },
-        style,
-      ]}
+    <MaterialIcons
+      color={color}
+      size={size}
+      name={MAPPING[name]}
+      style={{ fontFamily: "outfit-medium" }}
     />
   );
-}
-
-export function IconSymbol({ name, size, color, style }: IconSymbolProps) {
-  if (Platform.OS === "ios") {
-    return (
-      <IconSymbolIOS name={name} size={size} color={color} style={style} />
-    );
-  } else {
-    return (
-      <MaterialIcons
-        name={MAPPING[name]}
-        size={size}
-        color={color}
-        style={style}
-      />
-    );
-  }
 }
