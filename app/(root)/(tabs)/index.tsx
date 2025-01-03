@@ -11,9 +11,8 @@ import { Colors } from "@/constants/Colors";
 import DayCard from "@/components/meds/DayCard";
 import CustomFloatButton from "@/components/ui/CustomFloatButton";
 import { useGlobalContext } from "@/context/GlobalProvider";
-import CustomButton from "@/components/ui/CustomButton";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 
 interface Medication {
   id: string;
@@ -144,24 +143,25 @@ export default function MainScreen() {
               </View>
             </View>
 
-            {/* <View className="flex-row justify-between"> */}
-            <Text className="font-outfit-medium text-xl px-3">
-              Your Medication
-            </Text>
-            <TouchableOpacity onPress={() => router.push("/add")}>
-              <Image
-                source={require("@/assets/icons/pills.png")}
-                width={60}
-                height={60}
-                resizeMode="contain"
-                style={{ marginBottom: 20, backgroundColor: "yellow" }}
-              />
-            </TouchableOpacity>
-            {/* </View> */}
+            <View className="flex-row justify-between">
+              <Text className="font-outfit-medium text-xl px-3">
+                Your Medication
+              </Text>
+              <View className="mx-3">
+                <TouchableOpacity
+                  onPress={() => router.push("/add")}
+                  className="px-2 flex-row items-center "
+                >
+                  {/* <Text className="text-sm text-gray-600 font-outfit">
+                    Add Medication
+                  </Text> */}
+                  <Entypo name="plus" size={26} color="black" />
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         }
       />
-      <CustomFloatButton />
     </View>
   );
 }

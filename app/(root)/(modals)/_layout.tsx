@@ -12,7 +12,7 @@ export default function ModalsLayout() {
         }}
       />
       <Stack.Screen
-        name="edit"
+        name="[id]"
         options={{
           presentation: "modal",
           title: "Edit Medication",
