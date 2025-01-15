@@ -91,7 +91,9 @@ export default function MedicationForm({
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Medication Name</Text>
           <TextInput
+            style={styles.input}
             placeholder="Enter medication name"
+            placeholderTextColor={Colors.DARKGRAY}
             value={name}
             onChangeText={setName}
           />
@@ -179,7 +181,7 @@ export default function MedicationForm({
         >
           <View style={styles.modalPickerContainer}>
             <View style={styles.pickerContainer}>
-              <Picker
+              {/* <Picker
                 selectedValue={tempFrequency}
                 onValueChange={(itemValue) => setTempFrequency(itemValue)}
                 style={styles.picker}
@@ -192,25 +194,40 @@ export default function MedicationForm({
                     value={(i + 1).toString()}
                   />
                 ))}
+              </Picker> */}
+              <Picker
+                selectedValue={tempFrequency}
+                style={styles.picker}
+                onValueChange={(itemValue) => setTempFrequency(itemValue)}
+              >
+                {Array.from({ length: 23 }, (_, i) => i + 1).map((number) => (
+                  <Picker.Item
+                    key={number}
+                    label={
+                      number == 1
+                        ? number.toString() + " hour"
+                        : number.toString() + " hours"
+                    }
+                    value={number}
+                  />
+                ))}
               </Picker>
               <View style={styles.buttonPickerContainer}>
-                <TouchableOpacity
-                  style={[styles.button, styles.cancelButton]}
-                  onPress={() => setShowFrequencyPicker(false)}
-                >
-                  <Text style={styles.buttonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.button, styles.confirmButton]}
+                <CustomButton
+                  type="PRIMARY"
+                  text="Confirm"
                   onPress={() => {
                     if (tempFrequency != null) {
                       setFrequency(tempFrequency);
                     }
                     setShowFrequencyPicker(false);
                   }}
-                >
-                  <Text style={styles.buttonText}>Confirm</Text>
-                </TouchableOpacity>
+                />
+                <CustomButton
+                  type="TERTIARY"
+                  text="Cancel"
+                  onPress={() => setShowFrequencyPicker(false)}
+                />
               </View>
             </View>
           </View>
@@ -267,7 +284,9 @@ export default function MedicationForm({
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Box Quantity</Text>
           <TextInput
+            style={styles.input}
             placeholder="e.g., 30"
+            placeholderTextColor={Colors.DARKGRAY}
             value={quantity}
             onChangeText={setQuantity}
             keyboardType="numeric"
@@ -465,7 +484,8 @@ const styles = StyleSheet.create({
   modalPickerContainer: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    overflow: "scroll",
   },
   pickerContainer: {
     backgroundColor: "white",
@@ -486,7 +506,7 @@ const styles = StyleSheet.create({
     fontFamily: "outfit",
   },
   buttonPickerContainer: {
-    flexDirection: "row",
+    // flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 20,
   },

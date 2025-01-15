@@ -1,5 +1,12 @@
 import React, { useMemo, useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Platform,
+  Dimensions,
+} from "react-native";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import CustomHeader from "@/components/ui/CustomHeader";
 import DayCard from "@/components/meds/DayCard";
@@ -101,13 +108,14 @@ const AgendaScreen = () => {
   };
 
   return (
-    <View className="flex -max-h-screen-safe-offset-0">
+    <View style={{ flex: 1 }}>
       <CustomHeader title="Agenda" />
       <FlatList
         ref={flatListRef}
         data={groupedIntakes}
         renderItem={renderDayCard}
         keyExtractor={(item) => item.date}
+        style={{ marginBottom: "10%" }}
         onScrollToIndexFailed={(info) => {
           const wait = new Promise((resolve) => setTimeout(resolve, 500));
           wait.then(() => {
@@ -123,6 +131,7 @@ const AgendaScreen = () => {
           </Text>
         }
       />
+      <View style={{ marginBottom: Platform.OS === "ios" ? 38 : 56 }} />
     </View>
   );
 };

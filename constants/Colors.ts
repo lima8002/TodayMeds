@@ -15,4 +15,5 @@ export const Colors = {
   SHADOW: "#00000035",
   TEXT_TITLE: "#051C60",
   ALERT: "#FF0000",
+  BACKGROUND_100: "#F9F9F9",
 };

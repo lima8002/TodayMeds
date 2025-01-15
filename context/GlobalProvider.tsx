@@ -42,7 +42,7 @@ interface GlobalContextType {
   letUserSignOut: () => void;
   medications: MedsDB[];
   addMedication: (medication: Omit<MedsDB, "id" | "intake">) => void;
-  updateMedication: (id: string, medication: Partial<MedsDB>) => void;
+  // updateMedication: (id: string, medication: Partial<MedsDB>) => void;
   getAllIntakes: () => {
     dateTime: string;
     medicationName: string;
@@ -156,13 +156,13 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     return intake;
   };
 
-  const updateMedication = async (id: string, updatedMedication: MedsDB) => {
-    const updatedMedications = medications.map((med) =>
-      med.id === id ? { ...med, ...updatedMedication } : med
-    );
-    setMedications(updatedMedications);
-    await saveMedications(updatedMedications);
-  };
+  // const updateMedication = async (id: string, updatedMedication: MedsDB) => {
+  //   const updatedMedications = medications.map((med) =>
+  //     med.id === id ? { ...med, ...updatedMedication } : med
+  //   );
+  //   setMedications(updatedMedications);
+  //   await saveMedications(updatedMedications);
+  // };
 
   const getAllIntakes = () => {
     return medications
@@ -191,7 +191,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     letUserSignOut,
     medications,
     addMedication,
-    updateMedication,
+    // updateMedication,
     getAllIntakes,
   };
 

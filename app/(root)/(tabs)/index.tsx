@@ -6,13 +6,14 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import DayCard from "@/components/meds/DayCard";
-import CustomFloatButton from "@/components/ui/CustomFloatButton";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { useRouter } from "expo-router";
 import { Entypo, Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface Medication {
   id: string;
@@ -31,6 +32,9 @@ interface Intake {
 }
 
 export default function MainScreen() {
+  const insets = useSafeAreaInsets();
+  const tabBarHeight =
+    Platform.OS === "ios" ? insets.bottom - 40 : 56 + insets.bottom;
   const [greeting, setGreeting] = useState<string | null>(null);
   const { getAllIntakes } = useGlobalContext();
   const allIntakes: Intake[] = getAllIntakes();
@@ -91,24 +95,23 @@ export default function MainScreen() {
           With Food/Water: {item.withFoodWater ? "Yes" : "No"}
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={24} color={Colors.PRIMARY} />
+      <Ionicons name="chevron-forward" size={26} color={Colors.PRIMARY} />
     </TouchableOpacity>
   );
 
   return (
-    <View className="h-full">
-      <View className="bg-logo-background overflow-hidden rounded-b-2xl pt-20">
-        <Text className="px-3 text-2xl font-outfit-bold mb-5 text-white">
-          {greeting}
-        </Text>
+    <View style={styles.container}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>{greeting}</Text>
       </View>
 
       <FlatList
         data={medications}
         renderItem={renderMedicationItem}
         keyExtractor={(item) => item.id}
+        style={{ flex: 1, marginBottom: tabBarHeight }}
         ListEmptyComponent={
-          <View className="flex justify-center items-center bg-white rounded-2xl m-3 py-3 pb-6 shadow-sm">
+          <View className="flex justify-center items-center bg-white rounded-2xl m-3 py-3 pb-6 shadow-sm elevation-md">
             <Image
               source={require("@/assets/images/no-meds.png")}
               className="size-60 opacity-35"
@@ -119,26 +122,24 @@ export default function MainScreen() {
           </View>
         }
         ListHeaderComponent={
-          <View className="flex">
-            <Text className="font-outfit-medium text-xl px-3 mt-3">
-              Today's Agenda
-            </Text>
-            <View className="flex flex-row justify-center items-center bg-white rounded-2xl m-3 py-3 pb-6 shadow-sm">
-              <View style={styles.dayCardContainer}>
-                <DayCard
-                  day={new Date()
-                    .toLocaleDateString("en-US", { weekday: "short" })
-                    .toUpperCase()}
-                  date={new Date().getDate().toString()}
-                />
-              </View>
+          <View style={styles.contentContainer}>
+            <Text style={styles.textMainTitle}>Today's Agenda</Text>
+            <View className="flex flex-row justify-center items-center bg-white rounded-2xl m-3 py-3 pb-6 shadow-sm elevation-md">
               <View style={styles.intakesList}>
                 {todayIntakes.length > 0 ? (
                   todayIntakes.map(renderIntakeItem)
                 ) : (
-                  <Text className="text-center text-lg text-emptylist font-outfit opacity-35">
-                    No scheduled for today
-                  </Text>
+                  <View style={styles.dayCardContainer}>
+                    <DayCard
+                      day={new Date()
+                        .toLocaleDateString("en-US", { weekday: "short" })
+                        .toUpperCase()}
+                      date={new Date().getDate().toString()}
+                    />
+                    <Text className="text-center text-lg text-emptylist font-outfit opacity-35">
+                      You have no scheduled for today
+                    </Text>
+                  </View>
                 )}
               </View>
             </View>
@@ -150,7 +151,7 @@ export default function MainScreen() {
               <View className="mx-3">
                 <TouchableOpacity
                   onPress={() => router.push("/add")}
-                  className="px-2 flex-row items-center "
+                  className="px-2 flex-row items-center"
                 >
                   {/* <Text className="text-sm text-gray-600 font-outfit">
                     Add Medication
@@ -174,6 +175,9 @@ export default function MainScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginBottom: 87,
+    backgroundColor: Colors.BACKGROUND_100,
+    // backgroundColor: "#fff",
   },
   titleContainer: {
     backgroundColor: Colors.LOGO_BACKGROUND,
@@ -183,23 +187,22 @@ const styles = StyleSheet.create({
     paddingTop: "15%",
   },
   title: {
-    paddingHorizontal: 20,
-    fontSize: 24,
-    fontFamily: "Outfit-Bold",
+    paddingHorizontal: 12,
+    lineHeight: 32,
+    fontSize: 22,
+    fontFamily: "outfit-bold",
     marginBottom: 20,
     color: "#fff",
   },
+  contentContainer: {
+    flex: 1,
+  },
   textMainTitle: {
     fontFamily: "outfit-medium",
-    fontSize: 20,
+    fontSize: 17,
     padding: 10,
   },
-  scrollView: {
-    // backgroundColor: "#fff",
-  },
-  contentContainer: {
-    padding: 10,
-  },
+
   todayAgenda: {
     flexDirection: "row",
     backgroundColor: "#f0f0f0",
