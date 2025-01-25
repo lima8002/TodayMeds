@@ -14,6 +14,7 @@ import { useGlobalContext } from "@/context/GlobalProvider";
 import { useRouter } from "expo-router";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import CustomFloatButton from "@/components/ui/CustomFloatButton";
 
 interface Medication {
   id: string;
@@ -34,7 +35,7 @@ interface Intake {
 export default function MainScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight =
-    Platform.OS === "ios" ? insets.bottom - 40 : 56 + insets.bottom;
+    Platform.OS === "ios" ? insets.bottom - 42 : 56 + insets.bottom;
   const [greeting, setGreeting] = useState<string | null>(null);
   const { getAllIntakes } = useGlobalContext();
   const allIntakes: Intake[] = getAllIntakes();
@@ -136,7 +137,7 @@ export default function MainScreen() {
                         .toUpperCase()}
                       date={new Date().getDate().toString()}
                     />
-                    <Text className="text-center text-lg text-emptylist font-outfit opacity-35">
+                    <Text className="text-center text-lg text-emptylist pt-5 font-outfit opacity-35">
                       You have no scheduled for today
                     </Text>
                   </View>
@@ -148,26 +149,11 @@ export default function MainScreen() {
               <Text className="font-outfit-medium text-xl px-3">
                 Your Medication
               </Text>
-              <View className="mx-3">
-                <TouchableOpacity
-                  onPress={() => router.push("/add")}
-                  className="px-2 flex-row items-center"
-                >
-                  {/* <Text className="text-sm text-gray-600 font-outfit">
-                    Add Medication
-                  </Text> */}
-                  <Entypo
-                    name="plus"
-                    size={26}
-                    color="black"
-                    className="font-outfit-medium text-xl"
-                  />
-                </TouchableOpacity>
-              </View>
             </View>
           </View>
         }
       />
+      <CustomFloatButton type="ADD" />
     </View>
   );
 }
