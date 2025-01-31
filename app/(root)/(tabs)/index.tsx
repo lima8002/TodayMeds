@@ -24,6 +24,11 @@ interface Medication {
   dateTime: string;
   quantity: string;
   withFoodWater: boolean;
+  active: boolean;
+  intake: {
+    dateTime: string;
+    taken: boolean;
+  }[];
 }
 
 interface Intake {
@@ -69,21 +74,21 @@ export default function MainScreen() {
           hour12: false,
         })}
       </Text>
-      <View style={styles.intakeDetails}>
-        <Text style={styles.intakeMedName}>{item.medicationName}</Text>
-        <Text
-          style={[styles.status, item.taken ? styles.taken : styles.notTaken]}
-        >
-          {item.taken ? "Taken" : "Not Taken"}
-        </Text>
-      </View>
+      {/* <View style={styles.intakeDetails}> */}
+      <Text style={styles.intakeMedName}>{item.medicationName}</Text>
+      <Text
+        style={[styles.status, item.taken ? styles.taken : styles.notTaken]}
+      >
+        {item.taken ? "Taken" : "Not Taken"}
+      </Text>
+      {/* </View> */}
     </View>
   );
 
   const renderMedicationItem = ({ item }: { item: Medication }) => (
     <TouchableOpacity
       style={styles.medicationItem}
-      onPress={() => router.push(`/(modals)/${item.id}`)}
+      onPress={() => router.push(`/(modals)/details/${item.id}`)}
     >
       <View style={styles.medicationContent}>
         <Text style={styles.medicationName}>{item.name}</Text>

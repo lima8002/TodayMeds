@@ -5,6 +5,7 @@ import { Colors } from "@/constants/Colors";
 import pills from "@/assets/icons/pills.png";
 import calendar from "@/assets/icons/calendar.png";
 import person from "@/assets/icons/person.png";
+import presc from "@/assets/icons/presc.png";
 
 const TabIcon = ({
   focused,
@@ -54,12 +55,19 @@ export default function TabLayout() {
           ),
         }}
       />
-
       <Tabs.Screen
         name="agenda"
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon focused={focused} icon={calendar} title={"Agenda"} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="medication"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={presc} title={"Medications"} />
           ),
         }}
       />

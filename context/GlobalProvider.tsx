@@ -5,8 +5,15 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AuthenticatedUser, SignOutUser } from "@/utils/FirebaseHelper";
+import {
+  AuthenticatedUser,
+  SignOutUser,
+  onAddNewMedToDB,
+  onGetMedsByUser,
+  onUpdateMeds,
+  onDeleteMedById,
+} from "@/utils/FirebaseHelper";
+import { User } from "firebase/auth";
 
 interface UserDB {
   email: string;
@@ -24,6 +31,7 @@ interface MedsDB {
   dateTime: string;
   quantity: string;
   withFoodWater: boolean;
+  active: boolean;
   intake: {
     dateTime: string;
     taken: boolean;
@@ -33,16 +41,17 @@ interface MedsDB {
 interface GlobalContextType {
   isLoggedIn: boolean;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
-  user: any | null;
-  setUser: React.Dispatch<React.SetStateAction<any | null>>;
+  user: User | null;
   userDB: UserDB | null;
   setUserDB: React.Dispatch<React.SetStateAction<UserDB | null>>;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  letUserSignOut: () => void;
+  letUserSignOut: () => Promise<void>;
   medications: MedsDB[];
-  addMedication: (medication: Omit<MedsDB, "id" | "intake">) => void;
-  // updateMedication: (id: string, medication: Partial<MedsDB>) => void;
+  setMedications: React.Dispatch<React.SetStateAction<MedsDB[]>>;
+  addMedication: (medication: Omit<MedsDB, "id" | "intake">) => Promise<void>;
+  updateMedication: (id: string, medication: Partial<MedsDB>) => Promise<void>;
+  deleteMedication: (id: string) => Promise<void>;
   getAllIntakes: () => {
     dateTime: string;
     medicationName: string;
@@ -58,83 +67,91 @@ interface GlobalProviderProps {
 
 const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [userDB, setUserDB] = useState<UserDB | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [medications, setMedications] = useState<MedsDB[]>([]);
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      getUserAuth();
-      if (user) {
-        loadMedications();
-      }
-    }
-    if (!user) {
-      setIsLoggedIn(false);
-    }
-  }, [!isLoggedIn]);
-
-  const getUserAuth = (): void => {
-    try {
-      const unsubscriber = AuthenticatedUser((authUser) => {
-        if (!authUser) {
-          setUser(null);
-          setIsLoggedIn(false);
-        } else {
-          if (authUser) {
-            setUser(authUser);
-            setIsLoggedIn(true);
-          }
-        }
-        setIsLoading(false);
-        return () => unsubscriber();
-      });
-    } catch (error) {
-      console.error("Error loading medications:", error);
-    }
-  };
-
-  const letUserSignOut = (): void => {
-    try {
-      SignOutUser();
+    const unsubscribeAuth = AuthenticatedUser(async (authUser) => {
+      setUser(authUser);
       setIsLoading(true);
-    } catch (error) {
-      console.error("Error loading medications:", error);
-    }
-  };
-
-  const loadMedications = async () => {
-    try {
-      const storedMedications = await AsyncStorage.getItem("medications");
-      if (storedMedications) {
-        setMedications(JSON.parse(storedMedications));
+      if (authUser) {
+        setIsLoggedIn(true);
+        await fetchMedications(authUser.email || "");
+      } else {
+        setMedications([]);
+        setIsLoggedIn(false);
       }
-    } catch (error) {
-      console.error("Error loading medications:", error);
-    }
-  };
+      setIsLoading(false);
+    });
 
-  const saveMedications = async (updatedMedications: MedsDB[]) => {
+    return () => unsubscribeAuth(); // Unsubscribe when component unmounts
+  }, []);
+
+  const letUserSignOut = async () => {
     try {
-      await AsyncStorage.setItem(
-        "medications",
-        JSON.stringify(updatedMedications)
-      );
+      await SignOutUser();
     } catch (error) {
-      console.error("Error saving medications:", error);
+      console.error("Error signing out:", error);
     }
   };
 
-  const addMedication = (medication: Omit<MedsDB, "id" | "intake">) => {
-    const newMedication: MedsDB = {
-      ...medication,
-      id: Date.now().toString(),
-      intake: calculateIntakeArray(medication),
-    };
-    const updatedMedications = [...medications, newMedication];
-    setMedications(updatedMedications);
-    saveMedications(updatedMedications);
+  const fetchMedications = async (userEmail: string) => {
+    try {
+      const meds = await onGetMedsByUser(userEmail);
+      setMedications(meds);
+    } catch (error) {
+      console.error("Error fetching medications:", error);
+    }
+  };
+
+  const addMedication = async (medication: Omit<MedsDB, "id" | "intake">) => {
+    if (!user?.email) {
+      console.error("User email is missing. Cannot add medication.");
+      return;
+    }
+    try {
+      const newMedication: MedsDB = {
+        ...medication,
+        id: Date.now().toString(),
+        email: user.email, // Add user's email
+        intake: calculateIntakeArray(medication),
+      };
+      await onAddNewMedToDB(newMedication); // Use Firebase function
+      await fetchMedications(user.email); // Refresh medications list
+    } catch (error) {
+      console.error("Error adding medication:", error);
+    }
+  };
+
+  const updateMedication = async (
+    id: string,
+    updatedMedication: Partial<MedsDB>
+  ) => {
+    try {
+      const medsToUpdate = medications.find((med) => med.id === id);
+
+      if (!medsToUpdate) {
+        throw new Error("Medication not found");
+      }
+
+      const mergedMedication = { ...medsToUpdate, ...updatedMedication };
+
+      await onUpdateMeds(id, mergedMedication);
+      await fetchMedications(user?.email || "");
+    } catch (error) {
+      console.error("Error updating medication:", error);
+    }
+  };
+
+  const deleteMedication = async (id: string) => {
+    try {
+      await onDeleteMedById(id);
+      setMedications(medications.filter((med) => med.id !== id));
+    } catch (error) {
+      console.error("Error deleting medication:", error);
+    }
   };
 
   const calculateIntakeArray = (medication: Omit<MedsDB, "id" | "intake">) => {
@@ -156,14 +173,6 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     return intake;
   };
 
-  // const updateMedication = async (id: string, updatedMedication: MedsDB) => {
-  //   const updatedMedications = medications.map((med) =>
-  //     med.id === id ? { ...med, ...updatedMedication } : med
-  //   );
-  //   setMedications(updatedMedications);
-  //   await saveMedications(updatedMedications);
-  // };
-
   const getAllIntakes = () => {
     return medications
       .flatMap((med) =>
@@ -183,15 +192,16 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     isLoggedIn,
     setIsLoggedIn,
     user,
-    setUser,
     userDB,
     setUserDB,
     isLoading,
     setIsLoading,
     letUserSignOut,
     medications,
+    setMedications,
     addMedication,
-    // updateMedication,
+    updateMedication,
+    deleteMedication,
     getAllIntakes,
   };
 

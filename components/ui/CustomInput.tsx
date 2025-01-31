@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   input: {
     fontFamily: "outfit",
-    fontSize: 16,
+    fontSize: Platform.OS === "ios" ? 14 : 16,
     marginTop: Platform.OS === "ios" ? 0 : 11,
   },
 });

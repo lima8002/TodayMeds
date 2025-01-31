@@ -4,16 +4,21 @@ import { useGlobalContext } from "@/context/GlobalProvider";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, Slot } from "expo-router";
+import { Colors } from "@/constants/Colors";
 
 export default function RootLayout() {
   const { isLoading, isLoggedIn } = useGlobalContext();
 
   if (isLoading) {
     return (
-      <SafeAreaView>
-        {/* className="bg-white h-full flex justify-center items-center"> */}
-        <ActivityIndicator size="small" />
-        {/* className="text-primary-300"  */}
+      <SafeAreaView
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          backgroundColor: "#00000040",
+        }}
+      >
+        <ActivityIndicator size="small" color={Colors.PRIMARY} />
       </SafeAreaView>
     );
   }

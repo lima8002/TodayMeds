@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import { Picker } from "@react-native-picker/picker";
 import { Checkbox } from "react-native-paper";
 import { Colors } from "../../constants/Colors";
 import CustomButton from "../ui/CustomButton";
-import CustomInput from "../ui/CustomInput";
 
 interface MedicationFormProps {
   initialValues?: {
@@ -24,11 +23,15 @@ interface MedicationFormProps {
     dateTime: Date;
     quantity: string;
     withFoodWater: boolean;
+    active: boolean;
+    intake: {
+      dateTime: string;
+      taken: boolean;
+    }[];
   };
   onSubmit: (medication: any) => void;
   submitButtonText: string;
 }
-
 export default function MedicationForm({
   initialValues,
   onSubmit,
@@ -36,10 +39,11 @@ export default function MedicationForm({
 }: MedicationFormProps) {
   const [name, setName] = useState(initialValues?.name || "");
   const [dosage, setDosage] = useState(initialValues?.dosage || "");
-  const [frequency, setFrequency] = useState(initialValues?.frequency || "");
-  const [dateTime, setDateTime] = useState(
-    initialValues?.dateTime || new Date()
+  const [frequency, setFrequency] = useState<string | null>(
+    initialValues?.frequency || null
   );
+  const [dateTime, setDateTime] = useState<Date>(new Date());
+  const [tmpDateTime, setTmpDateTime] = useState<Date>(new Date());
   const [quantity, setQuantity] = useState(initialValues?.quantity || "");
   const [withFoodWater, setWithFoodWater] = useState(
     initialValues?.withFoodWater || false
@@ -48,10 +52,10 @@ export default function MedicationForm({
     !!initialValues?.dateTime || ""
   );
 
-  const [openDateTimePicker, setOpenDateTimePicker] = useState(false);
   const [selectedDosage, setSelectedDosage] = useState<string | null>(null);
   const [otherDosage, setOtherDosage] = useState<string | null>(null);
   const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
+  const [showDTPicker, setShowDTPicker] = useState(false);
   const [tempFrequency, setTempFrequency] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,6 +81,7 @@ export default function MedicationForm({
       dateTime: dateTime,
       quantity,
       withFoodWater,
+      active: true,
     };
     onSubmit(medicationData);
   };
@@ -148,11 +153,11 @@ export default function MedicationForm({
           </View>
           {selectedDosage === "Other" && (
             <TextInput
-              placeholder="e.g., 5"
               value={otherDosage || ""}
               onChangeText={setOtherDosage}
               keyboardType="numeric"
-              style={{ paddingTop: 15 }}
+              style={[styles.input, { marginTop: 15 }]}
+              placeholder="e.g., 5"
             />
           )}
         </View>
@@ -162,7 +167,10 @@ export default function MedicationForm({
           <Text style={styles.label}>Frequency Hours</Text>
           <TouchableOpacity
             style={styles.input}
-            onPress={() => setShowFrequencyPicker(true)}
+            onPress={() => {
+              setShowFrequencyPicker(true);
+              setTempFrequency(8);
+            }}
           >
             {frequency ? (
               <Text style={styles.text}>
@@ -177,28 +185,16 @@ export default function MedicationForm({
         <Modal
           visible={showFrequencyPicker}
           transparent={true}
-          animationType="slide"
+          animationType="fade"
         >
           <View style={styles.modalPickerContainer}>
             <View style={styles.pickerContainer}>
-              {/* <Picker
-                selectedValue={tempFrequency}
-                onValueChange={(itemValue) => setTempFrequency(itemValue)}
-                style={styles.picker}
-              >
-                <Picker.Item label="Select frequency" value="" />
-                {[...Array(24)].map((_, i) => (
-                  <Picker.Item
-                    key={i + 1}
-                    label={`Every ${i + 1} hour${i === 0 ? "" : "s"}`}
-                    value={(i + 1).toString()}
-                  />
-                ))}
-              </Picker> */}
+              <Text style={styles.label}>Select Frequency</Text>
               <Picker
                 selectedValue={tempFrequency}
                 style={styles.picker}
                 onValueChange={(itemValue) => setTempFrequency(itemValue)}
+                mode="dialog"
               >
                 {Array.from({ length: 23 }, (_, i) => i + 1).map((number) => (
                   <Picker.Item
@@ -209,6 +205,7 @@ export default function MedicationForm({
                         : number.toString() + " hours"
                     }
                     value={number}
+                    color="#000"
                   />
                 ))}
               </Picker>
@@ -234,12 +231,13 @@ export default function MedicationForm({
         </Modal>
 
         {/* Date and Time */}
-
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Date and Time</Text>
           <TouchableOpacity
             style={styles.input}
-            onPress={() => setOpenDateTimePicker(true)}
+            onPress={() => {
+              setShowDTPicker(true);
+            }}
           >
             <Text style={formattedDT ? styles.text : styles.textDisabled}>
               {formattedDT ? null : "e.g., "}
@@ -253,32 +251,59 @@ export default function MedicationForm({
               })}
             </Text>
           </TouchableOpacity>
-          <DatePicker
-            modal
-            open={openDateTimePicker}
-            date={dateTime}
-            minuteInterval={15}
-            onConfirm={(date) => {
-              setOpenDateTimePicker(false);
-              setDateTime(date);
-              setFormattedDT(
-                date.toLocaleString("en-GB", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })
-              );
-            }}
-            onCancel={() => {
-              setOpenDateTimePicker(false);
-              setFormattedDT("");
-            }}
-            mode="datetime"
-          />
         </View>
+        <Modal visible={showDTPicker} transparent={true} animationType="fade">
+          <View style={styles.modalPickerContainer}>
+            <View style={styles.pickerContainer}>
+              <DatePicker
+                date={dateTime}
+                // minuteInterval={15}
+                onDateChange={(date) => {
+                  setTmpDateTime(date);
+                }}
+                onCancel={() => {
+                  setShowDTPicker(false);
+                  setFormattedDT("");
+                }}
+                mode="datetime"
+                theme={"light"}
+              />
+              <View style={styles.buttonPickerContainer}>
+                <CustomButton
+                  type="PRIMARY"
+                  text="Confirm"
+                  onPress={() => {
+                    setDateTime(tmpDateTime);
+                    setTmpDateTime(new Date());
+                    setFormattedDT(
+                      dateTime.toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      })
+                    );
+                    {
+                      console.log("tmpDateTime " + tmpDateTime);
+                    }
+                    {
+                      console.log("dateTime " + dateTime);
+                    }
+
+                    setShowDTPicker(false);
+                  }}
+                />
+                <CustomButton
+                  type="TERTIARY"
+                  text="Cancel"
+                  onPress={() => setShowDTPicker(false)}
+                />
+              </View>
+            </View>
+          </View>
+        </Modal>
 
         {/* Box Quantity */}
         <View style={styles.inputGroup}>
@@ -298,6 +323,8 @@ export default function MedicationForm({
           <View style={styles.checkboxBorder}>
             <Checkbox
               status={withFoodWater ? "checked" : "unchecked"}
+              color={Colors.PRIMARY}
+              uncheckedColor="black"
               onPress={() => setWithFoodWater(!withFoodWater)}
             />
           </View>
@@ -435,7 +462,6 @@ const styles = StyleSheet.create({
     borderColor: Colors.BORDERDISABLED,
     borderRadius: 10,
     padding: 10,
-
     backgroundColor: Colors.BACKGROUNDDISABLED,
   },
   selectedDosageOption: {
@@ -477,18 +503,23 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   picker: {
-    height: 50,
+    height: Platform.OS === "ios" ? 195 : 50,
     width: "100%",
+    // color: "#000",
   },
 
   modalPickerContainer: {
     flex: 1,
+    alignItems: "center",
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.25)",
-    overflow: "scroll",
   },
   pickerContainer: {
-    backgroundColor: "white",
+    // backgroundColor: "#222",
+    backgroundColor: "#fff",
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -507,6 +538,7 @@ const styles = StyleSheet.create({
   },
   buttonPickerContainer: {
     // flexDirection: "row",
+    width: "100%",
     justifyContent: "space-between",
     marginTop: 20,
   },

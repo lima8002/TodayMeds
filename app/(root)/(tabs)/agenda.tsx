@@ -12,6 +12,12 @@ import CustomHeader from "@/components/ui/CustomHeader";
 import DayCard from "@/components/meds/DayCard";
 import { Colors } from "@/constants/Colors";
 
+interface Intake {
+  dateTime: string;
+  medicationName: string;
+  taken: boolean;
+}
+
 const AgendaScreen = () => {
   const { getAllIntakes } = useGlobalContext();
   const allIntakes = getAllIntakes();
@@ -61,22 +67,28 @@ const AgendaScreen = () => {
   }, [groupedIntakes, hasScrolled]);
 
   const renderIntakeItem = (item: Intake) => (
-    <View style={styles.intakeItem}>
-      <Text style={styles.intakeTime}>
+    <View style={[styles.intakeItem, { alignItems: "center" }]}>
+      <Text style={[styles.intakeTime, { flex: 0.36, textAlign: "right" }]}>
         {new Date(item.dateTime).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
           hour12: false,
         })}
       </Text>
-      <View style={styles.intakeDetails}>
-        <Text style={styles.medicationName}>{item.medicationName}</Text>
-        <Text
-          style={[styles.status, item.taken ? styles.taken : styles.notTaken]}
-        >
-          {item.taken ? "Taken" : "Not Taken"}
-        </Text>
-      </View>
+      {/* <View style={styles.intakeDetails}> */}
+      <Text style={[styles.medicationName, { textAlign: "left" }]}>
+        {item.medicationName}
+      </Text>
+      <Text
+        style={[
+          styles.status,
+          item.taken ? styles.taken : styles.notTaken,
+          { textAlign: "left" },
+        ]}
+      >
+        {item.taken ? "Taken" : "Not Taken"}
+      </Text>
+      {/* </View> */}
     </View>
   );
 

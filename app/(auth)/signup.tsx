@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,9 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
+  Button,
+  Modal,
 } from "react-native";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { router } from "expo-router";
@@ -15,6 +18,7 @@ import CustomButton from "@/components/ui/CustomButton";
 import EMAIL_REGEX from "@/constants/EmailRegex";
 import { CreateUser } from "@/utils/FirebaseHelper";
 import { Colors } from "@/constants/Colors";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface SignUpFormData {
   name: string;
@@ -30,9 +34,16 @@ const SignUp: React.FC = () => {
     formState: { errors },
     getValues,
   } = useForm<SignUpFormData>();
+  const [isModalLoading, setModalIsLoading] = useState(false);
+  const { setIsLoggedIn } = useGlobalContext();
 
   const onRegisterPressed: SubmitHandler<SignUpFormData> = (data) => {
+    setModalIsLoading(true);
     CreateUser(data.name, data.email, data.password);
+    setIsLoggedIn(true);
+    setTimeout(() => {
+      router.replace("/");
+    }, 500);
   };
 
   const onSignInPressed = () => {
@@ -97,12 +108,18 @@ const SignUp: React.FC = () => {
             text="Register"
             onPress={handleSubmit(onRegisterPressed)}
           />
+
           <CustomButton
             text="Have an account? Sign In"
             onPress={onSignInPressed}
             type="TERTIARY"
           />
         </View>
+        <Modal animationType="fade" transparent={true} visible={isModalLoading}>
+          <View style={styles.modal}>
+            <ActivityIndicator size="small" color={Colors.PRIMARY} />
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
     </ScrollView>
   );
@@ -129,5 +146,10 @@ const styles = StyleSheet.create({
     fontFamily: "outfit-medium",
     color: Colors.TEXT_TITLE,
     margin: 10,
+  },
+  modal: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "#00000040",
   },
 });

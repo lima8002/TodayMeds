@@ -1,6 +1,16 @@
 import * as FirebaseConfig from "./FirebaseConfig";
 import { Alert } from "react-native";
-import { collection, addDoc, DocumentReference } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  DocumentReference,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -8,6 +18,21 @@ import {
   User,
   signOut,
 } from "firebase/auth";
+
+interface MedsDB {
+  id?: string;
+  email: string;
+  dosage: string;
+  frequency: string;
+  dateTime: string;
+  quantity: string;
+  withFoodWater: boolean;
+  active: boolean;
+  intake: {
+    dateTime: string;
+    taken: boolean;
+  }[];
+}
 
 export const AuthenticatedUser = (
   credentials: (user: User | null) => void
@@ -50,8 +75,8 @@ export const CreateUser = async (
 ): Promise<void> => {
   try {
     await createUserWithEmailAndPassword(FirebaseConfig.auth, email, password);
-    console.log("User signed in!");
     await onAddNewUserToDB(name, email);
+    console.log("User signed in!");
   } catch (error: any) {
     console.log(error);
     if (error.code === "auth/email-already-in-use") {
@@ -65,7 +90,7 @@ export const CreateUser = async (
   }
 };
 
-const onAddNewUserToDB = async (
+export const onAddNewUserToDB = async (
   name: string,
   email: string
 ): Promise<DocumentReference | null> => {
@@ -82,5 +107,107 @@ const onAddNewUserToDB = async (
   } catch (e) {
     console.error("Error adding document: ", e);
     return null;
+  }
+};
+
+export const onAddNewMedToDB = async (
+  medsData: MedsDB
+): Promise<DocumentReference | null> => {
+  try {
+    const docRef = await addDoc(
+      collection(FirebaseConfig.db, "medications"),
+      medsData
+    );
+    console.log("Medication added with ID: ", docRef.id);
+    return docRef;
+  } catch (e) {
+    console.error("Error adding medication: ", e);
+    return null;
+  }
+};
+
+export const onGetMedsByUser = async (email: string): Promise<MedsDB[]> => {
+  try {
+    const medSnap = await getDocs(
+      query(
+        collection(FirebaseConfig.db, "medications"),
+        where("email", "==", email.toLowerCase())
+      )
+    );
+
+    const medications: MedsDB[] = [];
+
+    medSnap.forEach((doc) => {
+      const medicationData = doc.data() as MedsDB;
+      medicationData.id = doc.id;
+      medications.push(medicationData);
+    });
+
+    return medications;
+  } catch (error) {
+    console.error("Error getting medications:", error);
+    return [];
+  }
+};
+
+export const onUpdateMeds = async (
+  medId: string,
+  updatedMedsData: MedsDB
+): Promise<void> => {
+  try {
+    const medRef = doc(FirebaseConfig.db, "medications", medId);
+    await updateDoc(medRef, updatedMedsData);
+    console.log("Medication updated:", medId);
+  } catch (error) {
+    console.error("Error updating medication:", error);
+  }
+};
+
+export const onDeleteUserDB = async (email: string): Promise<void> => {
+  try {
+    const usersSnap = await getDocs(
+      query(
+        collection(FirebaseConfig.db, "users"),
+        where("email", "==", email.toLowerCase())
+      )
+    );
+    if (usersSnap.size === 1) {
+      await deleteDoc(usersSnap.docs[0].ref);
+    }
+    onDeleteMedByEmail(email);
+    await FirebaseConfig.auth.currentUser?.delete();
+
+    console.log("User and docs deleted with ID: ", email);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+};
+
+export const onDeleteMedById = async (medId: string): Promise<void> => {
+  try {
+    const medRef = doc(FirebaseConfig.db, "medications", medId);
+    await deleteDoc(medRef);
+    console.log("Medication deleted:", medId);
+  } catch (error) {
+    console.error("Error deleting medication by ID:", error);
+  }
+};
+
+export const onDeleteMedByEmail = async (email: string): Promise<void> => {
+  try {
+    const medSnap = await getDocs(
+      query(
+        collection(FirebaseConfig.db, "medications"),
+        where("email", "==", email.toLowerCase())
+      )
+    );
+    const medProm = medSnap.docs.map(async (doc) => {
+      await deleteDoc(doc.ref);
+      console.log("Medication deleted:", doc.id);
+    });
+    await Promise.all(medProm);
+    console.log("All medications deleted for user:", email);
+  } catch (error) {
+    console.error("Error deleting medications by email:", error);
   }
 };

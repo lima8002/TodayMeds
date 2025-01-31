@@ -19,6 +19,14 @@ export default function ModalsLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="details/[id]"
+        options={{
+          presentation: "modal",
+          title: "Edit Medication",
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

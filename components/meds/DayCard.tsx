@@ -22,7 +22,7 @@ const DayCard: React.FC<DayCardProps> = ({ day, date }) => {
 
 const styles = StyleSheet.create({
   dayCard: {
-    width: Platform.OS === "ios" ? 45 : 45,
+    width: 50,
     elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
