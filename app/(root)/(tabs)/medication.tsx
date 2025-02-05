@@ -9,12 +9,10 @@ import {
   Animated,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
-import CustomHeader from "@/components/ui/CustomHeader";
 import { useGlobalContext } from "@/context/GlobalProvider";
-import { router } from "expo-router";
 import { MedsDB } from "@/constants/Types";
+import CustomHeader from "@/components/ui/CustomHeader";
 import CustomFloatButton from "@/components/ui/CustomFloatButton";
-import { Ionicons } from "@expo/vector-icons";
 import CustomButton from "@/components/ui/CustomButton";
 
 const MedicationScreen = () => {
@@ -161,11 +159,11 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     borderRadius: 16,
-    // shadowColor: Colors.SHADOW, // Add shadow
-    // shadowOffset: { width: 0, height: 2 }, // Shadow offset
-    // shadowOpacity: 0.2, // Shadow opacity
-    // shadowRadius: 4, // Shadow blur radius
-    // elevation: 3, // Elevation for Android
+    // shadowColor: Colors.SHADOW,
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.2,
+    // shadowRadius: 4,
+    // elevation: 3,
     borderWidth: 1,
     borderColor: Colors.BORDERGRAY,
   },
