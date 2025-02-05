@@ -7,30 +7,37 @@ import {
   useWindowDimensions,
 } from "react-native";
 import React from "react";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { Colors } from "@/constants/Colors";
 
 interface CustomFloatButtonProps {
-  type?: "ADD" | "CLOSE";
+  type?: "ADD" | "CLOSE" | "ADD2";
 }
 
 const CustomFloatButton: React.FC<CustomFloatButtonProps> = ({
   type = "ADD",
 }) => {
+  const navigation = useNavigation();
   const { width } = useWindowDimensions();
-  if (type === "ADD") {
+  if (type === "ADD" || type === "ADD2") {
     const handleAddMedication = () => {
       router.push("/add");
     };
     return (
       <TouchableOpacity
         onPress={handleAddMedication}
-        style={styles.addButton}
+        style={[
+          styles.addButton,
+          type === "ADD" ? styles.addTop : styles.add2Top,
+        ]}
         activeOpacity={0.7}
       >
         <Image
           source={require("@/assets/icons/plus.png")}
-          style={styles.addImage}
+          style={[
+            styles.addImage,
+            type === "ADD" ? styles.add1Style : styles.add2Style,
+          ]}
         />
       </TouchableOpacity>
     );
@@ -38,6 +45,13 @@ const CustomFloatButton: React.FC<CustomFloatButtonProps> = ({
 
   if (type === "CLOSE") {
     const handleClose = () => {
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+        return true;
+      } else {
+        router.push("/medication");
+        return false;
+      }
       router.back();
     };
     return (
@@ -56,19 +70,18 @@ export default CustomFloatButton;
 const styles = StyleSheet.create({
   addButton: {
     position: "absolute",
-    top: 50,
     right: 15,
-    width: 60,
-    height: 60,
+    width: 40,
+    height: 40,
     borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 1, height: 2 },
         shadowOpacity: 0.3,
-        shadowRadius: 2,
+        shadowRadius: 0.8,
       },
       android: {
         elevation: 2,
@@ -78,13 +91,26 @@ const styles = StyleSheet.create({
   addImage: {
     width: 40,
     height: 40,
-    padding: 3,
     backgroundColor: "#fff",
     borderRadius: 99,
     justifyContent: "center",
     alignItems: "center",
     tintColor: Colors.LOGO_BACKGROUND,
-    resizeMode: "contain",
+    resizeMode: "center",
+  },
+  addTop: {
+    top: Platform.OS === "ios" ? "8%" : "7%",
+  },
+  add2Top: {
+    top: Platform.OS === "ios" ? "5.5%" : "5%",
+  },
+  add1Style: {
+    backgroundColor: "#fff",
+    tintColor: Colors.LOGO_BACKGROUND,
+  },
+  add2Style: {
+    backgroundColor: Colors.LOGO_BACKGROUND,
+    tintColor: "#fff",
   },
   closeButton: {
     position: "absolute",

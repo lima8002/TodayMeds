@@ -19,7 +19,8 @@ interface CustomButtonProps {
     | "QUATERNARY"
     | "ON"
     | "OFF"
-    | "ALERT";
+    | "ALERT"
+    | "TAKEN";
   bgColor?: string;
   fgColor?: string;
   otherStyles?: ViewStyle;
@@ -39,7 +40,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
     <TouchableOpacity
       onPress={onPress}
       style={[
-        styles.container,
+        type === "TAKEN" ? null : styles.container,
         styles[`container_${type}`],
         bgColor ? { backgroundColor: bgColor } : {},
         otherStyles,
@@ -69,8 +70,37 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     height: 46,
   },
+  text: {
+    fontFamily: "outfit-medium",
+    fontSize: 16,
+    textAlign: "center",
+    padding: 2,
+  },
+  container_ON: {
+    borderColor: Colors.PRIMARY_100,
+    backgroundColor: "white",
+    borderWidth: 2,
+  },
+  text_ON: {
+    fontSize: 14,
+    fontFamily: "outfit",
+    color: "#000",
+  },
+  container_OFF: {
+    borderColor: "lightgray",
+    backgroundColor: "white",
+    borderWidth: 2,
+  },
+  text_OFF: {
+    fontSize: 14,
+    color: Colors.GRAY,
+    fontFamily: "outfit",
+  },
   container_PRIMARY: {
     backgroundColor: Colors.LOGO_BACKGROUND,
+  },
+  text_PRIMARY: {
+    color: "#fff",
   },
   container_SECONDARY: {
     borderColor: Colors.LOGO_BACKGROUND,
@@ -81,9 +111,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 1, height: 2 },
     backgroundColor: "white",
   },
+  text_SECONDARY: {
+    color: Colors.PRIMARY_100,
+  },
   container_TERTIARY: {
     backgroundColor: "#fff",
     paddingBottom: -4,
+  },
+  text_TERTIARY: {
+    color: Colors.GRAY,
   },
   container_QUATERNARY: {
     backgroundColor: "white",
@@ -95,53 +131,41 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     shadowColor: Colors.SHADOW,
   },
-  container_ON: {
-    borderColor: Colors.PRIMARY_100,
-    backgroundColor: "white",
-    borderWidth: 2,
-  },
-  container_OFF: {
-    borderColor: "lightgray",
-    backgroundColor: "white",
-    borderWidth: 2,
+  text_QUATERNARY: {
+    fontFamily: "outfit",
+    color: Colors.GRAY,
   },
   container_ALERT: {
     borderColor: Colors.ALERT,
     backgroundColor: Colors.ALERT,
     borderWidth: 2,
   },
-  text: {
-    fontFamily: "outfit-medium",
-    fontSize: 16,
-    textAlign: "center",
-    padding: 2,
-  },
-  text_PRIMARY: {
-    color: "#fff",
-  },
-  text_SECONDARY: {
-    color: Colors.PRIMARY_100,
-  },
-  text_TERTIARY: {
-    color: Colors.GRAY,
-  },
-  text_QUATERNARY: {
-    fontFamily: "outfit",
-    color: Colors.GRAY,
-  },
-  text_ON: {
-    fontSize: 14,
-    fontFamily: "outfit",
-    color: "#000",
-  },
-  text_OFF: {
-    fontSize: 14,
-    color: Colors.GRAY,
-    fontFamily: "outfit",
-  },
   text_ALERT: {
     fontFamily: "outfit-bold",
     color: "#fff",
     fontSize: 16,
+  },
+  container_TAKEN: {
+    backgroundColor: Colors.TAKEN_200,
+    borderWidth: 1,
+    borderColor: Colors.TAKEN_100,
+    borderRadius: 8,
+    ...(Platform.OS === "android"
+      ? {
+          elevation: 3,
+        }
+      : {
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+        }),
+  },
+  text_TAKEN: {
+    fontFamily: "outfit-bold",
+    color: "#FFFFFF",
+    marginHorizontal: 20,
+    marginVertical: 1,
+    fontSize: Platform.OS === "ios" ? 12 : 14,
   },
 });

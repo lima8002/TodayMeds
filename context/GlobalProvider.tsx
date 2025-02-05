@@ -12,31 +12,12 @@ import {
   onGetMedsByUser,
   onUpdateMeds,
   onDeleteMedById,
+  onUpdateIntake,
+  onDeleteMedByEmail,
+  onGetUser,
 } from "@/utils/FirebaseHelper";
 import { User } from "firebase/auth";
-
-interface UserDB {
-  email: string;
-  name: string;
-  dob: string;
-  photo: string;
-}
-
-interface MedsDB {
-  id: string;
-  email: string;
-  name: string;
-  dosage: string;
-  frequency: string;
-  dateTime: string;
-  quantity: string;
-  withFoodWater: boolean;
-  active: boolean;
-  intake: {
-    dateTime: string;
-    taken: boolean;
-  }[];
-}
+import { Intake, MedsDB, UserDB } from "../constants/Types";
 
 interface GlobalContextType {
   isLoggedIn: boolean;
@@ -48,15 +29,17 @@ interface GlobalContextType {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   letUserSignOut: () => Promise<void>;
   medications: MedsDB[];
+  fetchMeds: (userEmail: string) => Promise<void>;
   setMedications: React.Dispatch<React.SetStateAction<MedsDB[]>>;
   addMedication: (medication: Omit<MedsDB, "id" | "intake">) => Promise<void>;
   updateMedication: (id: string, medication: Partial<MedsDB>) => Promise<void>;
+  updateIntake: (
+    medicationId: string,
+    intakeId: string,
+    taken: boolean
+  ) => Promise<void>;
   deleteMedication: (id: string) => Promise<void>;
-  getAllIntakes: () => {
-    dateTime: string;
-    medicationName: string;
-    taken: boolean;
-  }[];
+  getAllIntakes: () => Intake[];
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -78,7 +61,8 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       setIsLoading(true);
       if (authUser) {
         setIsLoggedIn(true);
-        await fetchMedications(authUser.email || "");
+        await fetchUser(authUser.email || "");
+        await fetchMeds(authUser.email || "");
       } else {
         setMedications([]);
         setIsLoggedIn(false);
@@ -97,10 +81,19 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     }
   };
 
-  const fetchMedications = async (userEmail: string) => {
+  const fetchUser = async (userEmail: string) => {
     try {
-      const meds = await onGetMedsByUser(userEmail);
-      setMedications(meds);
+      const result = await onGetUser(userEmail);
+      setUserDB(result);
+    } catch (error) {
+      console.error("Error fetching medications:", error);
+    }
+  };
+
+  const fetchMeds = async (userEmail: string) => {
+    try {
+      const result = await onGetMedsByUser(userEmail);
+      setMedications(result);
     } catch (error) {
       console.error("Error fetching medications:", error);
     }
@@ -112,17 +105,52 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       return;
     }
     try {
+      const newId = Date.now().toString();
       const newMedication: MedsDB = {
         ...medication,
-        id: Date.now().toString(),
-        email: user.email, // Add user's email
-        intake: calculateIntakeArray(medication),
+        id: newId,
+        email: user.email,
+        intakeRef: newId,
+        intake: calculateIntakeArray(medication, newId),
       };
-      await onAddNewMedToDB(newMedication); // Use Firebase function
-      await fetchMedications(user.email); // Refresh medications list
+      await onAddNewMedToDB(newMedication);
+      await fetchMeds(user.email);
     } catch (error) {
       console.error("Error adding medication:", error);
     }
+  };
+
+  const calculateIntakeArray = (
+    medication: Omit<MedsDB, "id" | "intake">,
+    newId: string
+  ) => {
+    const intake: Intake[] = [];
+    const startDateTime = new Date(medication.dateTime);
+    const frequencyHours = parseInt(medication.frequency);
+    const totalDoses = parseInt(medication.quantity);
+
+    for (let i = 0; i < totalDoses; i++) {
+      const intakeDateTime = new Date(
+        startDateTime.getTime() + i * frequencyHours * 60 * 60 * 1000
+      );
+      intake.push({
+        intakeRef: newId,
+        intakeId: i.toString(),
+        dateTime: intakeDateTime.toISOString(),
+        taken: false,
+      });
+    }
+
+    return intake;
+  };
+
+  const getAllIntakes = (): Intake[] => {
+    return medications
+      .flatMap((med) => med.intake || [])
+      .sort(
+        (a, b) =>
+          new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+      );
   };
 
   const updateMedication = async (
@@ -139,53 +167,33 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       const mergedMedication = { ...medsToUpdate, ...updatedMedication };
 
       await onUpdateMeds(id, mergedMedication);
-      await fetchMedications(user?.email || "");
+      await fetchMeds(user?.email || "");
     } catch (error) {
       console.error("Error updating medication:", error);
     }
   };
 
+  const updateIntake = async (
+    medicationId: string,
+    intakeId: string,
+    taken: boolean
+  ) => {
+    try {
+      await onUpdateIntake(medicationId, intakeId, taken); // Pass intakeId to FirebaseHelper function
+      await fetchMeds(user?.email || "");
+    } catch (error) {
+      console.error("Error updating intake:", error);
+    }
+  };
+
   const deleteMedication = async (id: string) => {
     try {
-      await onDeleteMedById(id);
-      setMedications(medications.filter((med) => med.id !== id));
+      await onDeleteMedByEmail(id);
+      await fetchMeds(user?.email || "");
+      setMedications([]);
     } catch (error) {
       console.error("Error deleting medication:", error);
     }
-  };
-
-  const calculateIntakeArray = (medication: Omit<MedsDB, "id" | "intake">) => {
-    const intake: { dateTime: string; taken: boolean }[] = [];
-    const startDateTime = new Date(medication.dateTime);
-    const frequencyHours = parseInt(medication.frequency);
-    const totalDoses = parseInt(medication.quantity);
-
-    for (let i = 0; i < totalDoses; i++) {
-      const intakeDateTime = new Date(
-        startDateTime.getTime() + i * frequencyHours * 60 * 60 * 1000
-      );
-      intake.push({
-        dateTime: intakeDateTime.toISOString(),
-        taken: false,
-      });
-    }
-
-    return intake;
-  };
-
-  const getAllIntakes = () => {
-    return medications
-      .flatMap((med) =>
-        med.intake.map((intake) => ({
-          dateTime: intake.dateTime,
-          medicationName: med.name,
-          taken: intake.taken,
-        }))
-      )
-      .sort(
-        (a, b) =>
-          new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
-      );
   };
 
   const contextValue: GlobalContextType = {
@@ -198,9 +206,11 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     setIsLoading,
     letUserSignOut,
     medications,
+    fetchMeds,
     setMedications,
     addMedication,
     updateMedication,
+    updateIntake,
     deleteMedication,
     getAllIntakes,
   };

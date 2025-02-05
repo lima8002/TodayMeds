@@ -5,8 +5,7 @@ export default function ModalsLayout() {
       <Stack.Screen
         name="add"
         options={{
-          presentation: "modal",
-          animation: "flip",
+          presentation: "fullScreenModal",
           title: "Add Medication",
           headerShown: false,
         }}
@@ -14,7 +13,7 @@ export default function ModalsLayout() {
       <Stack.Screen
         name="[id]"
         options={{
-          presentation: "modal",
+          presentation: "fullScreenModal",
           title: "Edit Medication",
           headerShown: false,
         }}
@@ -22,7 +21,7 @@ export default function ModalsLayout() {
       <Stack.Screen
         name="details/[id]"
         options={{
-          presentation: "modal",
+          presentation: "fullScreenModal",
           title: "Edit Medication",
           headerShown: false,
         }}

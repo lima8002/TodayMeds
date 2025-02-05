@@ -20,17 +20,12 @@ const DayCard: React.FC<DayCardProps> = ({ day, date }) => {
   );
 };
 
+export default DayCard;
+
 const styles = StyleSheet.create({
   dayCard: {
-    width: 50,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    width: Platform.OS === "ios" ? 53 : 57,
     borderRadius: 14,
-    backgroundColor: "white",
-    overflow: "visible",
   },
   cardTop: {
     backgroundColor: Colors.TERTIARY,
@@ -48,7 +43,7 @@ const styles = StyleSheet.create({
   },
   dayDate: {
     fontFamily: "outfit-medium",
-    fontSize: 16,
+    fontSize: Platform.OS === "ios" ? 18 : 22,
     color: Colors.PRIMARY,
     alignSelf: "center",
     textShadowColor: "rgba(0, 0, 0, 0.25)",
@@ -57,10 +52,8 @@ const styles = StyleSheet.create({
   },
   dayTitle: {
     fontFamily: "outfit-medium",
-    fontSize: 16,
+    fontSize: Platform.OS === "ios" ? 14 : 18,
     color: "white",
     alignSelf: "center",
   },
 });
-
-export default DayCard;

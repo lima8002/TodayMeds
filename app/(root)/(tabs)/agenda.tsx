@@ -1,22 +1,13 @@
-import React, { useMemo, useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Platform,
-  Dimensions,
-} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet, FlatList, Platform } from "react-native";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { Colors } from "@/constants/Colors";
+import { Intake } from "@/constants/Types";
 import CustomHeader from "@/components/ui/CustomHeader";
 import DayCard from "@/components/meds/DayCard";
-import { Colors } from "@/constants/Colors";
+import IntakeDetails from "@/components/meds/IntakeDetails";
 
-interface Intake {
-  dateTime: string;
-  medicationName: string;
-  taken: boolean;
-}
+// Still have to implement not active(finished medication) agenda
 
 const AgendaScreen = () => {
   const { getAllIntakes } = useGlobalContext();
@@ -24,8 +15,15 @@ const AgendaScreen = () => {
   const flatListRef = useRef<FlatList>(null);
   const [hasScrolled, setHasScrolled] = useState(false);
 
-  const groupedIntakes = useMemo(() => {
-    const grouped: Record<string, Intake[]> = allIntakes.reduce(
+  const groupIntakes = (intakes: Intake[]) => {
+    const today = new Date();
+
+    const filteredIntakes = intakes.filter((intake) => {
+      const intakeDate = new Date(intake.dateTime);
+      return intakeDate >= today;
+    });
+
+    const grouped: Record<string, Intake[]> = filteredIntakes.reduce(
       (acc, intake) => {
         const date = new Date(intake.dateTime).toDateString();
         if (!acc[date]) {
@@ -43,7 +41,9 @@ const AgendaScreen = () => {
         intakes,
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [allIntakes]);
+  };
+
+  const groupedIntakes = groupIntakes(allIntakes);
 
   useEffect(() => {
     if (!hasScrolled && groupedIntakes.length > 0) {
@@ -52,44 +52,30 @@ const AgendaScreen = () => {
         (item) => new Date(item.date).toDateString() === currentDate
       );
 
-      const indexToScrollTo =
-        currentDayIndex !== -1 ? currentDayIndex : groupedIntakes.length - 1;
+      if (new Date().toString() <= currentDate) {
+        console.log("no scroll");
+      } else {
+        const indexToScrollTo =
+          currentDayIndex !== -1 ? currentDayIndex : groupedIntakes.length - 1;
 
-      setTimeout(() => {
-        flatListRef.current?.scrollToIndex({
-          index: indexToScrollTo,
-          animated: true,
-          viewPosition: 0,
-        });
-        setHasScrolled(true);
-      }, 100);
+        setTimeout(() => {
+          flatListRef.current?.scrollToIndex({
+            index: indexToScrollTo,
+            animated: true,
+            viewPosition: 0,
+          });
+          setHasScrolled(true);
+        }, 100);
+      }
     }
-  }, [groupedIntakes, hasScrolled]);
+  }, [hasScrolled]);
 
   const renderIntakeItem = (item: Intake) => (
-    <View style={[styles.intakeItem, { alignItems: "center" }]}>
-      <Text style={[styles.intakeTime, { flex: 0.36, textAlign: "right" }]}>
-        {new Date(item.dateTime).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })}
-      </Text>
-      {/* <View style={styles.intakeDetails}> */}
-      <Text style={[styles.medicationName, { textAlign: "left" }]}>
-        {item.medicationName}
-      </Text>
-      <Text
-        style={[
-          styles.status,
-          item.taken ? styles.taken : styles.notTaken,
-          { textAlign: "left" },
-        ]}
-      >
-        {item.taken ? "Taken" : "Not Taken"}
-      </Text>
-      {/* </View> */}
-    </View>
+    <IntakeDetails
+      intakeItem={item}
+      medRef={item.intakeRef}
+      key={item.dateTime}
+    />
   );
 
   const renderDayCard = ({
@@ -102,25 +88,35 @@ const AgendaScreen = () => {
       .toLocaleDateString("en-US", { weekday: "short" })
       .toUpperCase();
     const dateNum = date.getDate();
+    const remaing =
+      item.intakes.length -
+      item.intakes.filter((intake) => intake.taken).length;
 
     return (
-      <View style={styles.dayCard}>
-        <View style={styles.dayCardContainer}>
+      <>
+        <View style={styles.dateContainer}>
           <DayCard day={day} date={dateNum.toString()} />
+          {remaing === 0 ? (
+            <Text style={[styles.cardTitle, { color: Colors.LOGO_BACKGROUND }]}>
+              All done!
+            </Text>
+          ) : (
+            <Text style={styles.cardTitle}>
+              You have {remaing} intake
+              {remaing === 1 ? " " : "s "}
+              remaing
+            </Text>
+          )}
         </View>
-        <View style={styles.intakesList}>
-          {item.intakes.map((intake, index) => (
-            <React.Fragment key={`${intake.dateTime}-${index}`}>
-              {renderIntakeItem(intake)}
-            </React.Fragment>
-          ))}
+        <View style={styles.cardContainer}>
+          {item.intakes.map(renderIntakeItem)}
         </View>
-      </View>
+      </>
     );
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <CustomHeader title="Agenda" />
       <FlatList
         ref={flatListRef}
@@ -128,6 +124,10 @@ const AgendaScreen = () => {
         renderItem={renderDayCard}
         keyExtractor={(item) => item.date}
         style={{ marginBottom: "10%" }}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === "ios" ? 6 : 38,
+          padding: 16,
+        }}
         onScrollToIndexFailed={(info) => {
           const wait = new Promise((resolve) => setTimeout(resolve, 500));
           wait.then(() => {
@@ -151,69 +151,28 @@ const AgendaScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
   },
-  dayCard: {
-    flexDirection: "row",
-    marginHorizontal: 20,
-    marginVertical: 5,
-    backgroundColor: "#f0f0f0",
-    borderColor: Colors.BORDERGRAY,
-    borderRadius: 10,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  dayCardContainer: {
-    padding: 10,
+  cardContainer: {
+    flex: 1,
     justifyContent: "flex-start",
-    alignItems: "center",
-    // borderTopLeftRadius: 10,
-    // borderBottomLeftRadius: 10,
-    backgroundColor: "#fff",
+    alignItems: "flex-start",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.BORDERGRAY,
+    backgroundColor: "#F4F7FC",
   },
-  intakesList: {
-    flex: 1,
-    backgroundColor: "#fff",
-    // borderTopRightRadius: 10,
-    // borderBottomRightRadius: 10,
-  },
-  intakeItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 13.5,
-    // marginBottom: -1,
-    // borderBottomWidth: 0.5,
-    // borderBottomColor: Colors.BORDERGRAY,
-  },
-  intakeTime: {
-    fontFamily: "outfit-medium",
-    fontSize: 14,
-    color: Colors.PRIMARY,
-    marginRight: 10,
-  },
-  intakeDetails: {
+  dateContainer: {
     flex: 1,
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    padding: 10,
   },
-  medicationName: {
-    fontFamily: "outfit",
-    fontSize: 14,
-    flex: 1,
-  },
-  status: {
+  cardTitle: {
     fontFamily: "outfit-medium",
-    fontSize: 12,
+    fontSize: Platform.OS === "ios" ? 17 : 21,
+    paddingTop: Platform.OS === "ios" ? "6%" : "7.8%",
     marginLeft: 10,
-  },
-  taken: {
-    color: "green",
-  },
-  notTaken: {
-    color: "red",
+    color: Colors.PRIMARY,
   },
   emptyListText: {
     textAlign: "center",

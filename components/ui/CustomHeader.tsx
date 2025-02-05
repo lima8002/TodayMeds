@@ -20,6 +20,8 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     marginTop: "8%",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   title: {
     fontFamily: "outfit-medium",

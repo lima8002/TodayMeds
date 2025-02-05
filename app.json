@@ -4,7 +4,7 @@
     "slug": "TodayMeds",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -30,7 +30,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/icon.png",
-          "resizeMode": "cover",
+          "resizeMode": "containr",
           "backgroundColor": "#ffffff",
           "enableFullScreenImage_legacy": true
         }

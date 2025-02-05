@@ -10,6 +10,9 @@ import {
   deleteDoc,
   doc,
   updateDoc,
+  runTransaction,
+  orderBy,
+  limit,
 } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
@@ -18,21 +21,7 @@ import {
   User,
   signOut,
 } from "firebase/auth";
-
-interface MedsDB {
-  id?: string;
-  email: string;
-  dosage: string;
-  frequency: string;
-  dateTime: string;
-  quantity: string;
-  withFoodWater: boolean;
-  active: boolean;
-  intake: {
-    dateTime: string;
-    taken: boolean;
-  }[];
-}
+import { MedsDB, UserDB } from "../constants/Types";
 
 export const AuthenticatedUser = (
   credentials: (user: User | null) => void
@@ -114,6 +103,7 @@ export const onAddNewMedToDB = async (
   medsData: MedsDB
 ): Promise<DocumentReference | null> => {
   try {
+    console.log("medsData", medsData);
     const docRef = await addDoc(
       collection(FirebaseConfig.db, "medications"),
       medsData
@@ -126,12 +116,35 @@ export const onAddNewMedToDB = async (
   }
 };
 
+export const onGetUser = async (email: string): Promise<UserDB | null> => {
+  try {
+    const userDoc = query(
+      collection(FirebaseConfig.db, "users"),
+      where("email", "==", email.toLowerCase()),
+      limit(1)
+    );
+
+    const userSnap = await getDocs(userDoc);
+
+    if (!userSnap.empty) {
+      return userSnap.docs[0].data() as UserDB;
+    } else {
+      console.log("User not found");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting user:", error);
+    return null;
+  }
+};
+
 export const onGetMedsByUser = async (email: string): Promise<MedsDB[]> => {
   try {
     const medSnap = await getDocs(
       query(
         collection(FirebaseConfig.db, "medications"),
-        where("email", "==", email.toLowerCase())
+        where("email", "==", email.toLowerCase()),
+        orderBy("name", "asc")
       )
     );
 
@@ -160,6 +173,36 @@ export const onUpdateMeds = async (
     console.log("Medication updated:", medId);
   } catch (error) {
     console.error("Error updating medication:", error);
+  }
+};
+
+export const onUpdateIntake = async (
+  medicationId: string,
+  intakeId: string,
+  taken: boolean
+) => {
+  try {
+    const medDoc = doc(
+      collection(FirebaseConfig.db, "medications"),
+      medicationId
+    );
+
+    await runTransaction(FirebaseConfig.db, async (transaction) => {
+      const medSnap = await transaction.get(medDoc);
+
+      if (!medSnap.exists()) {
+        throw new Error("Medication not found in database");
+      }
+      const medData = medSnap.data() as MedsDB;
+      const updatedIntakes = medData.intake.map(
+        (intake) =>
+          intake.intakeId === intakeId ? { ...intake, taken } : intake // Use intakeId for matching
+      );
+      transaction.update(medDoc, { intake: updatedIntakes });
+    });
+  } catch (error) {
+    console.error("Error updating intake in database:", error);
+    throw error;
   }
 };
 

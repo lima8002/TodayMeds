@@ -15,7 +15,7 @@ export default function RootLayout() {
         style={{
           flex: 1,
           justifyContent: "center",
-          backgroundColor: "#00000040",
+          backgroundColor: "#fff",
         }}
       >
         <ActivityIndicator size="small" color={Colors.PRIMARY} />

@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { View, Text, Image, Platform, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { Colors } from "@/constants/Colors";
 
 import pills from "@/assets/icons/pills.png";
@@ -40,9 +40,9 @@ export default function TabLayout() {
         tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: "white",
-          position: "absolute",
-          borderTopColor: "#00611FF1A",
           borderTopWidth: 1,
+          borderTopColor: "#EAECEF",
+          position: "absolute",
           minHeight: 70,
         },
       }}
@@ -56,18 +56,18 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="agenda"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={calendar} title={"Agenda"} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="medication"
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon focused={focused} icon={presc} title={"Medications"} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="agenda"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={calendar} title={"Agenda"} />
           ),
         }}
       />
@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     resizeMode: "contain",
-    marginTop: Platform.OS === "ios" ? 2 : 0,
   },
   text: {
     fontSize: 11,

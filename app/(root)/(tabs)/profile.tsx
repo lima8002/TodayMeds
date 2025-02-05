@@ -1,193 +1,261 @@
 import CustomHeader from "@/components/ui/CustomHeader";
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import CustomButton from "@/components/ui/CustomButton";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { onAddNewMedToDB } from "@/utils/FirebaseHelper";
+
+import { MedsDB } from "@/constants/Types";
+import { Colors } from "@/constants/Colors";
 
 export default function ProfileScreen() {
-  const medsToLoad = [
-    {
-      id: "1738346162529",
-      name: "Test",
-      dosage: "1",
-      frequency: 2,
-      dateTime: "2025-01-31T17:55:39.978Z",
-      quantity: "20",
-      withFoodWater: true,
-      active: true,
-      intake: [
-        {
-          dateTime: "2025-01-31T17:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-01-31T19:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-01-31T21:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-01-31T23:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T01:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T03:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T05:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T07:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T09:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T11:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T13:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T15:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T17:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T19:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T21:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T23:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-02T01:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-02T03:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-02T05:55:39.978Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-02T07:55:39.978Z",
-          taken: false,
-        },
-      ],
-    },
-    {
-      id: "1738346259644",
-      name: "Test 2",
-      dosage: "2",
-      frequency: 3,
-      dateTime: "2025-01-31T17:57:20.491Z",
-      quantity: "16",
-      withFoodWater: true,
-      active: true,
-      intake: [
-        {
-          dateTime: "2025-01-31T17:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-01-31T20:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-01-31T23:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T02:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T05:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T08:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T11:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T14:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T17:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T20:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-01T23:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-02T02:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-02T05:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-02T08:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-02T11:57:20.491Z",
-          taken: false,
-        },
-        {
-          dateTime: "2025-02-02T14:57:20.491Z",
-          taken: false,
-        },
-      ],
-    },
-  ];
+  const { letUserSignOut, deleteMedication, user, fetchMeds } =
+    useGlobalContext();
 
-  const { letUserSignOut } = useGlobalContext();
+  const loadRandomData = async () => {
+    const medsToAdd: MedsDB[] = [
+      {
+        id: "123",
+        email: "123@123.com",
+        name: "Vitamin A",
+        dosage: "1",
+        frequency: "8",
+        dateTime: "2025-02-02T12:21:17",
+        quantity: "10",
+        withFoodWater: false,
+        active: true,
+        intakeRef: "123",
+        intake: [
+          {
+            intakeId: "0",
+            intakeRef: "123",
+            dateTime: "2025-02-02T12:21:17",
+            taken: false,
+          },
+          {
+            intakeId: "1",
+            intakeRef: "123",
+            dateTime: "2025-02-02T20:21:17",
+            taken: false,
+          },
+          {
+            intakeId: "2",
+            intakeRef: "123",
+            dateTime: "2025-02-03T04:21:17",
+            taken: false,
+          },
+          {
+            intakeId: "3",
+            intakeRef: "123",
+            dateTime: "2025-02-03T12:21:17",
+            taken: false,
+          },
+          {
+            intakeId: "4",
+            intakeRef: "123",
+            dateTime: "2025-02-03T20:21:17",
+            taken: false,
+          },
+          {
+            intakeId: "5",
+            intakeRef: "123",
+            dateTime: "2025-02-04T04:21:17",
+            taken: false,
+          },
+          {
+            intakeId: "6",
+            intakeRef: "123",
+            dateTime: "2025-02-04T12:21:17",
+            taken: false,
+          },
+          {
+            intakeId: "7",
+            intakeRef: "123",
+            dateTime: "2025-02-04T20:21:17",
+            taken: false,
+          },
+        ],
+      },
+      {
+        id: "1234",
+        email: "123@123.com",
+        name: "Panadol",
+        dosage: "1",
+        frequency: "8",
+        dateTime: "2025-02-02T12:31:17",
+        quantity: "10",
+        withFoodWater: false,
+        active: true,
+        intakeRef: "1234",
+        intake: [
+          {
+            intakeId: "0",
+            intakeRef: "1234",
+            dateTime: "2025-02-02T12:31:17",
+            taken: false,
+          },
+          {
+            intakeId: "1",
+            intakeRef: "1234",
+            dateTime: "2025-02-02T20:31:17",
+            taken: false,
+          },
+          {
+            intakeId: "2",
+            intakeRef: "1234",
+            dateTime: "2025-02-03T04:31:17",
+            taken: false,
+          },
+          {
+            intakeId: "3",
+            intakeRef: "1234",
+            dateTime: "2025-02-03T12:31:17",
+            taken: false,
+          },
+          {
+            intakeId: "4",
+            intakeRef: "1234",
+            dateTime: "2025-02-03T20:31:17",
+            taken: false,
+          },
+          {
+            intakeId: "5",
+            intakeRef: "1234",
+            dateTime: "2025-02-04T04:31:17",
+            taken: false,
+          },
+          {
+            intakeId: "6",
+            intakeRef: "1234",
+            dateTime: "2025-02-04T12:31:17",
+            taken: false,
+          },
+          {
+            intakeId: "7",
+            intakeRef: "1234",
+            dateTime: "2025-02-04T20:31:17",
+            taken: false,
+          },
+        ],
+      },
+      {
+        id: "12345",
+        email: "123@123.com",
+        name: "Nurofen Pain Relief",
+        dosage: "1",
+        frequency: "8",
+        dateTime: "2025-02-02T12:34:17",
+        quantity: "10",
+        withFoodWater: true,
+        active: true,
+        intakeRef: "12345",
+        intake: [
+          {
+            intakeId: "0",
+            intakeRef: "12345",
+            dateTime: "2025-02-02T12:34:17",
+            taken: false,
+          },
+          {
+            intakeId: "1",
+            intakeRef: "12345",
+            dateTime: "2025-02-02T20:34:17",
+            taken: false,
+          },
+          {
+            intakeId: "2",
+            intakeRef: "12345",
+            dateTime: "2025-02-03T04:34:17",
+            taken: false,
+          },
+          {
+            intakeId: "3",
+            intakeRef: "12345",
+            dateTime: "2025-02-03T12:34:17",
+            taken: false,
+          },
+          {
+            intakeId: "4",
+            intakeRef: "12345",
+            dateTime: "2025-02-03T20:34:17",
+            taken: false,
+          },
+          {
+            intakeId: "5",
+            intakeRef: "12345",
+            dateTime: "2025-02-04T04:34:17",
+            taken: false,
+          },
+          {
+            intakeId: "6",
+            intakeRef: "12345",
+            dateTime: "2025-02-04T12:34:17",
+            taken: false,
+          },
+          {
+            intakeId: "7",
+            intakeRef: "12345",
+            dateTime: "2025-02-04T20:34:17",
+            taken: false,
+          },
+        ],
+      },
+    ];
+    try {
+      for (const med of medsToAdd) {
+        const newMed: MedsDB = {
+          ...med,
+          intake: med.intake.map((intake) => ({ ...intake })),
+        };
+        await onAddNewMedToDB(newMed);
+      }
+      console.log("Random medications added successfully!");
+      fetchMeds(user?.email || "");
+    } catch (error) {
+      console.error("Error adding random medications:", error);
+    }
+  };
+
+  // implement an option to reset the alert from taken
+
   return (
-    <View>
+    <View style={styles.container}>
       <CustomHeader title={"Profile"} />
-
-      <View style={[styles.signoutBtn, styles.shadow]}>
-        <CustomButton
-          text="Log Out"
-          onPress={() => letUserSignOut()}
-          type="SECONDARY"
-        />
-      </View>
+      <ScrollView
+        style={{
+          backgroundColor: Colors.BACKGROUND_200,
+          borderTopRightRadius: 20,
+          borderTopLeftRadius: 20,
+        }}
+      >
+        <View style={styles.containerBtn}>
+          <CustomButton
+            text="Delete all medicatons"
+            type="PRIMARY"
+            onPress={() => {
+              deleteMedication(user?.email || "");
+              fetchMeds(user?.email || "");
+            }}
+          />
+          <CustomButton
+            text="Load medicatons"
+            type="SECONDARY"
+            onPress={() => loadRandomData()}
+          />
+          <CustomButton
+            text="Delete all medicatons"
+            type="SECONDARY"
+            onPress={() => {}}
+          />
+        </View>
+        <View style={[styles.signoutBtn, styles.shadow]}>
+          <CustomButton
+            text="Log Out"
+            onPress={() => letUserSignOut()}
+            type="SECONDARY"
+          />
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -195,8 +263,19 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#fff",
+  },
+  containerBtn: {
+    flex: 1,
+    height: "40%",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 16,
+    margin: 12,
+    paddingVertical: 12,
+    paddingBottom: 24,
   },
   title: {
     fontSize: 24,

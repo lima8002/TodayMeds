@@ -9,30 +9,19 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
-import DatePicker from "react-native-date-picker";
 import { Picker } from "@react-native-picker/picker";
 import { Checkbox } from "react-native-paper";
 import { Colors } from "../../constants/Colors";
+import { MedsDB } from "@/constants/Types";
+import DatePicker from "react-native-date-picker";
 import CustomButton from "../ui/CustomButton";
 
 interface MedicationFormProps {
-  initialValues?: {
-    name: string;
-    dosage: string;
-    frequency: string;
-    dateTime: Date;
-    quantity: string;
-    withFoodWater: boolean;
-    active: boolean;
-    intake: {
-      dateTime: string;
-      taken: boolean;
-    }[];
-  };
+  initialValues?: MedsDB;
   onSubmit: (medication: any) => void;
   submitButtonText: string;
 }
-export default function MedicationForm({
+function MedicationForm({
   initialValues,
   onSubmit,
   submitButtonText,
@@ -339,6 +328,8 @@ export default function MedicationForm({
     </ScrollView>
   );
 }
+
+export default MedicationForm;
 
 const styles = StyleSheet.create({
   container: {

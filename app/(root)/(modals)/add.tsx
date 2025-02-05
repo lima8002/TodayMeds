@@ -6,7 +6,7 @@ import CustomFloatButton from "@/components/ui/CustomFloatButton";
 import MedicationForm from "@/components/meds/MedicationForm";
 import { useGlobalContext } from "@/context/GlobalProvider";
 
-export default function AddMedicationScreen() {
+function AddMedicationScreen() {
   const router = useRouter();
   const { addMedication } = useGlobalContext();
 
@@ -37,6 +37,8 @@ export default function AddMedicationScreen() {
     </View>
   );
 }
+
+export default AddMedicationScreen;
 
 const styles = StyleSheet.create({
   container: {
