@@ -6,12 +6,13 @@ import {
   Platform,
   ViewStyle,
   TextStyle,
+  Image,
 } from "react-native";
 import { Colors } from "../../constants/Colors";
 
 interface CustomButtonProps {
   onPress: () => void;
-  text: string;
+  text?: string;
   type?:
     | "PRIMARY"
     | "SECONDARY"
@@ -20,12 +21,22 @@ interface CustomButtonProps {
     | "ON"
     | "OFF"
     | "ALERT"
+    | "ICON"
     | "TAKEN";
   bgColor?: string;
   fgColor?: string;
   otherStyles?: ViewStyle;
   otherTextStyles?: TextStyle;
+  icon?: string;
+  iconColor?: string;
 }
+
+const iconMap: { [key: string]: any } = {
+  tick: require("../../assets/icons/tick.png"),
+  edit: require("../../assets/icons/edit.png"),
+  delete: require("../../assets/icons/delete.png"),
+  calendar: require("../../assets/icons/calendar.png"),
+};
 
 const CustomButton: React.FC<CustomButtonProps> = ({
   onPress,
@@ -35,6 +46,8 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   fgColor,
   otherStyles,
   otherTextStyles,
+  icon,
+  iconColor,
 }) => {
   return (
     <TouchableOpacity
@@ -46,16 +59,24 @@ const CustomButton: React.FC<CustomButtonProps> = ({
         otherStyles,
       ]}
     >
-      <Text
-        style={[
-          styles.text,
-          styles[`text_${type}` as keyof typeof styles],
-          fgColor ? { color: fgColor } : {},
-          otherTextStyles,
-        ]}
-      >
-        {text}
-      </Text>
+      {icon && (
+        <Image
+          source={iconMap[icon]}
+          style={[styles.icon, { tintColor: iconColor }]}
+        />
+      )}
+      {text && (
+        <Text
+          style={[
+            styles.text,
+            styles[`text_${type}` as keyof typeof styles],
+            fgColor ? { color: fgColor } : {},
+            otherTextStyles,
+          ]}
+        >
+          {text}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };
@@ -67,7 +88,7 @@ const styles = StyleSheet.create({
     minWidth: "55%",
     padding: 10,
     marginVertical: 5,
-    borderRadius: 15,
+    borderRadius: 8,
     height: 46,
   },
   text: {
@@ -167,5 +188,26 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 1,
     fontSize: Platform.OS === "ios" ? 12 : 14,
+  },
+  container_ICON: {
+    padding: 8,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    borderColor: Colors.PRIMARY,
+    backgroundColor: Colors.BACKGROUND_200,
+    borderWidth: 1,
+    minWidth: "20%",
+  },
+  text_ICON: {
+    fontFamily: "outfit",
+    fontSize: 14,
+    color: Colors.PRIMARY,
+    marginLeft: 8,
+  },
+  icon: {
+    width: 30,
+    height: 30,
+    resizeMode: "cover",
   },
 });

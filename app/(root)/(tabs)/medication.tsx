@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import { MedsDB } from "@/constants/Types";
 import CustomFloatButton from "@/components/ui/CustomFloatButton";
 import { Ionicons } from "@expo/vector-icons";
+import CustomButton from "@/components/ui/CustomButton";
 
 const MedicationScreen = () => {
   const { medications } = useGlobalContext();
@@ -94,54 +95,40 @@ const MedicationScreen = () => {
             </View>
 
             {selectedMedicationId === item.id && (
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  onPress={() => {
-                    /* Handle Edit */
-                  }}
-                  style={styles.button}
-                >
-                  <Ionicons
-                    name="create-outline"
-                    size={16}
-                    color={Colors.PRIMARY}
+              <>
+                <View style={styles.buttonContainer}>
+                  <CustomButton
+                    type={"ICON"}
+                    // text="Intake"
+                    icon={"calendar"}
+                    iconColor={Colors.TEXT_200}
+                    onPress={() => {}}
                   />
-                  <Text style={styles.buttonText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    /* Handle Delete */
-                  }}
-                  style={styles.button}
-                >
-                  <Ionicons name="trash-outline" size={16} color="red" />
-                  <Text style={styles.buttonText}>Delete</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => router.push(`/(modals)/details/${item.id}`)}
-                  style={styles.button}
-                >
-                  <Ionicons
-                    name="information-circle-outline"
-                    size={16}
-                    color={Colors.PRIMARY}
+                  <CustomButton
+                    type={"ICON"}
+                    // text="Done"
+                    icon={"tick"}
+                    iconColor={Colors.TAKEN_OK}
+                    onPress={() => {}}
                   />
-                  <Text style={styles.buttonText}>View Intake</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    /* Handle Save */
-                  }}
-                  style={styles.button}
-                >
-                  <Ionicons
-                    name="save-outline"
-                    size={16}
-                    color={Colors.PRIMARY}
+                  {/* </View>
+                <View style={styles.buttonContainer}> */}
+                  <CustomButton
+                    type={"ICON"}
+                    // text="Edit"
+                    icon={"edit"}
+                    iconColor={Colors.TEXT}
+                    onPress={() => {}}
                   />
-                  <Text style={styles.buttonText}>Save</Text>
-                </TouchableOpacity>
-              </View>
+                  <CustomButton
+                    type={"ICON"}
+                    // text="Delete"
+                    icon={"delete"}
+                    iconColor={Colors.ALERT}
+                    onPress={() => {}}
+                  />
+                </View>
+              </>
             )}
           </View>
         </TouchableOpacity>
@@ -172,7 +159,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingBottom: 20,
   },
 
   medicationItem: {
@@ -193,7 +180,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   row: {
-    // Style for name and icon row
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -213,7 +199,7 @@ const styles = StyleSheet.create({
   },
 
   activePill: {
-    backgroundColor: Colors.PRIMARY, // Active pill color
+    backgroundColor: Colors.PRIMARY,
   },
   medicationDetails: {
     fontSize: 14,
@@ -222,16 +208,17 @@ const styles = StyleSheet.create({
     marginVertical: 2,
   },
   buttonContainer: {
+    flex: 1,
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 10, // Space between content and buttons
+    justifyContent: "space-between",
+    paddingTop: 6,
   },
   button: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.PRIMARY, // Button border color
+    borderColor: Colors.PRIMARY,
   },
   buttonText: {
     color: Colors.PRIMARY,
