@@ -185,8 +185,8 @@ const styles = StyleSheet.create({
   titleContainer: {
     backgroundColor: Colors.LOGO_BACKGROUND,
     overflow: "hidden",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
     paddingTop: "15%",
   },
   title: {
@@ -239,8 +239,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    // backgroundColor: "#FFFFFF",
-    backgroundColor: "#F4F7FC",
+    backgroundColor: Colors.BACKGROUND_100,
     marginBottom: 12,
     borderRadius: 10,
     borderWidth: 1,

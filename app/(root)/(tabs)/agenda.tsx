@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: Colors.BORDERGRAY,
-    backgroundColor: "#F4F7FC",
+    backgroundColor: Colors.BACKGROUND_100,
   },
   dateContainer: {
     flex: 1,

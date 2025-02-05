@@ -63,15 +63,15 @@ const styles = StyleSheet.create({
     width: Platform.OS === "ios" ? 27 : 28.2,
     height: Platform.OS === "ios" ? 27 : 28.2,
     right: 22,
-    ...(Platform.OS === "android"
-      ? {
-          elevation: 3,
-        }
-      : {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 2,
-        }),
+    // ...(Platform.OS === "android"
+    //   ? {
+    //       elevation: 3,
+    //     }
+    //   : {
+    //       shadowColor: "#000",
+    //       shadowOffset: { width: 0, height: 2 },
+    //       shadowOpacity: 0.2,
+    //       shadowRadius: 2,
+    //     }),
   },
 });

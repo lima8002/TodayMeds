@@ -150,16 +150,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.TAKEN_100,
     borderRadius: 8,
-    ...(Platform.OS === "android"
-      ? {
-          elevation: 3,
-        }
-      : {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-        }),
+    // ...(Platform.OS === "android"
+    //   ? {
+    //       elevation: 3,
+    //     }
+    //   : {
+    //       shadowColor: "#000",
+    //       shadowOffset: { width: 0, height: 2 },
+    //       shadowOpacity: 0.2,
+    //       shadowRadius: 4,
+    //     }),
   },
   text_TAKEN: {
     fontFamily: "outfit-bold",
