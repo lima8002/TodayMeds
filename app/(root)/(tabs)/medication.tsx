@@ -99,30 +99,24 @@ const MedicationScreen = () => {
                 <View style={styles.buttonContainer}>
                   <CustomButton
                     type={"ICON"}
-                    // text="Intake"
                     icon={"calendar"}
                     iconColor={Colors.TEXT_200}
                     onPress={() => {}}
                   />
                   <CustomButton
                     type={"ICON"}
-                    // text="Done"
                     icon={"tick"}
                     iconColor={Colors.TAKEN_OK}
                     onPress={() => {}}
                   />
-                  {/* </View>
-                <View style={styles.buttonContainer}> */}
                   <CustomButton
                     type={"ICON"}
-                    // text="Edit"
                     icon={"edit"}
                     iconColor={Colors.TEXT}
                     onPress={() => {}}
                   />
                   <CustomButton
                     type={"ICON"}
-                    // text="Delete"
                     icon={"delete"}
                     iconColor={Colors.ALERT}
                     onPress={() => {}}
