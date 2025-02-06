@@ -20,7 +20,7 @@ const MedicationScreen = () => {
   const [selectedMedicationId, setSelectedMedicationId] = useState<
     string | null
   >(null);
-  const [animatedValues] = useState<{ [key: string]: Animated.Value }>({});
+  const animatedValues = useRef<{ [key: string]: Animated.Value }>({});
   const initialRender = useRef(false);
 
   useEffect(() => {
@@ -30,14 +30,14 @@ const MedicationScreen = () => {
     }
 
     medications?.forEach((med) => {
-      if (!animatedValues[med.id]) {
-        animatedValues[med.id] = new Animated.Value(0);
+      if (!animatedValues.current[med.id]) {
+        animatedValues.current[med.id] = new Animated.Value(0);
       }
     });
   }, [medications]);
 
   const renderMedItem = ({ item }: { item: MedsDB }) => {
-    const rotateValue = animatedValues[item.id]?.interpolate({
+    const rotateValue = animatedValues.current[item.id]?.interpolate({
       inputRange: [0, 1],
       outputRange: ["0deg", "90deg"],
     });
@@ -48,11 +48,19 @@ const MedicationScreen = () => {
         item.id === selectedMedicationId ? null : item.id
       );
 
-      Animated.timing(animatedValues[item.id], {
+      Animated.timing(animatedValues.current[item.id], {
         toValue: newValue,
-        duration: 300,
+        duration: 100,
         useNativeDriver: true,
       }).start();
+
+      if (selectedMedicationId && selectedMedicationId !== item.id) {
+        Animated.timing(animatedValues.current[selectedMedicationId], {
+          toValue: 0,
+          duration: 100,
+          useNativeDriver: true,
+        }).start();
+      }
     };
 
     return (
@@ -98,7 +106,7 @@ const MedicationScreen = () => {
                   <CustomButton
                     type={"ICON"}
                     icon={"calendar"}
-                    iconColor={Colors.TEXT_200}
+                    iconColor={Colors.PRIMARY}
                     onPress={() => {}}
                   />
                   <CustomButton
@@ -110,7 +118,7 @@ const MedicationScreen = () => {
                   <CustomButton
                     type={"ICON"}
                     icon={"edit"}
-                    iconColor={Colors.TEXT}
+                    iconColor={Colors.PRIMARY}
                     onPress={() => {}}
                   />
                   <CustomButton
