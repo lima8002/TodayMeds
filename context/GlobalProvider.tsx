@@ -18,6 +18,7 @@ import {
 } from "@/utils/FirebaseHelper";
 import { User } from "firebase/auth";
 import { Intake, MedsDB, UserDB } from "../constants/Types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface GlobalContextType {
   isLoggedIn: boolean;
@@ -27,6 +28,8 @@ interface GlobalContextType {
   setUserDB: React.Dispatch<React.SetStateAction<UserDB | null>>;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  screenName: string;
+  setScreenName: (value: string) => void;
   letUserSignOut: () => Promise<void>;
   medications: MedsDB[];
   fetchMeds: (userEmail: string) => Promise<void>;
@@ -38,8 +41,11 @@ interface GlobalContextType {
     intakeId: string,
     taken: boolean
   ) => Promise<void>;
+  deleteAllMedication: (id: string) => Promise<void>;
   deleteMedication: (id: string) => Promise<void>;
   getAllIntakes: () => Intake[];
+  autosave: boolean;
+  setAutosave: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -53,7 +59,9 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userDB, setUserDB] = useState<UserDB | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [screenName, setScreenName] = useState<string>("");
   const [medications, setMedications] = useState<MedsDB[]>([]);
+  const [autosave, setAutosave] = useState<boolean>(false);
 
   useEffect(() => {
     const unsubscribeAuth = AuthenticatedUser(async (authUser) => {
@@ -70,7 +78,20 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       setIsLoading(false);
     });
 
-    return () => unsubscribeAuth(); // Unsubscribe when component unmounts
+    const getAutoValue = async () => {
+      try {
+        const value = await AsyncStorage.getItem("Autosave");
+        if (value !== null) {
+          setAutosave(value === "true");
+        }
+      } catch (error) {
+        console.error("Error getting Autosave:", error);
+      }
+    };
+
+    getAutoValue();
+
+    return () => unsubscribeAuth();
   }, []);
 
   const letUserSignOut = async () => {
@@ -126,7 +147,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   ) => {
     const intake: Intake[] = [];
     const startDateTime = new Date(medication.dateTime);
-    const frequencyHours = parseInt(medication.frequency);
+    const frequencyHours = medication.frequency;
     const totalDoses = parseInt(medication.quantity);
 
     for (let i = 0; i < totalDoses; i++) {
@@ -146,6 +167,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getAllIntakes = (): Intake[] => {
     return medications
+      .filter((med) => med.active)
       .flatMap((med) => med.intake || [])
       .sort(
         (a, b) =>
@@ -188,6 +210,15 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const deleteMedication = async (id: string) => {
     try {
+      await onDeleteMedById(id);
+      await fetchMeds(user?.email || "");
+    } catch (error) {
+      console.error("Error deleting medication:", error);
+    }
+  };
+
+  const deleteAllMedication = async (id: string) => {
+    try {
       await onDeleteMedByEmail(id);
       await fetchMeds(user?.email || "");
       setMedications([]);
@@ -204,6 +235,8 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     setUserDB,
     isLoading,
     setIsLoading,
+    screenName,
+    setScreenName,
     letUserSignOut,
     medications,
     fetchMeds,
@@ -211,8 +244,11 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     addMedication,
     updateMedication,
     updateIntake,
+    deleteAllMedication,
     deleteMedication,
     getAllIntakes,
+    autosave,
+    setAutosave,
   };
 
   return (

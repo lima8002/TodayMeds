@@ -10,30 +10,19 @@ import IntakeDetails from "@/components/meds/IntakeDetails";
 // Still have to implement not active(finished medication) agenda
 
 const AgendaScreen = () => {
-  const { getAllIntakes } = useGlobalContext();
+  const { getAllIntakes, medications } = useGlobalContext();
   const allIntakes = getAllIntakes();
-  const flatListRef = useRef<FlatList>(null);
-  const [hasScrolled, setHasScrolled] = useState(false);
+  const flatListRef = useRef<FlatList<any>>(null);
 
   const groupIntakes = (intakes: Intake[]) => {
-    const today = new Date();
-
-    const filteredIntakes = intakes.filter((intake) => {
-      const intakeDate = new Date(intake.dateTime);
-      return intakeDate >= today;
-    });
-
-    const grouped: Record<string, Intake[]> = filteredIntakes.reduce(
-      (acc, intake) => {
-        const date = new Date(intake.dateTime).toDateString();
-        if (!acc[date]) {
-          acc[date] = [];
-        }
-        acc[date].push(intake);
-        return acc;
-      },
-      {} as Record<string, Intake[]>
-    );
+    const grouped: Record<string, Intake[]> = intakes.reduce((acc, intake) => {
+      const date = new Date(intake.dateTime).toDateString();
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(intake);
+      return acc;
+    }, {} as Record<string, Intake[]>);
 
     return Object.entries(grouped)
       .map(([date, intakes]) => ({
@@ -46,35 +35,24 @@ const AgendaScreen = () => {
   const groupedIntakes = groupIntakes(allIntakes);
 
   useEffect(() => {
-    if (!hasScrolled && groupedIntakes.length > 0) {
-      const currentDate = new Date().toDateString();
-      const currentDayIndex = groupedIntakes.findIndex(
-        (item) => new Date(item.date).toDateString() === currentDate
-      );
+    const today = new Date().toDateString();
+    const currentDayIndex = groupedIntakes.findIndex(
+      (item) => item.date === today
+    );
 
-      if (new Date().toString() <= currentDate) {
-        console.log("no scroll");
-      } else {
-        const indexToScrollTo =
-          currentDayIndex !== -1 ? currentDayIndex : groupedIntakes.length - 1;
-
-        setTimeout(() => {
-          flatListRef.current?.scrollToIndex({
-            index: indexToScrollTo,
-            animated: true,
-            viewPosition: 0,
-          });
-          setHasScrolled(true);
-        }, 100);
-      }
+    if (currentDayIndex !== -1) {
+      flatListRef.current?.scrollToIndex({
+        animated: true,
+        index: currentDayIndex,
+      });
     }
-  }, [hasScrolled]);
+  }, [groupedIntakes]);
 
   const renderIntakeItem = (item: Intake) => (
     <IntakeDetails
       intakeItem={item}
       medRef={item.intakeRef}
-      key={item.dateTime}
+      key={item.intakeRef + item.dateTime}
     />
   );
 
@@ -119,24 +97,11 @@ const AgendaScreen = () => {
     <View style={styles.container}>
       <CustomHeader title="Agenda" />
       <FlatList
-        ref={flatListRef}
         data={groupedIntakes}
         renderItem={renderDayCard}
         keyExtractor={(item) => item.date}
         style={{ marginBottom: "10%" }}
-        contentContainerStyle={{
-          paddingBottom: Platform.OS === "ios" ? 6 : 38,
-          padding: 16,
-        }}
-        onScrollToIndexFailed={(info) => {
-          const wait = new Promise((resolve) => setTimeout(resolve, 500));
-          wait.then(() => {
-            flatListRef.current?.scrollToIndex({
-              index: info.index,
-              animated: true,
-            });
-          });
-        }}
+        contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <Text style={styles.emptyListText}>
             No scheduled medications yet.
@@ -148,10 +113,16 @@ const AgendaScreen = () => {
   );
 };
 
+export default AgendaScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 20,
   },
   cardContainer: {
     flex: 1,
@@ -161,11 +132,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.BORDERGRAY,
     backgroundColor: Colors.BACKGROUND_100,
+    marginBottom: 10,
   },
   dateContainer: {
     flex: 1,
     flexDirection: "row",
-    padding: 10,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
   },
   cardTitle: {
     fontFamily: "outfit-medium",
@@ -182,5 +155,3 @@ const styles = StyleSheet.create({
     fontFamily: "outfit",
   },
 });
-
-export default AgendaScreen;

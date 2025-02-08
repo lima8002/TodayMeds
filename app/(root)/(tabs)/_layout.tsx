@@ -15,22 +15,27 @@ const TabIcon = ({
   focused: boolean;
   icon: any;
   title: string;
-}) => (
-  <View style={styles.container}>
-    <Image
-      source={icon}
-      style={[
-        styles.icon,
-        { tintColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY },
-      ]}
-    />
-    <Text
-      style={[styles.text, focused ? styles.textFocused : styles.textUnfocused]}
-    >
-      {title}
-    </Text>
-  </View>
-);
+}) => {
+  return (
+    <View style={styles.container}>
+      <Image
+        source={icon}
+        style={[
+          styles.icon,
+          { tintColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY },
+        ]}
+      />
+      <Text
+        style={[
+          styles.text,
+          focused ? styles.textFocused : styles.textUnfocused,
+        ]}
+      >
+        {title}
+      </Text>
+    </View>
+  );
+};
 
 export default function TabLayout() {
   return (

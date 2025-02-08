@@ -7,12 +7,12 @@ import {
   FlatList,
   Platform,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { Intake, MedsDB } from "@/constants/Types";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { useRouter } from "expo-router";
-import CustomFloatButton from "@/components/ui/CustomFloatButton";
 import DayCard from "@/components/meds/DayCard";
 import IntakeDetails from "@/components/meds/IntakeDetails";
 
@@ -21,10 +21,9 @@ const { width } = Dimensions.get("window");
 function MainScreen() {
   const router = useRouter();
   const [greeting, setGreeting] = useState<string | null>(null);
-  const { getAllIntakes, user, fetchMeds, medications, userDB } =
+  const { getAllIntakes, user, medications, userDB, setScreenName } =
     useGlobalContext();
   const [todayIntakes, setTodayIntakes] = useState<Intake[]>([]);
-  // const [refreshing, setRefreshing] = useState(false);
   const today = new Date().toDateString();
 
   useEffect(() => {
@@ -45,23 +44,12 @@ function MainScreen() {
     setTodayIntakes(intakes);
   }, [medications, getAllIntakes]);
 
-  // const onRefresh = async () => {
-  //   setRefreshing(true);
-  //   try {
-  //     if (user) {
-  //       await fetchMeds(user.email || "");
-  //     }
-  //   } finally {
-  //     setRefreshing(false);
-  //   }
-  // };
-
   const medicationsWithFutureIntakes = medications.filter((medication) => {
     const futureIntakes = medication.intake.filter((intake) => {
       const intakeDate = new Date(intake.dateTime);
-      return intakeDate >= new Date(); // Check if intake is today or in the future
+      return intakeDate >= new Date();
     });
-    return futureIntakes.length > 0; //Medication only included if it has at least one future intake
+    return futureIntakes.length > 0;
   });
 
   const renderIntakeItem = (item: Intake) => {
@@ -69,7 +57,7 @@ function MainScreen() {
       <IntakeDetails
         intakeItem={item}
         medRef={item.intakeRef}
-        key={item.dateTime}
+        key={item.intakeRef + item.dateTime}
       />
     );
   };
@@ -90,7 +78,7 @@ function MainScreen() {
       <View style={styles.line} />
       <Text style={styles.medicationDetails}>
         Take {item.dosage} pill/tablet every {item.frequency} hour
-        {parseInt(item.frequency) > 1 ? "s" : ""}
+        {item.frequency > 1 ? "s" : ""}
         {item.withFoodWater ? " with Food/Water." : "."}
       </Text>
     </View>
@@ -100,27 +88,32 @@ function MainScreen() {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{greeting}</Text>
-        {userDB?.name && (
-          <Text style={styles.subTitle}>Welcome, {userDB.name}!</Text>
-        )}
+        <Text style={styles.subTitle}>
+          Welcome, {userDB?.name ? userDB?.name : user?.email}!
+        </Text>
       </View>
-      <CustomFloatButton type="ADD" />
+      <>
+        <TouchableOpacity
+          onPress={() => {
+            setScreenName("ADD");
+            router.push("/add");
+          }}
+          style={styles.addButton}
+          activeOpacity={0.7}
+        >
+          <Image
+            source={require("@/assets/icons/plus.png")}
+            style={styles.addImage}
+          />
+        </TouchableOpacity>
+      </>
       <FlatList
-        // data={medications}
-        data={medicationsWithFutureIntakes}
+        data={medicationsWithFutureIntakes.filter((med) => med.active)}
         renderItem={renderMedItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{
           paddingBottom: Platform.OS === "ios" ? 50 : 38,
         }}
-        // refreshControl={
-        //   <RefreshControl
-        //     refreshing={refreshing}
-        //     onRefresh={onRefresh}
-        //     colors={Platform.OS === "android" ? [Colors.PRIMARY] : undefined}
-        //     tintColor={Platform.OS === "ios" ? Colors.PRIMARY : undefined}
-        //   />
-        // }
         ListEmptyComponent={
           <View
             style={[
@@ -210,12 +203,45 @@ const styles = StyleSheet.create({
   textMainTitle: {
     fontFamily: "outfit-medium",
     fontSize: Platform.OS === "ios" ? 18 : 20,
+    color: Colors.TEXT,
     paddingBottom: 5,
+  },
+  // add button
+  addButton: {
+    position: "absolute",
+    right: 15,
+    width: 40,
+    height: 40,
+    top: Platform.OS === "ios" ? "8%" : "7%",
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 0.8,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  addImage: {
+    width: 40,
+    height: 40,
+    backgroundColor: "#fff",
+    borderRadius: 99,
+    justifyContent: "center",
+    alignItems: "center",
+    tintColor: Colors.LOGO_BACKGROUND,
+    resizeMode: "center",
   },
   // render med item
   medicationName: {
-    fontSize: Platform.OS === "ios" ? 18 : 20,
-    color: Colors.TEXT_TITLE,
+    fontSize: Platform.OS === "ios" ? 16 : 18,
+    color: Colors.TEXT,
     fontFamily: "outfit-medium",
     paddingLeft: 10,
     paddingVertical: 9,
@@ -228,7 +254,7 @@ const styles = StyleSheet.create({
   },
   medicationDetails: {
     fontSize: Platform.OS === "ios" ? 14 : 16,
-    color: "#000",
+    color: Colors.TEXT_050,
     marginTop: 2,
     fontFamily: "outfit",
     paddingLeft: 10,
@@ -259,9 +285,7 @@ const styles = StyleSheet.create({
     fontFamily: "outfit",
     opacity: Platform.OS === "ios" ? 0.3 : 0.4,
   },
-
   // empty list image
-
   image: {
     width: width * 0.5,
     height: width * 0.5,

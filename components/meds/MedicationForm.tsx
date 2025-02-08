@@ -28,7 +28,7 @@ function MedicationForm({
 }: MedicationFormProps) {
   const [name, setName] = useState(initialValues?.name || "");
   const [dosage, setDosage] = useState(initialValues?.dosage || "");
-  const [frequency, setFrequency] = useState<string | null>(
+  const [frequency, setFrequency] = useState<number | null>(
     initialValues?.frequency || null
   );
   const [dateTime, setDateTime] = useState<Date>(new Date());
@@ -45,7 +45,7 @@ function MedicationForm({
   const [otherDosage, setOtherDosage] = useState<string | null>(null);
   const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
   const [showDTPicker, setShowDTPicker] = useState(false);
-  const [tempFrequency, setTempFrequency] = useState<string | null>(null);
+  const [tempFrequency, setTempFrequency] = useState<number | null>(null);
 
   useEffect(() => {
     if (initialValues?.dosage) {
@@ -60,6 +60,7 @@ function MedicationForm({
   }, [initialValues]);
 
   const handleSubmit = () => {
+    console.log("dateTime " + dateTime);
     const finalDosage =
       selectedDosage === "Other" ? otherDosage : selectedDosage;
     const medicationData = {
@@ -163,7 +164,7 @@ function MedicationForm({
           >
             {frequency ? (
               <Text style={styles.text}>
-                Every {frequency} hour{parseInt(frequency) > 1 ? "s" : ""}
+                Every {frequency} hour{frequency > 1 ? "s" : ""}
               </Text>
             ) : (
               <Text style={styles.textDisabled}>e.g., Every 4 hours</Text>
@@ -512,8 +513,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
   text: {
     fontSize: 16,

@@ -5,21 +5,13 @@ export default function ModalsLayout() {
       <Stack.Screen
         name="add"
         options={{
-          presentation: "fullScreenModal",
+          presentation: "card",
           title: "Add Medication",
           headerShown: false,
         }}
       />
       <Stack.Screen
         name="[id]"
-        options={{
-          presentation: "fullScreenModal",
-          title: "Edit Medication",
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="details/[id]"
         options={{
           presentation: "fullScreenModal",
           title: "Edit Medication",

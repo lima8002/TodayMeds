@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Image, Text, Platform, StyleSheet, View } from "react-native";
+import React from "react";
+import { Text, Platform, StyleSheet, View } from "react-native";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { Colors } from "@/constants/Colors";
 import { Intake } from "@/constants/Types";
@@ -8,10 +8,12 @@ import Taken from "./Taken";
 interface IntakeProps {
   medRef: string;
   intakeItem: Intake;
+  type?: string;
 }
 
-const IntakeDetails: React.FC<IntakeProps> = ({ intakeItem, medRef }) => {
+const IntakeDetails: React.FC<IntakeProps> = ({ intakeItem, medRef, type }) => {
   const { medications } = useGlobalContext();
+
   const medication = medications.find((med) => med.intakeRef === medRef);
 
   if (!medication) {
@@ -20,22 +22,43 @@ const IntakeDetails: React.FC<IntakeProps> = ({ intakeItem, medRef }) => {
 
   return (
     <View style={styles.intakeItem}>
-      <View style={styles.col1}>
+      {medication && type !== "UNDO" ? (
+        <View style={styles.col1}>
+          <Text style={styles.intakeTime}>
+            {new Date(intakeItem.dateTime).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            })}
+          </Text>
+        </View>
+      ) : (
         <Text style={styles.intakeTime}>
+          {new Date(intakeItem.dateTime).toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })}
+        </Text>
+      )}
+      {medication && type !== "UNDO" ? (
+        <View style={styles.col2}>
+          <Text style={styles.intakeMedName}>{medication.name || ""}</Text>
+        </View>
+      ) : (
+        <Text style={[styles.intakeTime, { paddingLeft: "20%" }]}>
           {new Date(intakeItem.dateTime).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
           })}
         </Text>
-      </View>
-      <View style={styles.col2}>
-        <Text style={styles.intakeMedName}>{medication.name || ""}</Text>
-      </View>
+      )}
       <View style={styles.col3}>
         <Taken
           intakeId={intakeItem.intakeId}
           intakeRef={intakeItem.intakeRef}
+          type={type}
         />
       </View>
     </View>
@@ -67,12 +90,11 @@ const styles = StyleSheet.create({
   intakeTime: {
     fontFamily: "outfit-medium",
     fontSize: Platform.OS === "ios" ? 14 : 17,
-    // color: "#6B7B8F",
-    color: "#333333",
+    color: Colors.TEXT,
     marginRight: 10,
   },
   intakeMedName: {
-    color: "#1E2A3A",
+    color: Colors.TEXT,
     fontFamily: "outfit-medium",
     fontSize: Platform.OS === "ios" ? 16 : 18,
   },

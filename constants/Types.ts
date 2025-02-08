@@ -10,7 +10,7 @@ export interface MedsDB {
   email: string;
   name: string;
   dosage: string;
-  frequency: string;
+  frequency: number;
   dateTime: string;
   quantity: string;
   withFoodWater: boolean;

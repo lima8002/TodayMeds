@@ -25,7 +25,7 @@ export default DayCard;
 const styles = StyleSheet.create({
   dayCard: {
     width: Platform.OS === "ios" ? 53 : 57,
-    borderRadius: 14,
+    borderRadius: 8,
   },
   cardTop: {
     backgroundColor: Colors.TERTIARY,

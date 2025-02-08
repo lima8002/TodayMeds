@@ -1,16 +1,37 @@
-import CustomHeader from "@/components/ui/CustomHeader";
-import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import CustomButton from "@/components/ui/CustomButton";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Switch } from "react-native";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { onAddNewMedToDB } from "@/utils/FirebaseHelper";
-
 import { MedsDB } from "@/constants/Types";
 import { Colors } from "@/constants/Colors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomButton from "@/components/ui/CustomButton";
+import CustomHeader from "@/components/ui/CustomHeader";
 
 export default function ProfileScreen() {
-  const { letUserSignOut, deleteMedication, user, fetchMeds } =
-    useGlobalContext();
+  const {
+    letUserSignOut,
+    deleteMedication,
+    user,
+    fetchMeds,
+    autosave,
+    setAutosave,
+  } = useGlobalContext();
+
+  const handleAutosaveSwitch = async (newValue: boolean) => {
+    try {
+      setAutosave(newValue);
+      if (newValue) {
+        await AsyncStorage.setItem("Autosave", "true");
+        console.log("Autosave enabled");
+      } else {
+        await AsyncStorage.removeItem("Autosave");
+        console.log("Autosave disabled");
+      }
+    } catch (error) {
+      console.error("Error getting Autosave:", error);
+    }
+  };
 
   const loadRandomData = async () => {
     const medsToAdd: MedsDB[] = [
@@ -19,9 +40,9 @@ export default function ProfileScreen() {
         email: "123@123.com",
         name: "Vitamin A",
         dosage: "1",
-        frequency: "8",
-        dateTime: "2025-02-02T12:21:17",
-        quantity: "10",
+        frequency: "12",
+        dateTime: "2025-02-06T00:47:00",
+        quantity: "22",
         withFoodWater: false,
         active: true,
         intakeRef: "123",
@@ -29,49 +50,133 @@ export default function ProfileScreen() {
           {
             intakeId: "0",
             intakeRef: "123",
-            dateTime: "2025-02-02T12:21:17",
+            dateTime: "2025-02-06T00:47:00",
             taken: false,
           },
           {
             intakeId: "1",
             intakeRef: "123",
-            dateTime: "2025-02-02T20:21:17",
+            dateTime: "2025-02-06T12:47:00",
             taken: false,
           },
           {
             intakeId: "2",
             intakeRef: "123",
-            dateTime: "2025-02-03T04:21:17",
+            dateTime: "2025-02-07T00:47:00",
             taken: false,
           },
           {
             intakeId: "3",
             intakeRef: "123",
-            dateTime: "2025-02-03T12:21:17",
+            dateTime: "2025-02-07T12:47:00",
             taken: false,
           },
           {
             intakeId: "4",
             intakeRef: "123",
-            dateTime: "2025-02-03T20:21:17",
+            dateTime: "2025-02-08T00:47:00",
             taken: false,
           },
           {
             intakeId: "5",
             intakeRef: "123",
-            dateTime: "2025-02-04T04:21:17",
+            dateTime: "2025-02-08T12:47:00",
             taken: false,
           },
           {
             intakeId: "6",
             intakeRef: "123",
-            dateTime: "2025-02-04T12:21:17",
+            dateTime: "2025-02-09T00:47:00",
             taken: false,
           },
           {
             intakeId: "7",
             intakeRef: "123",
-            dateTime: "2025-02-04T20:21:17",
+            dateTime: "2025-02-09T12:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "8",
+            intakeRef: "123",
+            dateTime: "2025-02-10T00:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "9",
+            intakeRef: "123",
+            dateTime: "2025-02-10T12:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "10",
+            intakeRef: "123",
+            dateTime: "2025-02-11T00:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "11",
+            intakeRef: "123",
+            dateTime: "2025-02-11T12:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "12",
+            intakeRef: "123",
+            dateTime: "2025-02-12T00:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "13",
+            intakeRef: "123",
+            dateTime: "2025-02-12T12:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "14",
+            intakeRef: "123",
+            dateTime: "2025-02-13T00:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "15",
+            intakeRef: "123",
+            dateTime: "2025-02-13T12:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "16",
+            intakeRef: "123",
+            dateTime: "2025-02-14T00:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "17",
+            intakeRef: "123",
+            dateTime: "2025-02-14T12:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "18",
+            intakeRef: "123",
+            dateTime: "2025-02-15T00:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "19",
+            intakeRef: "123",
+            dateTime: "2025-02-15T12:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "20",
+            intakeRef: "123",
+            dateTime: "2025-02-16T00:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "21",
+            intakeRef: "123",
+            dateTime: "2025-02-16T12:47:00",
             taken: false,
           },
         ],
@@ -82,7 +187,7 @@ export default function ProfileScreen() {
         name: "Panadol",
         dosage: "1",
         frequency: "8",
-        dateTime: "2025-02-02T12:31:17",
+        dateTime: "2025-02-06T00:47:01",
         quantity: "10",
         withFoodWater: false,
         active: true,
@@ -91,49 +196,61 @@ export default function ProfileScreen() {
           {
             intakeId: "0",
             intakeRef: "1234",
-            dateTime: "2025-02-02T12:31:17",
+            dateTime: "2025-02-06T00:47:00",
             taken: false,
           },
           {
             intakeId: "1",
             intakeRef: "1234",
-            dateTime: "2025-02-02T20:31:17",
+            dateTime: "2025-02-06T08:47:00",
             taken: false,
           },
           {
             intakeId: "2",
             intakeRef: "1234",
-            dateTime: "2025-02-03T04:31:17",
+            dateTime: "2025-02-06T16:47:00",
             taken: false,
           },
           {
             intakeId: "3",
             intakeRef: "1234",
-            dateTime: "2025-02-03T12:31:17",
+            dateTime: "2025-02-07T00:47:00",
             taken: false,
           },
           {
             intakeId: "4",
             intakeRef: "1234",
-            dateTime: "2025-02-03T20:31:17",
+            dateTime: "2025-02-07T08:47:00",
             taken: false,
           },
           {
             intakeId: "5",
             intakeRef: "1234",
-            dateTime: "2025-02-04T04:31:17",
+            dateTime: "2025-02-07T16:47:00",
             taken: false,
           },
           {
             intakeId: "6",
             intakeRef: "1234",
-            dateTime: "2025-02-04T12:31:17",
+            dateTime: "2025-02-08T00:47:00",
             taken: false,
           },
           {
             intakeId: "7",
             intakeRef: "1234",
-            dateTime: "2025-02-04T20:31:17",
+            dateTime: "2025-02-08T08:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "8",
+            intakeRef: "1234",
+            dateTime: "2025-02-09T00:47:00",
+            taken: false,
+          },
+          {
+            intakeId: "9",
+            intakeRef: "1234",
+            dateTime: "2025-02-09T08:47:00",
             taken: false,
           },
         ],
@@ -144,7 +261,7 @@ export default function ProfileScreen() {
         name: "Nurofen Pain Relief",
         dosage: "1",
         frequency: "8",
-        dateTime: "2025-02-02T12:34:17",
+        dateTime: "2025-02-06T00:47:02",
         quantity: "10",
         withFoodWater: true,
         active: true,
@@ -153,54 +270,55 @@ export default function ProfileScreen() {
           {
             intakeId: "0",
             intakeRef: "12345",
-            dateTime: "2025-02-02T12:34:17",
+            dateTime: "2025-02-06T00:47:00",
             taken: false,
           },
           {
             intakeId: "1",
             intakeRef: "12345",
-            dateTime: "2025-02-02T20:34:17",
+            dateTime: "2025-02-06T08:47:00",
             taken: false,
           },
           {
             intakeId: "2",
             intakeRef: "12345",
-            dateTime: "2025-02-03T04:34:17",
+            dateTime: "2025-02-06T16:47:00",
             taken: false,
           },
           {
             intakeId: "3",
             intakeRef: "12345",
-            dateTime: "2025-02-03T12:34:17",
+            dateTime: "2025-02-07T00:47:00",
             taken: false,
           },
           {
             intakeId: "4",
             intakeRef: "12345",
-            dateTime: "2025-02-03T20:34:17",
+            dateTime: "2025-02-07T08:47:00",
             taken: false,
           },
           {
             intakeId: "5",
             intakeRef: "12345",
-            dateTime: "2025-02-04T04:34:17",
+            dateTime: "2025-02-07T16:47:00",
             taken: false,
           },
           {
             intakeId: "6",
             intakeRef: "12345",
-            dateTime: "2025-02-04T12:34:17",
+            dateTime: "2025-02-08T00:47:00",
             taken: false,
           },
           {
             intakeId: "7",
             intakeRef: "12345",
-            dateTime: "2025-02-04T20:34:17",
+            dateTime: "2025-02-08T08:47:00",
             taken: false,
           },
         ],
       },
     ];
+
     try {
       for (const med of medsToAdd) {
         const newMed: MedsDB = {
@@ -248,6 +366,10 @@ export default function ProfileScreen() {
             onPress={() => {}}
           />
         </View>
+        <View style={styles.switchContainer}>
+          <Text style={styles.switchText}>Enable Autosave</Text>
+          <Switch value={autosave} onValueChange={handleAutosaveSwitch} />
+        </View>
         <View style={[styles.signoutBtn, styles.shadow]}>
           <CustomButton
             text="Log Out"
@@ -281,6 +403,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "outfit-bold",
     marginBottom: 20,
+  },
+  switchContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  switchText: {
+    fontFamily: "outfit",
+    fontSize: 16,
   },
   signoutBtn: {
     paddingTop: 20,

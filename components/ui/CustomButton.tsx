@@ -31,11 +31,16 @@ interface CustomButtonProps {
   iconColor?: string;
 }
 
-const iconMap: { [key: string]: any } = {
-  tick: require("../../assets/icons/tick.png"),
-  edit: require("../../assets/icons/edit.png"),
-  delete: require("../../assets/icons/delete.png"),
-  calendar: require("../../assets/icons/calendar.png"),
+const iconMap: {
+  [key: string]: {
+    icon: any;
+    title?: string;
+  };
+} = {
+  done: { icon: require("../../assets/icons/tick.png"), title: "Done" },
+  edit: { icon: require("../../assets/icons/edit.png"), title: "Edit" },
+  delete: { icon: require("../../assets/icons/delete.png"), title: "Delete" },
+  intake: { icon: require("../../assets/icons/calendar.png"), title: "Intake" },
 };
 
 const CustomButton: React.FC<CustomButtonProps> = ({
@@ -60,10 +65,13 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       ]}
     >
       {icon && (
-        <Image
-          source={iconMap[icon]}
-          style={[styles.icon, { tintColor: iconColor }]}
-        />
+        <>
+          <Image
+            source={iconMap[icon].icon}
+            style={[styles.icon, { tintColor: iconColor }]}
+          />
+          <Text style={styles.iconText}>{iconMap[icon].title}</Text>
+        </>
       )}
       {text && (
         <Text
@@ -88,7 +96,7 @@ const styles = StyleSheet.create({
     minWidth: "55%",
     padding: 10,
     marginVertical: 5,
-    borderRadius: 8,
+    borderRadius: 12,
     height: 46,
   },
   text: {
@@ -187,27 +195,31 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     marginHorizontal: 20,
     marginVertical: 1,
-    fontSize: Platform.OS === "ios" ? 12 : 14,
+    fontSize: Platform.OS === "ios" ? 13 : 14,
   },
   container_ICON: {
-    padding: 8,
+    marginTop: 10,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    borderColor: Colors.PRIMARY,
-    backgroundColor: Colors.BACKGROUND_200,
-    borderWidth: 1,
-    minWidth: "20%",
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    minWidth: "24%",
   },
   text_ICON: {
     fontFamily: "outfit",
     fontSize: 14,
     color: Colors.PRIMARY,
-    marginLeft: 8,
   },
   icon: {
     width: 30,
     height: 30,
     resizeMode: "cover",
+  },
+  iconText: {
+    color: Colors.PRIMARY,
+    fontFamily: "outfit",
+    fontSize: 14,
+    paddingTop: 2,
   },
 });
