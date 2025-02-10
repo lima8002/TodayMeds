@@ -33,28 +33,32 @@ const IntakeDetails: React.FC<IntakeProps> = ({ intakeItem, medRef, type }) => {
           </Text>
         </View>
       ) : (
-        <Text style={styles.intakeTime}>
-          {new Date(intakeItem.dateTime).toLocaleString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })}
-        </Text>
+        <View style={styles.col1Modal}>
+          <Text style={styles.intakeTime}>
+            {new Date(intakeItem.dateTime).toLocaleString("en-GB", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })}
+          </Text>
+        </View>
       )}
       {medication && type !== "UNDO" ? (
         <View style={styles.col2}>
           <Text style={styles.intakeMedName}>{medication.name || ""}</Text>
         </View>
       ) : (
-        <Text style={[styles.intakeTime, { paddingLeft: "20%" }]}>
-          {new Date(intakeItem.dateTime).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          })}
-        </Text>
+        <View style={styles.col2Modal}>
+          <Text style={[styles.intakeTime, { fontFamily: "outfit-medium" }]}>
+            {new Date(intakeItem.dateTime).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            })}
+          </Text>
+        </View>
       )}
-      <View style={styles.col3}>
+      <View style={type !== "UNDO" ? styles.col3 : styles.col3Modal}>
         <Taken
           intakeId={intakeItem.intakeId}
           intakeRef={intakeItem.intakeRef}
@@ -80,12 +84,22 @@ const styles = StyleSheet.create({
     flex: 18,
     alignItems: "flex-end",
   },
+  col1Modal: {
+    flex: 27,
+  },
   col2: {
     flex: 52,
+  },
+  col2Modal: {
+    flex: 48,
+    alignItems: "center",
   },
   col3: {
     flex: 30,
     alignItems: "flex-end",
+  },
+  col3Modal: {
+    flex: 25,
   },
   intakeTime: {
     fontFamily: "outfit-medium",

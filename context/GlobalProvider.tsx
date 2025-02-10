@@ -88,9 +88,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         console.error("Error getting Autosave:", error);
       }
     };
-
     getAutoValue();
-
     return () => unsubscribeAuth();
   }, []);
 

@@ -62,7 +62,7 @@ export default AddMedicationScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: Colors.BACKGROUND_100,
   },
   closeButton: {
     position: "absolute",

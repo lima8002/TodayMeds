@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
   View,
   Text,
@@ -21,10 +21,11 @@ const { width } = Dimensions.get("window");
 function MainScreen() {
   const router = useRouter();
   const [greeting, setGreeting] = useState<string | null>(null);
-  const { getAllIntakes, user, medications, userDB, setScreenName } =
+  const { getAllIntakes, user, userDB, medications, setScreenName, fetchMeds } =
     useGlobalContext();
   const [todayIntakes, setTodayIntakes] = useState<Intake[]>([]);
-  const today = new Date().toDateString();
+  const [todayMeds, setTodayMeds] = useState<MedsDB[]>([]);
+  const todayDate = new Date().getDate();
 
   useEffect(() => {
     const currentHour = new Date().getHours();
@@ -38,19 +39,21 @@ function MainScreen() {
   }, []);
 
   useEffect(() => {
-    const intakes = getAllIntakes().filter(
-      (intake) => new Date(intake.dateTime).toDateString() === today
+    const dailyMeds = medications.filter(
+      (medication) =>
+        medication.active &&
+        medication.intake.some(
+          (intake) => new Date(intake.dateTime).getDate() === todayDate
+        )
     );
-    setTodayIntakes(intakes);
-  }, [medications, getAllIntakes]);
 
-  const medicationsWithFutureIntakes = medications.filter((medication) => {
-    const futureIntakes = medication.intake.filter((intake) => {
-      const intakeDate = new Date(intake.dateTime);
-      return intakeDate >= new Date();
-    });
-    return futureIntakes.length > 0;
-  });
+    const dailyIntakes = getAllIntakes().filter(
+      (intake) => new Date(intake.dateTime).getDate() === todayDate
+    );
+
+    setTodayMeds(dailyMeds);
+    setTodayIntakes(dailyIntakes);
+  }, [medications, getAllIntakes]);
 
   const renderIntakeItem = (item: Intake) => {
     return (
@@ -108,7 +111,7 @@ function MainScreen() {
         </TouchableOpacity>
       </>
       <FlatList
-        data={medicationsWithFutureIntakes.filter((med) => med.active)}
+        data={todayMeds}
         renderItem={renderMedItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{

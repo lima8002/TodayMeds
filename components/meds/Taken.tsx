@@ -13,12 +13,29 @@ interface TakenProps {
 }
 
 const Taken: React.FC<TakenProps> = ({ intakeRef, intakeId, type }) => {
-  const { medications, updateIntake, autosave, setAutosave } =
-    useGlobalContext();
+  const {
+    medications,
+    updateIntake,
+    autosave,
+    getAllIntakes,
+    setAutosave,
+    updateMedication,
+  } = useGlobalContext();
+
+  const medication = medications.find((med) => med.intakeRef === intakeRef);
+
+  if (!medication) {
+    return null;
+  }
+
+  useEffect(() => {
+    if (medication) {
+      setIntakeData(medication.intake || []);
+    }
+    getAllIntakes();
+  }, [medications, getAllIntakes]);
 
   const showAlert = (index: number) => {
-    console.log("showAlert --->", !intakeData[index].taken, type);
-
     if (intakeData[index].taken && type === "UNDO") {
       Alert.alert(
         "Do you want to undo the medication?",
@@ -48,7 +65,6 @@ const Taken: React.FC<TakenProps> = ({ intakeRef, intakeId, type }) => {
       return;
     }
 
-    // if (type !== "UNDO") {
     Alert.alert(
       "Did you take the medication?",
       "\nIf you don't want to see this alert \nagain, select 'Autosave' " +
@@ -85,13 +101,7 @@ const Taken: React.FC<TakenProps> = ({ intakeRef, intakeId, type }) => {
       ],
       { cancelable: false }
     );
-    // }
   };
-
-  const medication = medications.find((med) => med.intakeRef === intakeRef);
-  if (!medication) {
-    return null;
-  }
 
   const [intakeData, setIntakeData] = useState<Intake[]>(
     medication.intake || []
@@ -106,6 +116,26 @@ const Taken: React.FC<TakenProps> = ({ intakeRef, intakeId, type }) => {
       updatedIntake[index].intakeId,
       updatedIntake[index].taken
     );
+    getRemaining();
+  };
+  const getRemaining = () => {
+    const remaining = getAllIntakes().filter(
+      (intake) => intakeRef === intake.intakeRef && !intake.taken
+    ).length;
+    if (remaining === 0) {
+      Alert.alert(
+        "🎉 Well done 🎉",
+        "You have no remaining pills/tablet for " + `${medication.name}`,
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              updateMedication(medication.id, { active: false });
+            },
+          },
+        ]
+      );
+    }
   };
 
   const updateTaken = () => {

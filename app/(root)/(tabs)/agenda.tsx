@@ -12,7 +12,6 @@ import IntakeDetails from "@/components/meds/IntakeDetails";
 const AgendaScreen = () => {
   const { getAllIntakes, medications } = useGlobalContext();
   const allIntakes = getAllIntakes();
-  const flatListRef = useRef<FlatList<any>>(null);
 
   const groupIntakes = (intakes: Intake[]) => {
     const grouped: Record<string, Intake[]> = intakes.reduce((acc, intake) => {
@@ -33,20 +32,6 @@ const AgendaScreen = () => {
   };
 
   const groupedIntakes = groupIntakes(allIntakes);
-
-  useEffect(() => {
-    const today = new Date().toDateString();
-    const currentDayIndex = groupedIntakes.findIndex(
-      (item) => item.date === today
-    );
-
-    if (currentDayIndex !== -1) {
-      flatListRef.current?.scrollToIndex({
-        animated: true,
-        index: currentDayIndex,
-      });
-    }
-  }, [groupedIntakes]);
 
   const renderIntakeItem = (item: Intake) => (
     <IntakeDetails

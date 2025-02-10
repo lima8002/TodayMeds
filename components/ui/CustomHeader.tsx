@@ -18,7 +18,9 @@ export default CustomHeader;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+    paddingHorizontal: 20,
     marginTop: "8%",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,

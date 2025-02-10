@@ -4,6 +4,8 @@ export const Colors = {
   SECONDARY: "#7F57F1",
   TERTIARY: "#8393E1",
   LOGO_BACKGROUND: "#5E75CA",
+  // LOGO_BACKGROUND: "#697bbf",
+  //LOGO_BACKGROUND: "#5064a6",
   GRAY: "#8f8f8f",
   LIGHTGRAY: "#E5E5EA",
   ICON_BG: "#f4e5fc",

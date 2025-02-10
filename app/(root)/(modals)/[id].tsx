@@ -19,14 +19,10 @@ const EditMedicationScreen = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { medications, updateMedication } = useGlobalContext();
-  const [currentId, setCurrentId] = useState<string>(id.toString());
+  const [currentId] = useState<string>(id.toString());
   const medication = medications.find((med) => med.id === id);
 
   const handleSubmit = (medicationData: any) => {
-    // updateMedication(id, updatedMedication);
-    // Navigate back or show success message
-    console.log("currentId", currentId);
-    console.log("medicationData", medicationData);
     updateMedication(currentId, medicationData);
     Alert.alert(
       "Medication Updated",

@@ -6,6 +6,7 @@ import pills from "@/assets/icons/pills.png";
 import calendar from "@/assets/icons/calendar.png";
 import person from "@/assets/icons/person.png";
 import presc from "@/assets/icons/presc.png";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 const TabIcon = ({
   focused,
@@ -16,15 +17,38 @@ const TabIcon = ({
   icon: any;
   title: string;
 }) => {
+  const { userDB } = useGlobalContext();
+  const imageURI =
+    "https://firebasestorage.googleapis.com/v0/b/chatdc-be5f6.appspot.com/o/profile1.png?alt=media&token=f0952d92-d37f-414c-bab0-edefb7598fbd";
+
   return (
     <View style={styles.container}>
-      <Image
-        source={icon}
-        style={[
-          styles.icon,
-          { tintColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY },
-        ]}
-      />
+      {!userDB?.photo && title === "Profile" ? (
+        <Image
+          // source={{uri: userDB?.photo}}
+          source={{ uri: imageURI }}
+          style={[
+            styles.icon,
+            {
+              borderRadius: 50,
+              borderWidth: 1,
+              borderColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY,
+              resizeMode: "cover",
+              width: 30,
+              height: 30,
+            },
+            // { tintColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY },
+          ]}
+        />
+      ) : (
+        <Image
+          source={icon}
+          style={[
+            styles.icon,
+            { tintColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY },
+          ]}
+        />
+      )}
       <Text
         style={[
           styles.text,

@@ -11,10 +11,11 @@ import {
   Alert,
   LayoutAnimation,
   Modal,
+  StatusBar,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
-import { MedsDB, Intake } from "@/constants/Types";
+import { MedsDB } from "@/constants/Types";
 import { format } from "date-fns";
 import { router } from "expo-router";
 import CustomHeader from "@/components/ui/CustomHeader";
@@ -28,7 +29,6 @@ const MedicationScreen = () => {
     string | null
   >(null);
   const [showModal, setShowModal] = useState(false);
-  const [currentItemId, setCurrentItemId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList<MedsDB> | null>(null);
   const animatedValues = useRef<{ [key: string]: Animated.Value }>({});
   const initialRender = useRef(false);
@@ -46,7 +46,7 @@ const MedicationScreen = () => {
     });
   }, [medications]);
 
-  const hanleDone = (id: string, remaining: number) => {
+  const handleDone = (id: string, remaining: number) => {
     Alert.alert(
       "🎉 Well done 🎉",
       `${
@@ -110,6 +110,7 @@ const MedicationScreen = () => {
 
     const handlePress = () => {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
       const newValue = selectedMedicationId === item.id ? 0 : 1;
       setSelectedMedicationId(
         item.id === selectedMedicationId ? null : item.id
@@ -134,10 +135,6 @@ const MedicationScreen = () => {
     let remaining =
       item.intake.length -
       item.intake.filter((intake) => intake.taken === true).length;
-
-    {
-      console.log(format(new Date(item.dateTime), "dd/MM/yyyy"));
-    }
 
     return (
       <View style={styles.medicationContainer}>
@@ -241,10 +238,9 @@ const MedicationScreen = () => {
                   type={"ICON"}
                   icon={"intake"}
                   iconColor={Colors.PRIMARY}
-                  onPress={() => (
-                    setShowModal(true), setCurrentItemId(item.id)
-                  )}
+                  onPress={() => setShowModal(!showModal)}
                 />
+
                 <Modal
                   visible={showModal}
                   transparent={true}
@@ -252,23 +248,66 @@ const MedicationScreen = () => {
                 >
                   <View style={styles.modalContainer}>
                     <View style={styles.modalStyle}>
-                      <Text style={styles.modalText}>
+                      <Text style={styles.modalTitle}>
                         Intakes for {item.name}
                       </Text>
+                      <View
+                        style={{ maxHeight: "80%", width: "100%", flex: 1 }}
+                      >
+                        <FlatList
+                          data={item.intake}
+                          keyExtractor={(item) => item.intakeId}
+                          contentContainerStyle={styles.modalIntake}
+                          renderItem={({ item }) => (
+                            <IntakeDetails
+                              intakeItem={item}
+                              medRef={item.intakeRef}
+                              type={"UNDO"}
+                            />
+                          )}
+                          ListHeaderComponent={
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                padding: 10,
+                              }}
+                            >
+                              <View style={styles.col1Modal}>
+                                <Text style={styles.modalTextDate}>Date</Text>
+                              </View>
+                              <View style={styles.col2Modal}>
+                                <Text style={styles.modalTextTime}>Time</Text>
+                              </View>
+                              <View style={styles.col3Modal}>
+                                <Text style={styles.modalTextStatus}>
+                                  Status
+                                </Text>
+                              </View>
+                            </View>
+                          }
+                        />
+                      </View>
 
                       <CustomButton
                         type="TERTIARY"
-                        text="Cancel"
-                        onPress={() => setShowModal(false)}
+                        text="Done"
+                        onPress={() => {
+                          setShowModal(!showModal);
+                        }}
                       />
                     </View>
+                    <StatusBar
+                      animated={true}
+                      backgroundColor="rgba(0, 0, 0, 0.25)"
+                    />
                   </View>
                 </Modal>
                 <CustomButton
                   type={"ICON"}
                   icon={"done"}
                   iconColor={Colors.TAKEN_OK}
-                  onPress={() => hanleDone(item.id, remaining)}
+                  onPress={() => handleDone(item.id, remaining)}
                 />
                 <CustomButton
                   type={"ICON"}
@@ -450,8 +489,19 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.25)",
   },
+  modalIntake: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    shadowColor: Colors.SHADOW,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: Colors.BORDERGRAY,
+    overflow: "hidden",
+  },
   modalStyle: {
-    minHeight: "50%",
+    height: "63%",
     backgroundColor: "#fff",
     width: "100%",
     justifyContent: "center",
@@ -460,7 +510,30 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
   },
-  modalText: {
+  modalTitle: {
+    paddingBottom: 20,
+    fontSize: Platform.OS === "ios" ? 16 : 18,
     fontFamily: "outfit",
+  },
+  modalTextDate: {
+    paddingLeft: "30%",
+    fontFamily: "outfit-medium",
+  },
+  modalTextTime: {
+    paddingLeft: "36%",
+    fontFamily: "outfit-medium",
+  },
+  modalTextStatus: {
+    paddingLeft: "26%",
+    fontFamily: "outfit-medium",
+  },
+  col1Modal: {
+    flex: 27,
+  },
+  col2Modal: {
+    flex: 48,
+  },
+  col3Modal: {
+    flex: 25,
   },
 });

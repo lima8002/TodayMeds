@@ -15,6 +15,7 @@ import { Colors } from "../../constants/Colors";
 import { MedsDB } from "@/constants/Types";
 import DatePicker from "react-native-date-picker";
 import CustomButton from "../ui/CustomButton";
+import { isValid } from "date-fns";
 
 interface MedicationFormProps {
   initialValues?: MedsDB;
@@ -31,15 +32,15 @@ function MedicationForm({
   const [frequency, setFrequency] = useState<number | null>(
     initialValues?.frequency || null
   );
-  const [dateTime, setDateTime] = useState<Date>(new Date());
+  const [dateTime, setDateTime] = useState<Date>(
+    initialValues?.dateTime ? new Date(initialValues.dateTime) : new Date()
+  );
   const [tmpDateTime, setTmpDateTime] = useState<Date>(new Date());
   const [quantity, setQuantity] = useState(initialValues?.quantity || "");
   const [withFoodWater, setWithFoodWater] = useState(
     initialValues?.withFoodWater || false
   );
-  const [formattedDT, setFormattedDT] = useState(
-    !!initialValues?.dateTime || ""
-  );
+  const [formattedDT, setFormattedDT] = useState(initialValues?.dateTime || "");
 
   const [selectedDosage, setSelectedDosage] = useState<string | null>(null);
   const [otherDosage, setOtherDosage] = useState<string | null>(null);
@@ -60,15 +61,34 @@ function MedicationForm({
   }, [initialValues]);
 
   const handleSubmit = () => {
-    console.log("dateTime " + dateTime);
     const finalDosage =
       selectedDosage === "Other" ? otherDosage : selectedDosage;
+    if (!name) {
+      alert("Please enter a medication name");
+      return;
+    }
+    if (finalDosage === null) {
+      alert("Please enter dosage per intake");
+      return;
+    }
+    if (frequency === null) {
+      alert("Please select a frequency");
+      return;
+    }
+    if (formattedDT === "") {
+      alert("Please select a date and time");
+      return;
+    }
+    if (!quantity) {
+      alert("Please enter a quantity");
+      return;
+    }
     const medicationData = {
       id: Date.now().toString(),
       name,
       dosage: finalDosage,
       frequency,
-      dateTime: dateTime,
+      dateTime: dateTime.toISOString(),
       quantity,
       withFoodWater,
       active: true,
@@ -263,25 +283,22 @@ function MedicationForm({
                   type="PRIMARY"
                   text="Confirm"
                   onPress={() => {
-                    setDateTime(tmpDateTime);
+                    if (isValid(tmpDateTime)) {
+                      setDateTime(tmpDateTime);
+                      setFormattedDT(
+                        tmpDateTime.toLocaleString("en-GB", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        })
+                      );
+                    } else {
+                      setFormattedDT("Invalid date");
+                    }
                     setTmpDateTime(new Date());
-                    setFormattedDT(
-                      dateTime.toLocaleString("en-GB", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                      })
-                    );
-                    {
-                      console.log("tmpDateTime " + tmpDateTime);
-                    }
-                    {
-                      console.log("dateTime " + dateTime);
-                    }
-
                     setShowDTPicker(false);
                   }}
                 />

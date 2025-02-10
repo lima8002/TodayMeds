@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Switch } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Switch,
+  Image,
+} from "react-native";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { onAddNewMedToDB } from "@/utils/FirebaseHelper";
 import { MedsDB } from "@/constants/Types";
@@ -8,11 +15,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomButton from "@/components/ui/CustomButton";
 import CustomHeader from "@/components/ui/CustomHeader";
 
+import Profile from "@/assets/icons/person90.png";
+import RandomPhoto from "@/assets/images/profile1.png";
+import RandomPhoto3 from "@/assets/images/pexels-olly-3763188.jpg";
+
 export default function ProfileScreen() {
   const {
     letUserSignOut,
     deleteMedication,
     user,
+    userDB,
     fetchMeds,
     autosave,
     setAutosave,
@@ -334,47 +346,108 @@ export default function ProfileScreen() {
     }
   };
 
-  // implement an option to reset the alert from taken
+  const imageURI =
+    "https://firebasestorage.googleapis.com/v0/b/chatdc-be5f6.appspot.com/o/profile1.png?alt=media&token=f0952d92-d37f-414c-bab0-edefb7598fbd";
 
   return (
     <View style={styles.container}>
       <CustomHeader title={"Profile"} />
-      <ScrollView
-        style={{
-          backgroundColor: Colors.BACKGROUND_200,
-          borderTopRightRadius: 20,
-          borderTopLeftRadius: 20,
-        }}
-      >
-        <View style={styles.containerBtn}>
-          <CustomButton
-            text="Delete all medicatons"
-            type="PRIMARY"
-            onPress={() => {
-              deleteMedication(user?.email || "");
-              fetchMeds(user?.email || "");
+      <ScrollView>
+        <View style={styles.containerProfile}>
+          <View
+            style={{
+              // paddingHorizontal: 20,
+              // paddingVertical: 10,
+              position: "absolute",
+              left: "4%",
+              top: "-20%",
             }}
-          />
-          <CustomButton
-            text="Load medicatons"
-            type="SECONDARY"
-            onPress={() => loadRandomData()}
-          />
-          <CustomButton
-            text="Delete all medicatons"
-            type="SECONDARY"
-            onPress={() => {}}
-          />
+          >
+            <Image
+              resizeMode="cover"
+              style={{
+                borderRadius: 50,
+                width: 100,
+                height: 100,
+                borderColor: Colors.BORDERDISABLED,
+                borderWidth: 2,
+              }}
+              // source={{ uri: imageURI }}
+              source={RandomPhoto}
+            />
+          </View>
+          <View
+            style={{
+              paddingTop: 10,
+              paddingLeft: "30%",
+            }}
+          >
+            <Text
+              style={[
+                styles.profileText,
+                { fontFamily: "outfit-bold", fontSize: 20 },
+              ]}
+            >
+              {userDB?.name}
+            </Text>
+            <Text style={styles.profileText}>Email: {userDB?.email}</Text>
+            <Text style={styles.profileText}>Date of Birth: {userDB?.dob}</Text>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-around",
+              padding: 10,
+            }}
+          >
+            <CustomButton
+              type={"ICON"}
+              icon={"edit"}
+              iconColor={Colors.PRIMARY}
+              otherStyles={{
+                width: "40%",
+                borderColor: Colors.PRIMARY,
+                borderWidth: 1,
+                padding: 5,
+                flexDirection: "row",
+              }}
+              onPress={() => {}}
+            />
+          </View>
         </View>
-        <View style={styles.switchContainer}>
-          <Text style={styles.switchText}>Enable Autosave</Text>
-          <Switch value={autosave} onValueChange={handleAutosaveSwitch} />
+        <View style={styles.containerBtn}>
+          <Text style={styles.title}>Settings</Text>
+          <View style={styles.switchContainer}>
+            <Text style={styles.switchText}>Enable Autosave</Text>
+            <Switch value={autosave} onValueChange={handleAutosaveSwitch} />
+          </View>
+          <View style={{ width: "60%", alignSelf: "center" }}>
+            <CustomButton
+              text="Delete all medicatons"
+              type="PRIMARY"
+              onPress={() => {
+                deleteMedication(user?.email || "");
+                fetchMeds(user?.email || "");
+              }}
+            />
+            <CustomButton
+              text="Load medicatons"
+              type="SECONDARY"
+              onPress={() => loadRandomData()}
+            />
+          </View>
         </View>
+
         <View style={[styles.signoutBtn, styles.shadow]}>
           <CustomButton
             text="Log Out"
             onPress={() => letUserSignOut()}
             type="SECONDARY"
+          />
+          <CustomButton
+            type="SECONDARY"
+            text="Delete Account"
+            onPress={() => {}}
           />
         </View>
       </ScrollView>
@@ -385,30 +458,46 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.BACKGROUND_100,
+    paddingHorizontal: 16,
+  },
+  containerProfile: {
+    flex: 1,
+    height: "40%",
+    flexDirection: "column",
+    backgroundColor: "white",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.BORDERDISABLED,
+    marginBottom: 10,
+    marginTop: 40,
+  },
+  profileText: {
+    fontFamily: "outfit",
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
   },
   containerBtn: {
     flex: 1,
     height: "40%",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
     backgroundColor: "white",
-    borderRadius: 16,
-    margin: 12,
-    paddingVertical: 12,
+    borderRadius: 8,
+    padding: 10,
     paddingBottom: 24,
   },
+
   title: {
-    fontSize: 24,
-    fontFamily: "outfit-bold",
+    fontSize: 18,
+    fontFamily: "outfit-medium",
     marginBottom: 20,
   },
   switchContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 20,
+    paddingHorizontal: 10,
+    paddingBottom: 5,
   },
   switchText: {
     fontFamily: "outfit",
@@ -417,7 +506,6 @@ const styles = StyleSheet.create({
   signoutBtn: {
     paddingTop: 20,
     marginHorizontal: 20,
-    height: "100%",
     alignItems: "center",
   },
   shadow: {
