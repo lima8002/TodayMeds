@@ -22,6 +22,7 @@ interface MedicationFormProps {
   onSubmit: (medication: any) => void;
   submitButtonText: string;
 }
+
 function MedicationForm({
   initialValues,
   onSubmit,

@@ -89,7 +89,7 @@ export const onAddNewUserToDB = async (
       dob: "",
       name: name,
       phone: "",
-      photo: "",
+      photo: false,
     });
     console.log("Document written with ID: ", docRef.id);
     return docRef;
@@ -162,10 +162,26 @@ export const onGetMedsByUser = async (email: string): Promise<MedsDB[]> => {
     return [];
   }
 };
+export const onUpdateUser = async (
+  email: string,
+  updatedUserData: Partial<UserDB>
+): Promise<void> => {
+  try {
+    const userDocRef = doc(
+      collection(FirebaseConfig.db, "users"),
+      email.toLowerCase()
+    );
+
+    await updateDoc(userDocRef, updatedUserData);
+    console.log("User data updated:", FirebaseConfig.auth.currentUser?.email);
+  } catch (error) {
+    console.error("Error updating user", error);
+  }
+};
 
 export const onUpdateMeds = async (
   medId: string,
-  updatedMedsData: MedsDB
+  updatedMedsData: Partial<MedsDB>
 ): Promise<void> => {
   try {
     const medRef = doc(FirebaseConfig.db, "medications", medId);

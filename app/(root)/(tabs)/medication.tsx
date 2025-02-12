@@ -16,11 +16,12 @@ import {
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { MedsDB } from "@/constants/Types";
-import { format } from "date-fns";
-import { router } from "expo-router";
+import { format, set } from "date-fns";
 import CustomHeader from "@/components/ui/CustomHeader";
 import CustomButton from "@/components/ui/CustomButton";
 import IntakeDetails from "@/components/meds/IntakeDetails";
+import EditMeds from "@/components/modals/EditMeds";
+import AddMeds from "@/components/modals/AddMeds";
 
 const MedicationScreen = () => {
   const { medications, updateMedication, deleteMedication, setScreenName } =
@@ -28,7 +29,10 @@ const MedicationScreen = () => {
   const [selectedMedicationId, setSelectedMedicationId] = useState<
     string | null
   >(null);
-  const [showModal, setShowModal] = useState(false);
+  const [modalIntakeVisible, setModalIntakeVisible] = useState<boolean>(false);
+  const [modalEditVisible, setModaEditVisible] = useState<boolean>(false);
+  const [modalAddVisible, setModalAddVisible] = useState<boolean>(false);
+  const [currentItemId, setCurrentItemId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList<MedsDB> | null>(null);
   const animatedValues = useRef<{ [key: string]: Animated.Value }>({});
   const initialRender = useRef(false);
@@ -238,11 +242,10 @@ const MedicationScreen = () => {
                   type={"ICON"}
                   icon={"intake"}
                   iconColor={Colors.PRIMARY}
-                  onPress={() => setShowModal(!showModal)}
+                  onPress={() => setModalIntakeVisible(!modalIntakeVisible)}
                 />
-
                 <Modal
-                  visible={showModal}
+                  visible={modalIntakeVisible}
                   transparent={true}
                   animationType="fade"
                 >
@@ -291,10 +294,10 @@ const MedicationScreen = () => {
 
                       <CustomButton
                         type="TERTIARY"
-                        text="Done"
-                        onPress={() => {
-                          setShowModal(!showModal);
-                        }}
+                        text="Cancel"
+                        onPress={() =>
+                          setModalIntakeVisible(!modalIntakeVisible)
+                        }
                       />
                     </View>
                     <StatusBar
@@ -313,10 +316,14 @@ const MedicationScreen = () => {
                   type={"ICON"}
                   icon={"edit"}
                   iconColor={Colors.PRIMARY}
-                  onPress={() => {
-                    router.push(`/${item.id}`);
-                  }}
+                  onPress={() => setModaEditVisible(!modalEditVisible)}
                 />
+                <EditMeds
+                  id={item.id}
+                  isVisible={modalEditVisible}
+                  onClose={() => setModaEditVisible(!modalEditVisible)}
+                />
+
                 <CustomButton
                   type={"ICON"}
                   icon={"delete"}
@@ -335,13 +342,14 @@ const MedicationScreen = () => {
     <View style={styles.container}>
       <CustomHeader title="Medication" />
       <TouchableOpacity
-        onPress={() => {
-          setScreenName("ADD2");
-          router.push("/add");
-        }}
+        onPress={() => setModalAddVisible(!modalAddVisible)}
         style={styles.addButton}
         activeOpacity={0.7}
       >
+        <AddMeds
+          isVisible={modalAddVisible}
+          onClose={() => setModalAddVisible(!modalAddVisible)}
+        />
         <Image
           source={require("@/assets/icons/plus.png")}
           style={styles.addImage}
@@ -501,7 +509,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   modalStyle: {
-    height: "63%",
+    minHeight: "50%",
     backgroundColor: "#fff",
     width: "100%",
     justifyContent: "center",
@@ -512,7 +520,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     paddingBottom: 20,
-    fontSize: Platform.OS === "ios" ? 16 : 18,
+    fontSize: Platform.OS === "ios" ? 17 : 19,
     fontFamily: "outfit",
   },
   modalTextDate: {

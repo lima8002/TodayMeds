@@ -6,6 +6,7 @@ import { Intake } from "@/constants/Types";
 import CustomHeader from "@/components/ui/CustomHeader";
 import DayCard from "@/components/meds/DayCard";
 import IntakeDetails from "@/components/meds/IntakeDetails";
+import EmptyAgenda from "@/components/ui/EmptyAgenda";
 
 // Still have to implement not active(finished medication) agenda
 
@@ -88,9 +89,9 @@ const AgendaScreen = () => {
         style={{ marginBottom: "10%" }}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <Text style={styles.emptyListText}>
-            No scheduled medications yet.
-          </Text>
+          <View style={{ paddingTop: "10%" }}>
+            <EmptyAgenda />
+          </View>
         }
       />
       <View style={{ marginBottom: Platform.OS === "ios" ? 38 : 56 }} />
@@ -131,12 +132,5 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "ios" ? "6%" : "7.8%",
     marginLeft: 10,
     color: Colors.PRIMARY,
-  },
-  emptyListText: {
-    textAlign: "center",
-    marginTop: 50,
-    fontSize: 16,
-    color: Colors.EMPTYLIST,
-    fontFamily: "outfit",
   },
 });

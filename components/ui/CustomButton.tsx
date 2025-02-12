@@ -39,8 +39,16 @@ const iconMap: {
 } = {
   done: { icon: require("../../assets/icons/tick.png"), title: "Done" },
   edit: { icon: require("../../assets/icons/edit.png"), title: "Edit" },
+  editP: {
+    icon: require("../../assets/icons/edit.png"),
+    title: "Edit Profile",
+  },
   delete: { icon: require("../../assets/icons/delete.png"), title: "Delete" },
   intake: { icon: require("../../assets/icons/calendar.png"), title: "Intake" },
+  gallery: {
+    icon: require("../../assets/icons/person.png"),
+    title: " Change Photo",
+  },
 };
 
 const CustomButton: React.FC<CustomButtonProps> = ({
@@ -202,7 +210,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+
     paddingHorizontal: 20,
     minWidth: "24%",
   },

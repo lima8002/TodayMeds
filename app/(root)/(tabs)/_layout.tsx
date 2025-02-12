@@ -1,12 +1,13 @@
 import { Tabs } from "expo-router";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { Colors } from "@/constants/Colors";
+import { useGlobalContext } from "@/context/GlobalProvider";
+import RNFS from "react-native-fs";
 
 import pills from "@/assets/icons/pills.png";
 import calendar from "@/assets/icons/calendar.png";
 import person from "@/assets/icons/person.png";
 import presc from "@/assets/icons/presc.png";
-import { useGlobalContext } from "@/context/GlobalProvider";
 
 const TabIcon = ({
   focused,
@@ -18,15 +19,12 @@ const TabIcon = ({
   title: string;
 }) => {
   const { userDB } = useGlobalContext();
-  const imageURI =
-    "https://firebasestorage.googleapis.com/v0/b/chatdc-be5f6.appspot.com/o/profile1.png?alt=media&token=f0952d92-d37f-414c-bab0-edefb7598fbd";
 
   return (
     <View style={styles.container}>
-      {!userDB?.photo && title === "Profile" ? (
+      {userDB?.photo && title === "Profile" ? (
         <Image
-          // source={{uri: userDB?.photo}}
-          source={{ uri: imageURI }}
+          source={{ uri: `${RNFS.DocumentDirectoryPath}/profileImage.jpg` }}
           style={[
             styles.icon,
             {
@@ -34,10 +32,9 @@ const TabIcon = ({
               borderWidth: 1,
               borderColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY,
               resizeMode: "cover",
-              width: 30,
-              height: 30,
+              width: 28,
+              height: 28,
             },
-            // { tintColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY },
           ]}
         />
       ) : (

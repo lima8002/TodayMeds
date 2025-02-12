@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Modal,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useGlobalContext } from "@/context/GlobalProvider";
@@ -13,15 +14,21 @@ import { Colors } from "@/constants/Colors";
 import { useRouter } from "expo-router";
 import MedicationForm from "@/components/meds/MedicationForm";
 import CustomHeader from "@/components/ui/CustomHeader";
-import { Route } from "expo-router/build/Route";
 
-const EditMedicationScreen = () => {
-  const router = useRouter();
-  const { id } = useLocalSearchParams();
+interface ModalProps {
+  id: string;
+  isVisible: boolean;
+  onClose: () => void;
+}
+
+function EditMeds({ id, isVisible, onClose }: ModalProps) {
   const { medications, updateMedication } = useGlobalContext();
   const [currentId] = useState<string>(id.toString());
   const medication = medications.find((med) => med.id === id);
 
+  const handleClose = () => {
+    onClose();
+  };
   const handleSubmit = (medicationData: any) => {
     updateMedication(currentId, medicationData);
     Alert.alert(
@@ -30,9 +37,7 @@ const EditMedicationScreen = () => {
       [
         {
           text: "OK",
-          onPress: () => {
-            router.dismissTo("/medication");
-          },
+          onPress: handleClose,
         },
       ]
     );
@@ -47,29 +52,37 @@ const EditMedicationScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <CustomHeader title="Edit Medication" />
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => {
-          router.dismissTo("/medication");
-        }}
-      >
-        <Image
-          source={require("@/assets/icons/xmark.png")}
-          style={styles.closeImage}
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={onClose}
+    >
+      <View style={styles.container}>
+        <CustomHeader title="Edit Medication" />
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => {
+            handleClose();
+          }}
+        >
+          <Image
+            source={require("@/assets/icons/xmark.png")}
+            style={styles.closeImage}
+          />
+        </TouchableOpacity>
+        <MedicationForm
+          initialValues={medication}
+          onSubmit={() => handleSubmit(medication)}
+          submitButtonText="Update Medication"
         />
-      </TouchableOpacity>
-      <MedicationForm
-        initialValues={medication}
-        onSubmit={() => handleSubmit(medication)}
-        submitButtonText="Update Medication"
-      />
-    </View>
+      </View>
+    </Modal>
   );
-};
+}
 
-export default EditMedicationScreen;
+export default EditMeds;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

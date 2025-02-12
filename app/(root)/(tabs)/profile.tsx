@@ -6,18 +6,21 @@ import {
   ScrollView,
   Switch,
   Image,
+  Platform,
+  Alert,
+  TextInput,
 } from "react-native";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { onAddNewMedToDB } from "@/utils/FirebaseHelper";
 import { MedsDB } from "@/constants/Types";
 import { Colors } from "@/constants/Colors";
+import { launchImageLibrary } from "react-native-image-picker";
+import RNFS from "react-native-fs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomButton from "@/components/ui/CustomButton";
 import CustomHeader from "@/components/ui/CustomHeader";
 
-import Profile from "@/assets/icons/person90.png";
-import RandomPhoto from "@/assets/images/profile1.png";
-import RandomPhoto3 from "@/assets/images/pexels-olly-3763188.jpg";
+import Profile from "@/assets/icons/person91.png";
 
 export default function ProfileScreen() {
   const {
@@ -29,6 +32,12 @@ export default function ProfileScreen() {
     autosave,
     setAutosave,
   } = useGlobalContext();
+  const [editEnabled, setEditEnabled] = useState(false);
+
+  const [name, setName] = useState<string>("");
+  const [dob, setDob] = useState<string>("");
+  const [photo, setPhoto] = useState<boolean>();
+  const [profileImage, setProfileImage] = useState<string>("");
 
   const handleAutosaveSwitch = async (newValue: boolean) => {
     try {
@@ -346,13 +355,85 @@ export default function ProfileScreen() {
     }
   };
 
-  const imageURI =
-    "https://firebasestorage.googleapis.com/v0/b/chatdc-be5f6.appspot.com/o/profile1.png?alt=media&token=f0952d92-d37f-414c-bab0-edefb7598fbd";
+  const pickImage = async () => {
+    launchImageLibrary(
+      {
+        mediaType: "photo",
+        includeBase64: true,
+        selectionLimit: 1,
+      },
+      async (response) => {
+        if (response.didCancel) {
+          console.log("User cancelled image picker");
+        } else if (response.errorMessage) {
+          console.error("ImagePicker Error: ", response.errorMessage);
+        } else if (response.assets && response.assets.length > 0) {
+          const imageUri = response.assets[0].uri;
+          const path = `${RNFS.DocumentDirectoryPath}/profileImage.jpg`;
+          try {
+            const exists = await RNFS.exists(path);
+            if (exists) {
+              await RNFS.unlink(path);
+              setProfileImage("");
+              console.log("Image deleted successfully");
+            }
+
+            if (!userDB?.photo) {
+              await RNFS.copyFile(imageUri?.toString() || "", path);
+              setProfileImage(path);
+              console.log("Image saved successfully");
+            }
+
+            // if (!exists) {
+            //   // setUserImageProfile(path);
+            //   console.log("Image saved successfully");
+            // }
+          } catch (error) {
+            console.error("Error saving image:", error);
+          }
+          // saveImageToLocalStorage(imageUri?.toString() || "");
+        }
+      }
+    );
+  };
+
+  // const saveImageToLocalStorage = async (imageUri: string) => {
+  //   const path = `${RNFS.DocumentDirectoryPath}/profileImage.jpg`;
+  //   try {
+  //     const exists = await RNFS.exists(path);
+  //     if (exists) {
+  //       deleteProfileImage();
+  //     }
+
+  //     if (!exists) {
+  //       await RNFS.copyFile(imageUri, path);
+  //       setUserImageProfile(path);
+  //       console.log("Image saved successfully");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error saving image:", error);
+  //   }
+  // };
+
+  // const deleteProfileImage = async () => {
+  //   const path = `${RNFS.DocumentDirectoryPath}/profileImage.jpg`;
+  //   try {
+  //     const exists = await RNFS.exists(path);
+  //     if (exists) {
+  //       await RNFS.unlink(path);
+  //       setUserImageProfile(null);
+  //       console.log("Image deleted successfully");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error deleting image:", error);
+  //   }
+  // };
 
   return (
     <View style={styles.container}>
       <CustomHeader title={"Profile"} />
-      <ScrollView>
+
+      <View style={{ flex: 1, marginTop: 40 }}>
         <View style={styles.containerProfile}>
           <View
             style={{
@@ -361,19 +442,36 @@ export default function ProfileScreen() {
               position: "absolute",
               left: "4%",
               top: "-20%",
+              // overflow: "hidden",
+              width: 100,
+              height: 100,
             }}
           >
             <Image
-              resizeMode="cover"
-              style={{
-                borderRadius: 50,
-                width: 100,
-                height: 100,
-                borderColor: Colors.BORDERDISABLED,
-                borderWidth: 2,
-              }}
-              // source={{ uri: imageURI }}
-              source={RandomPhoto}
+              style={
+                userDB?.photo
+                  ? {
+                      borderRadius: 100,
+                      width: 100,
+                      height: 100,
+                      borderColor: Colors.BORDERDISABLED,
+                      borderWidth: 2,
+                      resizeMode: "cover",
+                    }
+                  : {
+                      backgroundColor: "#fff",
+                      resizeMode: "stretch",
+                      width: "100%",
+                      height: "100%",
+                      borderWidth: 2,
+                      borderColor: Colors.BORDERDISABLED,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderRadius: 100,
+                      tintColor: Colors.BORDERDISABLED,
+                    }
+              }
+              source={userDB?.photo ? { uri: profileImage } : Profile}
             />
           </View>
           <View
@@ -382,39 +480,105 @@ export default function ProfileScreen() {
               paddingLeft: "30%",
             }}
           >
-            <Text
-              style={[
-                styles.profileText,
-                { fontFamily: "outfit-bold", fontSize: 20 },
-              ]}
-            >
-              {userDB?.name}
-            </Text>
-            <Text style={styles.profileText}>Email: {userDB?.email}</Text>
-            <Text style={styles.profileText}>Date of Birth: {userDB?.dob}</Text>
+            {editEnabled ? (
+              <>
+                <View style={{ flexDirection: "row" }}>
+                  <Text
+                    style={[
+                      styles.profileText,
+                      { fontFamily: "outfit-bold", fontSize: 20 },
+                    ]}
+                  >
+                    Name:
+                  </Text>
+                  <TextInput
+                    style={[
+                      styles.profileText,
+                      { fontFamily: "outfit-bold", fontSize: 20 },
+                      {
+                        backgroundColor: "#fff",
+                        width: "65%",
+                        borderRadius: 8,
+                      },
+                    ]}
+                    value={userDB?.name}
+                    onChangeText={setName}
+                  />
+                </View>
+                <View>
+                  <Text style={styles.profileText}>Email: {userDB?.email}</Text>
+                </View>
+                <View style={{ flexDirection: "row" }}>
+                  <Text style={styles.profileText}>Date of Birth:</Text>
+                  <TextInput
+                    style={[
+                      styles.profileText,
+                      {
+                        backgroundColor: "#fff",
+                        width: "52%",
+                        borderRadius: 8,
+                      },
+                    ]}
+                    value={userDB?.name}
+                    onChangeText={setName}
+                  />
+                </View>
+              </>
+            ) : (
+              <>
+                <Text
+                  style={[
+                    styles.profileText,
+                    { fontFamily: "outfit-bold", fontSize: 20 },
+                  ]}
+                >
+                  {userDB?.name}
+                </Text>
+                <Text style={styles.profileText}>Email: {userDB?.email}</Text>
+                <Text style={styles.profileText}>
+                  Date of Birth: {userDB?.dob ? userDB?.dob : "Not Entered"}
+                </Text>
+              </>
+            )}
           </View>
           <View
             style={{
               flexDirection: "row",
               justifyContent: "space-around",
-              padding: 10,
+              paddingTop: 10,
             }}
           >
             <CustomButton
               type={"ICON"}
-              icon={"edit"}
+              icon={"gallery"}
               iconColor={Colors.PRIMARY}
               otherStyles={{
                 width: "40%",
-                borderColor: Colors.PRIMARY,
-                borderWidth: 1,
                 padding: 5,
                 flexDirection: "row",
               }}
-              onPress={() => {}}
+              onPress={() => {
+                pickImage();
+              }}
+            />
+            <CustomButton
+              type={"ICON"}
+              icon={"editP"}
+              iconColor={Colors.PRIMARY}
+              otherStyles={{
+                width: "40%",
+
+                padding: 5,
+                flexDirection: "row",
+              }}
+              onPress={() => {
+                setEditEnabled(!editEnabled);
+              }}
             />
           </View>
         </View>
+      </View>
+      <ScrollView style={{ marginTop: -32 }}>
         <View style={styles.containerBtn}>
           <Text style={styles.title}>Settings</Text>
           <View style={styles.switchContainer}>
@@ -458,19 +622,19 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.BACKGROUND_100,
+    backgroundColor: "#fff",
     paddingHorizontal: 16,
   },
   containerProfile: {
-    flex: 1,
-    height: "40%",
+    flex: 0.8,
+    height: "20%",
     flexDirection: "column",
-    backgroundColor: "white",
+    backgroundColor: Colors.BACKGROUND_100,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: Colors.BORDERDISABLED,
-    marginBottom: 10,
-    marginTop: 40,
+    // marginBottom: -40,
+    // paddingBottom: 10,
   },
   profileText: {
     fontFamily: "outfit",
@@ -481,7 +645,7 @@ const styles = StyleSheet.create({
   containerBtn: {
     flex: 1,
     height: "40%",
-    backgroundColor: "white",
+    backgroundColor: Colors.BACKGROUND_100,
     borderRadius: 8,
     padding: 10,
     paddingBottom: 24,

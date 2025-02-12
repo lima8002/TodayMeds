@@ -2,7 +2,7 @@ export interface UserDB {
   email: string;
   name: string;
   dob: string;
-  photo: string;
+  photo: boolean;
 }
 
 export interface MedsDB {

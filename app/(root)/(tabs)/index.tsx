@@ -15,17 +15,20 @@ import { useGlobalContext } from "@/context/GlobalProvider";
 import { useRouter } from "expo-router";
 import DayCard from "@/components/meds/DayCard";
 import IntakeDetails from "@/components/meds/IntakeDetails";
+import EmptyMeds from "@/components/ui/EmptyMeds";
+import EmptyAgenda from "@/components/ui/EmptyAgenda";
+import AddMeds from "@/components/modals/AddMeds";
 
 const { width } = Dimensions.get("window");
 
 function MainScreen() {
   const router = useRouter();
   const [greeting, setGreeting] = useState<string | null>(null);
-  const { getAllIntakes, user, userDB, medications, setScreenName, fetchMeds } =
-    useGlobalContext();
+  const { getAllIntakes, user, userDB, medications } = useGlobalContext();
   const [todayIntakes, setTodayIntakes] = useState<Intake[]>([]);
   const [todayMeds, setTodayMeds] = useState<MedsDB[]>([]);
   const todayDate = new Date().getDate();
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
     const currentHour = new Date().getHours();
@@ -97,13 +100,14 @@ function MainScreen() {
       </View>
       <>
         <TouchableOpacity
-          onPress={() => {
-            setScreenName("ADD");
-            router.push("/add");
-          }}
+          onPress={() => setModalVisible(!modalVisible)}
           style={styles.addButton}
           activeOpacity={0.7}
         >
+          <AddMeds
+            isVisible={modalVisible}
+            onClose={() => setModalVisible(!modalVisible)}
+          />
           <Image
             source={require("@/assets/icons/plus.png")}
             style={styles.addImage}
@@ -117,25 +121,7 @@ function MainScreen() {
         contentContainerStyle={{
           paddingBottom: Platform.OS === "ios" ? 50 : 38,
         }}
-        ListEmptyComponent={
-          <View
-            style={[
-              styles.cardContainer,
-              styles.shadow,
-              { marginHorizontal: 16 },
-            ]}
-          >
-            <View style={styles.insideCardContainer}>
-              <Image
-                source={require("@/assets/images/no-meds.png")}
-                style={styles.image}
-              />
-              <Text style={styles.textCardContainer}>
-                No medications added yet
-              </Text>
-            </View>
-          </View>
-        }
+        ListEmptyComponent={<EmptyMeds />}
         ListHeaderComponent={
           <View style={styles.contentContainer}>
             <Text style={styles.textMainTitle}>Today's Agenda</Text>
@@ -144,19 +130,7 @@ function MainScreen() {
                 {todayIntakes.map(renderIntakeItem)}
               </View>
             ) : (
-              <View style={[styles.cardContainer, styles.shadow]}>
-                <View style={styles.insideCardContainer}>
-                  <DayCard
-                    day={new Date()
-                      .toLocaleDateString("en-US", { weekday: "short" })
-                      .toUpperCase()}
-                    date={new Date().getDate().toString()}
-                  />
-                  <Text style={styles.textCardContainer}>
-                    You have no scheduled for today
-                  </Text>
-                </View>
-              </View>
+              <EmptyAgenda />
             )}
 
             <Text style={[styles.textMainTitle, { marginBottom: -19 }]}>
