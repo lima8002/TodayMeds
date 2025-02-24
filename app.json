@@ -4,17 +4,24 @@
     "slug": "TodayMeds",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/app-icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.TodayMeds"
+      "bundleIdentifier": "com.anonymous.TodayMeds",
+      "icon": {
+        "light": "./assets/images/app-icon.png"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "monochromeImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.anonymous.TodayMeds"
@@ -22,17 +29,17 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/app-icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/icon.png",
-          "resizeMode": "containr",
-          "backgroundColor": "#ffffff",
-          "enableFullScreenImage_legacy": true
+          "image": "./assets/images/splash-icon-dark.png",
+          "resizeMode": "contain",
+          "imageWidth": 200,
+          "backgroundColor": "#ffffff"
         }
       ],
       [
@@ -43,6 +50,15 @@
             "./assets/fonts/Outfit-Bold.ttf",
             "./assets/fonts/Outfit-Medium.ttf"
           ]
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "enableBackgroundRemoteNotifications": false
         }
       ]
     ],

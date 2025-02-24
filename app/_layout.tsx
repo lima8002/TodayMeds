@@ -3,9 +3,44 @@ import { SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import GlobalProvider from "@/context/GlobalProvider";
+import * as Notifications from "expo-notifications";
 import "./global.css";
+import { Alert, Linking } from "react-native";
+import { setupNotificationCategories } from "@/utils/Notifications";
 
 SplashScreen.preventAutoHideAsync();
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
+
+async function requestPermissions(): Promise<void> {
+  const { status }: Notifications.PermissionResponse =
+    await Notifications.requestPermissionsAsync();
+  if (status !== "granted") {
+    Alert.alert(
+      "Notifications",
+      "You need to enable notifications for this app!",
+      [
+        {
+          text: "Go to Settings",
+          onPress: async () => {
+            await Linking.openSettings();
+          },
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
+    );
+  }
+}
 
 export default function RootLayout() {
   const [fontsLoaded, error] = useFonts({
@@ -21,10 +56,14 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, error]);
 
+  useEffect(() => {
+    requestPermissions();
+    setupNotificationCategories();
+  }, []);
+
   if (!fontsLoaded && !error) {
     return null;
   }
-
   return (
     <GlobalProvider>
       <Stack screenOptions={{ headerShown: false, animation: "fade" }} />

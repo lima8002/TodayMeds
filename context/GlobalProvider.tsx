@@ -8,17 +8,25 @@ import React, {
 import {
   AuthenticatedUser,
   SignOutUser,
-  onAddNewMedToDB,
+  onUpdateUser,
   onGetMedsByUser,
+  onAddNewMedToDB,
   onUpdateMeds,
   onDeleteMedById,
   onUpdateIntake,
   onDeleteMedByEmail,
   onGetUser,
+  onDeleteUserDB,
 } from "@/utils/FirebaseHelper";
 import { User } from "firebase/auth";
 import { Intake, MedsDB, UserDB } from "../constants/Types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
+import {
+  checkAndDeleteNotifications,
+  deleteAllNotifications,
+  scheduleNotifications,
+} from "@/utils/Notifications";
 
 interface GlobalContextType {
   isLoggedIn: boolean;
@@ -28,14 +36,22 @@ interface GlobalContextType {
   setUserDB: React.Dispatch<React.SetStateAction<UserDB | null>>;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  screenName: string;
-  setScreenName: (value: string) => void;
+  updateUser: (
+    userEmail: string,
+    updatedUser: Partial<UserDB>
+  ) => Promise<void>;
+  deleteUser: () => Promise<void>;
   letUserSignOut: () => Promise<void>;
   medications: MedsDB[];
   fetchMeds: (userEmail: string) => Promise<void>;
+  fetchUser: (userEmail: string) => Promise<void>;
   setMedications: React.Dispatch<React.SetStateAction<MedsDB[]>>;
   addMedication: (medication: Omit<MedsDB, "id" | "intake">) => Promise<void>;
-  updateMedication: (id: string, medication: Partial<MedsDB>) => Promise<void>;
+  updateMedication: (
+    id: string,
+    medication: Partial<MedsDB>,
+    newIntake?: string
+  ) => Promise<void>;
   updateIntake: (
     medicationId: string,
     intakeId: string,
@@ -46,6 +62,12 @@ interface GlobalContextType {
   getAllIntakes: () => Intake[];
   autosave: boolean;
   setAutosave: React.Dispatch<React.SetStateAction<boolean>>;
+  showQtLeft: boolean;
+  setShowQtLeft: React.Dispatch<React.SetStateAction<boolean>>;
+  showFindMedsT: boolean;
+  setShowFindMedsT: React.Dispatch<React.SetStateAction<boolean>>;
+  showFindMedsM: boolean;
+  setShowFindMedsM: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -59,9 +81,11 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userDB, setUserDB] = useState<UserDB | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [screenName, setScreenName] = useState<string>("");
   const [medications, setMedications] = useState<MedsDB[]>([]);
   const [autosave, setAutosave] = useState<boolean>(false);
+  const [showQtLeft, setShowQtLeft] = useState<boolean>(false);
+  const [showFindMedsT, setShowFindMedsT] = useState<boolean>(false);
+  const [showFindMedsM, setShowFindMedsM] = useState<boolean>(false);
 
   useEffect(() => {
     const unsubscribeAuth = AuthenticatedUser(async (authUser) => {
@@ -78,17 +102,29 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       setIsLoading(false);
     });
 
-    const getAutoValue = async () => {
+    const getSettingsValues = async () => {
       try {
-        const value = await AsyncStorage.getItem("Autosave");
+        let value = await AsyncStorage.getItem(`${user?.email}` + "-Autosave");
         if (value !== null) {
           setAutosave(value === "true");
+        }
+        value = await AsyncStorage.getItem(`${user?.email}` + "-ShowQtLeft");
+        if (value !== null) {
+          setShowQtLeft(value === "true");
+        }
+        value = await AsyncStorage.getItem(`${user?.email}` + "-ShowFindMedsT");
+        if (value !== null) {
+          setShowFindMedsT(value === "true");
+        }
+        value = await AsyncStorage.getItem(`${user?.email}` + "-ShowFindMedsM");
+        if (value !== null) {
+          setShowFindMedsM(value === "true");
         }
       } catch (error) {
         console.error("Error getting Autosave:", error);
       }
     };
-    getAutoValue();
+    getSettingsValues();
     return () => unsubscribeAuth();
   }, []);
 
@@ -103,9 +139,37 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const fetchUser = async (userEmail: string) => {
     try {
       const result = await onGetUser(userEmail);
-      setUserDB(result);
+      if (result !== null) {
+        setUserDB(result);
+      } else {
+        console.warn("No user found for email:", userEmail);
+      }
     } catch (error) {
       console.error("Error fetching medications:", error);
+    }
+  };
+
+  const updateUser = async (
+    userEmail: string,
+    updatedUser: Partial<UserDB>
+  ) => {
+    try {
+      const userToUpdate = userDB?.email === userEmail;
+      if (!userToUpdate) {
+        throw new Error("User not found");
+      }
+      await onUpdateUser(userEmail, updatedUser);
+      await fetchUser(userEmail);
+    } catch (error) {
+      console.error("Error updating user:", error);
+    }
+  };
+
+  const deleteUser = async () => {
+    try {
+      await onDeleteUserDB(user?.email || "");
+    } catch (error) {
+      console.error("Error updating user:", error);
     }
   };
 
@@ -124,15 +188,22 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       return;
     }
     try {
-      const newId = Date.now().toString();
+      const RefId = Date.now().toString();
       const newMedication: MedsDB = {
         ...medication,
-        id: newId,
-        email: user.email,
-        intakeRef: newId,
-        intake: calculateIntakeArray(medication, newId),
+        id: RefId,
+        email: user?.email,
+        intakeRef: RefId,
+        intake: calculateIntakeArray(medication, RefId),
       };
-      await onAddNewMedToDB(newMedication);
+      const docRef = await onAddNewMedToDB(newMedication);
+      if (docRef) {
+        const newMedicationWithId: MedsDB = {
+          ...newMedication,
+          id: docRef?.id,
+        };
+        await scheduleNotifications(newMedicationWithId);
+      }
       await fetchMeds(user.email);
     } catch (error) {
       console.error("Error adding medication:", error);
@@ -141,19 +212,20 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const calculateIntakeArray = (
     medication: Omit<MedsDB, "id" | "intake">,
-    newId: string
+    RefId: string
   ) => {
     const intake: Intake[] = [];
     const startDateTime = new Date(medication.dateTime);
     const frequencyHours = medication.frequency;
-    const totalDoses = parseInt(medication.quantity);
+    const totalDoses =
+      parseInt(medication.quantity) / parseInt(medication.dosage);
 
     for (let i = 0; i < totalDoses; i++) {
       const intakeDateTime = new Date(
         startDateTime.getTime() + i * frequencyHours * 60 * 60 * 1000
       );
       intake.push({
-        intakeRef: newId,
+        intakeRef: RefId,
         intakeId: i.toString(),
         dateTime: intakeDateTime.toISOString(),
         taken: false,
@@ -175,7 +247,8 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const updateMedication = async (
     id: string,
-    updatedMedication: Partial<MedsDB>
+    updatedMedication: Partial<MedsDB>,
+    newIntake?: string
   ) => {
     try {
       const medsToUpdate = medications.find((med) => med.id === id);
@@ -183,10 +256,21 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       if (!medsToUpdate) {
         throw new Error("Medication not found");
       }
+      if (newIntake === undefined || "") {
+        await onUpdateMeds(id, { ...medsToUpdate, ...updatedMedication });
+      } else {
+        const intake = calculateIntakeArray(
+          updatedMedication as MedsDB,
+          medsToUpdate.intakeRef
+        );
+        const updatedMedicationWithIntake: Partial<MedsDB> = {
+          ...updatedMedication,
+          intake: intake,
+        };
+        await onUpdateMeds(id, updatedMedicationWithIntake);
+        await scheduleNotifications(updatedMedicationWithIntake);
+      }
 
-      const mergedMedication = { ...medsToUpdate, ...updatedMedication };
-
-      await onUpdateMeds(id, mergedMedication);
       await fetchMeds(user?.email || "");
     } catch (error) {
       console.error("Error updating medication:", error);
@@ -199,7 +283,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     taken: boolean
   ) => {
     try {
-      await onUpdateIntake(medicationId, intakeId, taken); // Pass intakeId to FirebaseHelper function
+      await onUpdateIntake(medicationId, intakeId, taken);
       await fetchMeds(user?.email || "");
     } catch (error) {
       console.error("Error updating intake:", error);
@@ -208,6 +292,10 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const deleteMedication = async (id: string) => {
     try {
+      const notifitcationsToDelete = medications.find((med) => med.id === id);
+      if (notifitcationsToDelete) {
+        await checkAndDeleteNotifications(notifitcationsToDelete?.intakeRef);
+      }
       await onDeleteMedById(id);
       await fetchMeds(user?.email || "");
     } catch (error) {
@@ -218,6 +306,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const deleteAllMedication = async (id: string) => {
     try {
       await onDeleteMedByEmail(id);
+      await deleteAllNotifications();
       await fetchMeds(user?.email || "");
       setMedications([]);
     } catch (error) {
@@ -233,11 +322,12 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     setUserDB,
     isLoading,
     setIsLoading,
-    screenName,
-    setScreenName,
+    updateUser,
+    deleteUser,
     letUserSignOut,
     medications,
     fetchMeds,
+    fetchUser,
     setMedications,
     addMedication,
     updateMedication,
@@ -247,6 +337,12 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     getAllIntakes,
     autosave,
     setAutosave,
+    showQtLeft,
+    setShowQtLeft,
+    showFindMedsM,
+    setShowFindMedsM,
+    showFindMedsT,
+    setShowFindMedsT,
   };
 
   return (

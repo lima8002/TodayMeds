@@ -1,25 +1,59 @@
 import React from "react";
-import { Platform, Dimensions, StyleSheet, Text, View } from "react-native";
+import {
+  Platform,
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+  Linking,
+} from "react-native";
 import { Colors } from "@/constants/Colors";
 import DayCard from "../meds/DayCard";
+import CustomButton from "./CustomButton";
 
 const { width } = Dimensions.get("window");
 
-const EmptyAgenda = () => {
+interface EmptyAgendaProps {
+  screenOptions?: string | undefined;
+}
+
+const EmptyAgenda: React.FC<EmptyAgendaProps> = ({ screenOptions }) => {
   return (
-    <View style={[styles.cardContainer, styles.shadow]}>
-      <View style={styles.insideCardContainer}>
-        <DayCard
-          day={new Date()
-            .toLocaleDateString("en-US", { weekday: "short" })
-            .toUpperCase()}
-          date={new Date().getDate().toString()}
-        />
-        <Text style={styles.textCardContainer}>
-          You have no scheduled for today
-        </Text>
+    <>
+      <View style={[styles.cardContainer, styles.shadow]}>
+        <View style={styles.insideCardContainer}>
+          <DayCard
+            day={new Date()
+              .toLocaleDateString("en-US", { weekday: "short" })
+              .toUpperCase()}
+            date={new Date().getDate().toString()}
+          />
+          <Text style={styles.textCardContainer}>
+            You have no scheduled for today
+          </Text>
+        </View>
       </View>
-    </View>
+      {screenOptions === "agenda" && (
+        <View style={styles.button}>
+          <CustomButton
+            type="ICON"
+            icon={"locationT"}
+            iconColor={Colors.TAKEN_200}
+            onPress={() => {
+              Linking.openURL(
+                "https://www.google.com/maps/search/?api=1&query=pharmacy+near+me"
+              ).catch((err) => console.error("An error occurred", err));
+            }}
+            otherStyles={{
+              width: "45%",
+              flexDirection: "row",
+              borderWidth: 1,
+              borderColor: Colors.TEXT_100,
+            }}
+          />
+        </View>
+      )}
+    </>
   );
 };
 
@@ -35,6 +69,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: Colors.BORDERGRAY,
+    height: 200,
   },
   insideCardContainer: {
     marginTop: 25,
@@ -46,7 +81,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: Platform.OS === "ios" ? 16 : 18,
     color: "#000000",
-    paddingTop: 20,
+    paddingTop: 35,
     fontFamily: "outfit",
     opacity: Platform.OS === "ios" ? 0.3 : 0.4,
   },
@@ -54,6 +89,10 @@ const styles = StyleSheet.create({
     width: width * 0.5,
     height: width * 0.5,
     opacity: 0.35,
+  },
+  button: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
   },
   shadow: {
     ...(Platform.OS === "android"

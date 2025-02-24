@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Redirect, useRouter } from "expo-router";
@@ -26,14 +28,22 @@ interface SignInFormData {
 const SignIn: React.FC = () => {
   const router = useRouter();
   const { isLoading, isLoggedIn } = useGlobalContext();
+  const [isModalLoading, setModalIsLoading] = useState<boolean>(false);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
     reset,
-    setValue,
   } = useForm<SignInFormData>();
+
+  const onSignInPressed: SubmitHandler<SignInFormData> = (data) => {
+    setModalIsLoading(true);
+    SignInUser(data.email, data.password);
+    setTimeout(() => {
+      setModalIsLoading(false);
+    }, 500);
+  };
 
   if (!isLoading && isLoggedIn) {
     return <Redirect href="/" />;
@@ -45,17 +55,10 @@ const SignIn: React.FC = () => {
           style={styles.keyboardAvoidingView}
         >
           <View style={styles.containerLogo}>
-            <TouchableOpacity
-              onPress={() => {
-                setValue("email", "123@123.com");
-                setValue("password", "password");
-              }}
-            >
-              <Image
-                source={require("@/assets/images/logo.png")}
-                style={[styles.shadow, styles.imageLogo]}
-              />
-            </TouchableOpacity>
+            <Image
+              source={require("@/assets/images/logo.png")}
+              style={[styles.shadow, styles.imageLogo]}
+            />
             <Text style={styles.textLogo}>TodayMeds</Text>
 
             <CustomInput
@@ -102,14 +105,19 @@ const SignIn: React.FC = () => {
               type="TERTIARY"
             />
           </View>
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={isModalLoading}
+          >
+            <View style={styles.modal}>
+              <ActivityIndicator size="small" color={Colors.PRIMARY} />
+            </View>
+          </Modal>
         </KeyboardAvoidingView>
       </ScrollView>
     );
   }
-};
-
-const onSignInPressed: SubmitHandler<SignInFormData> = (data) => {
-  SignInUser(data.email, data.password);
 };
 
 export default SignIn;
@@ -152,5 +160,10 @@ const styles = StyleSheet.create({
     textShadowColor: Colors.SHADOW,
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 5,
+  },
+  modal: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "#00000040",
   },
 });

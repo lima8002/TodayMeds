@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, FlatList, Platform } from "react-native";
+import { View, Text, StyleSheet, SectionList, Platform } from "react-native";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { Colors } from "@/constants/Colors";
 import { Intake } from "@/constants/Types";
@@ -7,8 +7,6 @@ import CustomHeader from "@/components/ui/CustomHeader";
 import DayCard from "@/components/meds/DayCard";
 import IntakeDetails from "@/components/meds/IntakeDetails";
 import EmptyAgenda from "@/components/ui/EmptyAgenda";
-
-// Still have to implement not active(finished medication) agenda
 
 const AgendaScreen = () => {
   const { getAllIntakes, medications } = useGlobalContext();
@@ -26,75 +24,73 @@ const AgendaScreen = () => {
 
     return Object.entries(grouped)
       .map(([date, intakes]) => ({
-        date,
-        intakes,
+        title: date,
+        data: intakes,
       }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .sort(
+        (a, b) => new Date(a.title).getTime() - new Date(b.title).getTime()
+      );
   };
 
   const groupedIntakes = groupIntakes(allIntakes);
 
-  const renderIntakeItem = (item: Intake) => (
+  const renderSectionHeader = ({
+    section,
+  }: {
+    section: { title: string; data: Intake[] };
+  }) => {
+    const date = new Date(section.title);
+    const day = date
+      .toLocaleDateString("en-US", { weekday: "short" })
+      .toUpperCase();
+    const dateNum = date.getDate();
+    const remaining =
+      section.data.length -
+      section.data.filter((intake) => intake.taken).length;
+
+    return (
+      <View style={styles.headerContainer}>
+        <View style={styles.dateContainer}>
+          <DayCard day={day} date={dateNum.toString()} />
+          {remaining === 0 ? (
+            <Text style={[styles.cardTitle, { color: Colors.LOGO_BACKGROUND }]}>
+              All done!
+            </Text>
+          ) : (
+            <Text style={styles.cardTitle}>
+              You have {remaining} intake
+              {remaining === 1 ? " " : "s "}
+              remaining
+            </Text>
+          )}
+        </View>
+      </View>
+    );
+  };
+
+  const renderSectionContent = ({ item }: { item: Intake }) => (
     <IntakeDetails
       intakeItem={item}
       medRef={item.intakeRef}
       key={item.intakeRef + item.dateTime}
     />
   );
-
-  const renderDayCard = ({
-    item,
-  }: {
-    item: { date: string; intakes: Intake[] };
-  }) => {
-    const date = new Date(item.date);
-    const day = date
-      .toLocaleDateString("en-US", { weekday: "short" })
-      .toUpperCase();
-    const dateNum = date.getDate();
-    const remaing =
-      item.intakes.length -
-      item.intakes.filter((intake) => intake.taken).length;
-
-    return (
-      <>
-        <View style={styles.dateContainer}>
-          <DayCard day={day} date={dateNum.toString()} />
-          {remaing === 0 ? (
-            <Text style={[styles.cardTitle, { color: Colors.LOGO_BACKGROUND }]}>
-              All done!
-            </Text>
-          ) : (
-            <Text style={styles.cardTitle}>
-              You have {remaing} intake
-              {remaing === 1 ? " " : "s "}
-              remaing
-            </Text>
-          )}
-        </View>
-        <View style={styles.cardContainer}>
-          {item.intakes.map(renderIntakeItem)}
-        </View>
-      </>
-    );
-  };
-
   return (
     <View style={styles.container}>
       <CustomHeader title="Agenda" />
-      <FlatList
-        data={groupedIntakes}
-        renderItem={renderDayCard}
-        keyExtractor={(item) => item.date}
-        style={{ marginBottom: "10%" }}
+      <SectionList
+        sections={groupedIntakes}
+        renderSectionHeader={renderSectionHeader}
+        renderItem={renderSectionContent}
+        keyExtractor={(item, index) => item.intakeRef + index.toString()}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={{ paddingTop: "10%" }}>
-            <EmptyAgenda />
+            <EmptyAgenda screenOptions="agenda" />
           </View>
         }
       />
-      <View style={{ marginBottom: Platform.OS === "ios" ? 38 : 56 }} />
+      <View style={{ marginBottom: "12%" }} />
     </View>
   );
 };
@@ -108,7 +104,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingBottom: 60,
   },
   cardContainer: {
     flex: 1,
@@ -120,11 +116,21 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.BACKGROUND_100,
     marginBottom: 10,
   },
+  headerContainer: {
+    backgroundColor: Colors.BACKGROUND_100,
+    // backgroundColor: "#fff",
+    paddingTop: 5,
+    borderRadius: 8,
+    // borderWidth: 1,
+    borderColor: Colors.BORDERDISABLED,
+    borderBottomWidth: 1,
+    marginBottom: 8,
+  },
   dateContainer: {
     flex: 1,
     flexDirection: "row",
     paddingHorizontal: 10,
-    paddingBottom: 10,
+    paddingBottom: 5,
   },
   cardTitle: {
     fontFamily: "outfit-medium",

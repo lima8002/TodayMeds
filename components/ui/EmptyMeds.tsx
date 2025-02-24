@@ -6,24 +6,50 @@ import {
   Image,
   Platform,
   Dimensions,
+  Linking,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
+import CustomButton from "./CustomButton";
 
 const { width } = Dimensions.get("window");
 
-const EmptyMeds = () => {
+interface EmptyMedsProps {
+  screenOptions?: string | undefined;
+}
+
+const EmptyMeds: React.FC<EmptyMedsProps> = ({ screenOptions }) => {
   return (
-    <View
-      style={[styles.cardContainer, styles.shadow, { marginHorizontal: 16 }]}
-    >
-      <View style={styles.insideCardContainer}>
-        <Image
-          source={require("@/assets/images/no-meds.png")}
-          style={styles.image}
-        />
-        <Text style={styles.textCardContainer}>No medications added yet</Text>
+    <>
+      <View style={[styles.cardContainer, styles.shadow]}>
+        <View style={styles.insideCardContainer}>
+          <Image
+            source={require("@/assets/images/no-meds.png")}
+            style={styles.image}
+          />
+          <Text style={styles.textCardContainer}>No medications added yet</Text>
+        </View>
       </View>
-    </View>
+      {screenOptions === "meds" && (
+        <View style={styles.button}>
+          <CustomButton
+            type="ICON"
+            icon={"locationT"}
+            iconColor={Colors.TAKEN_200}
+            onPress={() => {
+              Linking.openURL(
+                "https://www.google.com/maps/search/?api=1&query=pharmacy+near+me"
+              ).catch((err) => console.error("An error occurred", err));
+            }}
+            otherStyles={{
+              width: "45%",
+              flexDirection: "row",
+              borderWidth: 1,
+              borderColor: Colors.TEXT_100,
+            }}
+          />
+        </View>
+      )}
+    </>
   );
 };
 
@@ -51,6 +77,7 @@ const styles = StyleSheet.create({
     fontSize: Platform.OS === "ios" ? 16 : 18,
     color: "#000000",
     paddingTop: 20,
+    paddingBottom: 15,
     fontFamily: "outfit",
     opacity: Platform.OS === "ios" ? 0.3 : 0.4,
   },
@@ -58,6 +85,10 @@ const styles = StyleSheet.create({
     width: width * 0.5,
     height: width * 0.5,
     opacity: 0.35,
+  },
+  button: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
   },
   shadow: {
     ...(Platform.OS === "android"

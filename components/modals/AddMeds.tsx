@@ -12,6 +12,7 @@ import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import CustomHeader from "@/components/ui/CustomHeader";
 import MedicationForm from "@/components/meds/MedicationForm";
+import { StatusBar } from "expo-status-bar";
 
 interface ModalProps {
   isVisible: boolean;
@@ -65,6 +66,7 @@ function AddMeds({ isVisible, onClose }: ModalProps) {
           submitButtonText="Add Medication"
         />
       </View>
+      <StatusBar hidden={true} />
     </Modal>
   );
 }

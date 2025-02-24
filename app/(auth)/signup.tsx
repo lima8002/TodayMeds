@@ -43,6 +43,7 @@ const SignUp: React.FC = () => {
     setIsLoggedIn(true);
     setTimeout(() => {
       router.replace("/");
+      setModalIsLoading(false);
     }, 500);
   };
 

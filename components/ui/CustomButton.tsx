@@ -29,6 +29,7 @@ interface CustomButtonProps {
   otherTextStyles?: TextStyle;
   icon?: string;
   iconColor?: string;
+  disabled?: boolean;
 }
 
 const iconMap: {
@@ -44,10 +45,26 @@ const iconMap: {
     title: "Edit Profile",
   },
   delete: { icon: require("../../assets/icons/delete.png"), title: "Delete" },
+  deleteM: {
+    icon: require("../../assets/icons/delete.png"),
+    title: "Delete Medications",
+  },
+  loadM: {
+    icon: require("../../assets/icons/presc.png"),
+    title: "Load Medications",
+  },
   intake: { icon: require("../../assets/icons/calendar.png"), title: "Intake" },
   gallery: {
     icon: require("../../assets/icons/person.png"),
     title: " Change Photo",
+  },
+  location: {
+    icon: require("../../assets/icons/location.png"),
+    title: "Find",
+  },
+  locationT: {
+    icon: require("../../assets/icons/location.png"),
+    title: "FindMeds",
   },
 };
 
@@ -61,6 +78,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   otherTextStyles,
   icon,
   iconColor,
+  disabled,
 }) => {
   return (
     <TouchableOpacity
@@ -68,9 +86,12 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       style={[
         type === "TAKEN" ? null : styles.container,
         styles[`container_${type}`],
+        // styles.shadow,
         bgColor ? { backgroundColor: bgColor } : {},
         otherStyles,
+        disabled && styles.disabledContainer,
       ]}
+      disabled={disabled}
     >
       {icon && (
         <>
@@ -88,6 +109,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
             styles[`text_${type}` as keyof typeof styles],
             fgColor ? { color: fgColor } : {},
             otherTextStyles,
+            disabled && styles.disabledText,
           ]}
         >
           {text}
@@ -187,16 +209,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.TAKEN_100,
     borderRadius: 8,
-    // ...(Platform.OS === "android"
-    //   ? {
-    //       elevation: 3,
-    //     }
-    //   : {
-    //       shadowColor: "#000",
-    //       shadowOffset: { width: 0, height: 2 },
-    //       shadowOpacity: 0.2,
-    //       shadowRadius: 4,
-    //     }),
   },
   text_TAKEN: {
     fontFamily: "outfit-bold",
@@ -210,9 +222,8 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-
     paddingHorizontal: 20,
-    minWidth: "24%",
+    minWidth: "10%",
   },
   text_ICON: {
     fontFamily: "outfit",
@@ -229,5 +240,23 @@ const styles = StyleSheet.create({
     fontFamily: "outfit",
     fontSize: 14,
     paddingTop: 2,
+  },
+  disabledContainer: {
+    opacity: 0.5,
+  },
+  disabledText: {
+    color: Colors.GRAY,
+  },
+  shadow: {
+    ...(Platform.OS === "android"
+      ? {
+          elevation: 3,
+        }
+      : {
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+        }),
   },
 });

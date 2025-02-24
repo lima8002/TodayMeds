@@ -8,12 +8,11 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { Colors } from "@/constants/Colors";
-import { useRouter } from "expo-router";
 import MedicationForm from "@/components/meds/MedicationForm";
 import CustomHeader from "@/components/ui/CustomHeader";
+import { StatusBar } from "expo-status-bar";
 
 interface ModalProps {
   id: string;
@@ -23,14 +22,55 @@ interface ModalProps {
 
 function EditMeds({ id, isVisible, onClose }: ModalProps) {
   const { medications, updateMedication } = useGlobalContext();
+  const [needNewIntake, setNeedNewIntake] = useState<boolean>(false);
   const [currentId] = useState<string>(id.toString());
   const medication = medications.find((med) => med.id === id);
+
+  if (!medication) {
+    return (
+      <View>
+        <Text>Medication not found</Text>
+      </View>
+    );
+  }
 
   const handleClose = () => {
     onClose();
   };
-  const handleSubmit = (medicationData: any) => {
-    updateMedication(currentId, medicationData);
+
+  const handleUpdateMedication = (medicationData: any) => {
+    if (
+      medication.dosage !== medicationData.dosage ||
+      medication.frequency !== medicationData.frequency ||
+      medication.dateTime !== medicationData.dateTime ||
+      medication.quantity !== medicationData.quantity
+    ) {
+      showAlertNewIntake(medicationData);
+    } else {
+      updateMedication(currentId, medicationData);
+      showAlertMedUpdated();
+    }
+  };
+
+  const handleCreateNewIntake = (medicationData: any) => {
+    updateMedication(currentId, medicationData, "newIntake");
+    showAlertMedUpdated();
+  };
+
+  const showAlertNewIntake = (medicationData: any) => {
+    Alert.alert(
+      "New Intake Required",
+      "If you taken any medication, make sure to update your intake.",
+      [
+        {
+          text: "OK",
+          onPress: () => handleCreateNewIntake(medicationData),
+        },
+      ]
+    );
+  };
+
+  const showAlertMedUpdated = () => {
     Alert.alert(
       "Medication Updated",
       "Your medication has been successfully Updated!",
@@ -42,14 +82,6 @@ function EditMeds({ id, isVisible, onClose }: ModalProps) {
       ]
     );
   };
-
-  if (!medication) {
-    return (
-      <View>
-        <Text>Medication not found</Text>
-      </View>
-    );
-  }
 
   return (
     <Modal
@@ -73,10 +105,11 @@ function EditMeds({ id, isVisible, onClose }: ModalProps) {
         </TouchableOpacity>
         <MedicationForm
           initialValues={medication}
-          onSubmit={() => handleSubmit(medication)}
+          onSubmit={handleUpdateMedication}
           submitButtonText="Update Medication"
         />
       </View>
+      <StatusBar hidden={true} />
     </Modal>
   );
 }

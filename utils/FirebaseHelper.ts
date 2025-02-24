@@ -88,30 +88,12 @@ export const onAddNewUserToDB = async (
       email: email.toLowerCase(),
       dob: "",
       name: name,
-      phone: "",
-      photo: false,
+      photo: "",
     });
     console.log("Document written with ID: ", docRef.id);
     return docRef;
   } catch (e) {
     console.error("Error adding document: ", e);
-    return null;
-  }
-};
-
-export const onAddNewMedToDB = async (
-  medsData: MedsDB
-): Promise<DocumentReference | null> => {
-  try {
-    console.log("medsData", medsData);
-    const docRef = await addDoc(
-      collection(FirebaseConfig.db, "medications"),
-      medsData
-    );
-    console.log("Medication added with ID: ", docRef.id);
-    return docRef;
-  } catch (e) {
-    console.error("Error adding medication: ", e);
     return null;
   }
 };
@@ -134,6 +116,45 @@ export const onGetUser = async (email: string): Promise<UserDB | null> => {
     }
   } catch (error) {
     console.error("Error getting user:", error);
+    return null;
+  }
+};
+
+export const onUpdateUser = async (
+  email: string,
+  updatedUserData: Partial<UserDB>
+): Promise<void> => {
+  try {
+    const userDoc = query(
+      collection(FirebaseConfig.db, "users"),
+      where("email", "==", email.toLowerCase()),
+      limit(1)
+    );
+    const userSnap = await getDocs(userDoc);
+    if (userSnap) {
+      const userDocRef = doc(
+        collection(FirebaseConfig.db, "users"),
+        userSnap.docs[0].id
+      );
+      await updateDoc(userDocRef, updatedUserData);
+    }
+  } catch (error) {
+    console.error("Error updating user", error);
+  }
+};
+
+export const onAddNewMedToDB = async (
+  medsData: MedsDB
+): Promise<DocumentReference | null> => {
+  try {
+    const docRef = await addDoc(
+      collection(FirebaseConfig.db, "medications"),
+      medsData
+    );
+    console.log("Medication added with ID: ", docRef.id);
+    return docRef;
+  } catch (e) {
+    console.error("Error adding medication: ", e);
     return null;
   }
 };
@@ -162,31 +183,20 @@ export const onGetMedsByUser = async (email: string): Promise<MedsDB[]> => {
     return [];
   }
 };
-export const onUpdateUser = async (
-  email: string,
-  updatedUserData: Partial<UserDB>
-): Promise<void> => {
-  try {
-    const userDocRef = doc(
-      collection(FirebaseConfig.db, "users"),
-      email.toLowerCase()
-    );
-
-    await updateDoc(userDocRef, updatedUserData);
-    console.log("User data updated:", FirebaseConfig.auth.currentUser?.email);
-  } catch (error) {
-    console.error("Error updating user", error);
-  }
-};
 
 export const onUpdateMeds = async (
   medId: string,
   updatedMedsData: Partial<MedsDB>
-): Promise<void> => {
+) => {
   try {
     const medRef = doc(FirebaseConfig.db, "medications", medId);
     await updateDoc(medRef, updatedMedsData);
     console.log("Medication updated:", medId);
+    const medWithId: Partial<MedsDB> = {
+      ...updatedMedsData,
+      id: medRef.id,
+    };
+    return medWithId;
   } catch (error) {
     console.error("Error updating medication:", error);
   }
@@ -210,9 +220,8 @@ export const onUpdateIntake = async (
         throw new Error("Medication not found in database");
       }
       const medData = medSnap.data() as MedsDB;
-      const updatedIntakes = medData.intake.map(
-        (intake) =>
-          intake.intakeId === intakeId ? { ...intake, taken } : intake // Use intakeId for matching
+      const updatedIntakes = medData.intake.map((intake) =>
+        intake.intakeId === intakeId ? { ...intake, taken } : intake
       );
       transaction.update(medDoc, { intake: updatedIntakes });
     });

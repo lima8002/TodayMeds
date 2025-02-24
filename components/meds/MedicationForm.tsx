@@ -13,9 +13,9 @@ import { Picker } from "@react-native-picker/picker";
 import { Checkbox } from "react-native-paper";
 import { Colors } from "../../constants/Colors";
 import { MedsDB } from "@/constants/Types";
+import { isValid } from "date-fns";
 import DatePicker from "react-native-date-picker";
 import CustomButton from "../ui/CustomButton";
-import { isValid } from "date-fns";
 
 interface MedicationFormProps {
   initialValues?: MedsDB;
@@ -29,7 +29,6 @@ function MedicationForm({
   submitButtonText,
 }: MedicationFormProps) {
   const [name, setName] = useState(initialValues?.name || "");
-  const [dosage, setDosage] = useState(initialValues?.dosage || "");
   const [frequency, setFrequency] = useState<number | null>(
     initialValues?.frequency || null
   );
@@ -58,12 +57,12 @@ function MedicationForm({
         setOtherDosage(initialValues.dosage);
       }
     }
-    console.log(initialValues);
   }, [initialValues]);
 
   const handleSubmit = () => {
     const finalDosage =
       selectedDosage === "Other" ? otherDosage : selectedDosage;
+
     if (!name) {
       alert("Please enter a medication name");
       return;

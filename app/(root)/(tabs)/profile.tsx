@@ -6,63 +6,96 @@ import {
   ScrollView,
   Switch,
   Image,
-  Platform,
   Alert,
-  TextInput,
+  TouchableOpacity,
+  Platform,
 } from "react-native";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { onAddNewMedToDB } from "@/utils/FirebaseHelper";
 import { MedsDB } from "@/constants/Types";
 import { Colors } from "@/constants/Colors";
 import { launchImageLibrary } from "react-native-image-picker";
+import { format, parseISO } from "date-fns";
+import { ProgressBar } from "react-native-paper";
 import RNFS from "react-native-fs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomButton from "@/components/ui/CustomButton";
 import CustomHeader from "@/components/ui/CustomHeader";
-
-import Profile from "@/assets/icons/person91.png";
+import EditProfileModal from "@/components/modals/EditProfileModal";
+import Profile from "@/assets/icons/person90.png";
 
 export default function ProfileScreen() {
   const {
     letUserSignOut,
-    deleteMedication,
+    deleteAllMedication,
     user,
     userDB,
+    medications,
     fetchMeds,
     autosave,
     setAutosave,
+    updateUser,
+    showQtLeft,
+    setShowQtLeft,
+    showFindMedsM,
+    setShowFindMedsM,
+    showFindMedsT,
+    setShowFindMedsT,
+    deleteUser,
   } = useGlobalContext();
-  const [editEnabled, setEditEnabled] = useState(false);
+  const [editEnabled, setEditEnabled] = useState<boolean>(false);
+  const path = `${Platform.OS === "android" && "file://"}${
+    RNFS.DocumentDirectoryPath
+  }/profileImage.jpg`;
 
-  const [name, setName] = useState<string>("");
-  const [dob, setDob] = useState<string>("");
-  const [photo, setPhoto] = useState<boolean>();
-  const [profileImage, setProfileImage] = useState<string>("");
+  const [name, setName] = useState<string>(userDB?.name || "");
+  const [dob, setDob] = useState<string>(userDB?.dob || "");
+  const [photo, setPhoto] = useState<string>("");
+  const [profilePhotoExists, setProfilePhotoExists] = useState<boolean>();
+  const [selectedDate, setSelectedDate] = useState(
+    (userDB?.dob && userDB?.dob.length > 0 && parseISO(userDB?.dob)) ||
+      new Date()
+  );
+  const [loadDisabled, setLoadDisabled] = useState<boolean>(false);
+  const [deleteDisabled, setDeleteDisabled] = useState<boolean>(true);
 
-  const handleAutosaveSwitch = async (newValue: boolean) => {
-    try {
-      setAutosave(newValue);
-      if (newValue) {
-        await AsyncStorage.setItem("Autosave", "true");
-        console.log("Autosave enabled");
-      } else {
-        await AsyncStorage.removeItem("Autosave");
-        console.log("Autosave disabled");
-      }
-    } catch (error) {
-      console.error("Error getting Autosave:", error);
+  useEffect(() => {
+    const checkIfLoaded = medications.some((medication) =>
+      ["Lisinopril", "Metformin", "Atorvastatin", "Amoxicillin"].includes(
+        medication.name
+      )
+    );
+
+    if (checkIfLoaded) {
+      setLoadDisabled(true);
+      setDeleteDisabled(false);
     }
-  };
+  }, [medications]);
 
   const loadRandomData = async () => {
+    const initialDate = new Date();
+    const initialDate1 = new Date();
+    const initialDate2 = new Date();
+    const initialDate3 = new Date();
+
+    // const initialDate = new Date("2023-05-24T03:06:50.000Z");
+    // const initialDate1 = new Date("2023-05-24T03:06:50.000Z");
+    // const initialDate2 = new Date("2023-05-24T03:06:50.000Z");
+    // const initialDate3 = new Date("2023-05-24T03:06:50.000Z");
+    initialDate.setDate(initialDate.getDate() - 3);
+
+    initialDate1.setDate(initialDate1.getDate() - 2);
+
+    initialDate3.setDate(initialDate3.getDate() - 25);
+
     const medsToAdd: MedsDB[] = [
       {
         id: "123",
-        email: "123@123.com",
-        name: "Vitamin A",
+        email: `${userDB?.email}`,
+        name: "Lisinopril",
         dosage: "1",
-        frequency: "12",
-        dateTime: "2025-02-06T00:47:00",
+        frequency: 12,
+        dateTime: `${initialDate.toISOString()}`,
         quantity: "22",
         withFoodWater: false,
         active: true,
@@ -71,144 +104,186 @@ export default function ProfileScreen() {
           {
             intakeId: "0",
             intakeRef: "123",
-            dateTime: "2025-02-06T00:47:00",
-            taken: false,
+            dateTime: `${initialDate.toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "1",
             intakeRef: "123",
-            dateTime: "2025-02-06T12:47:00",
-            taken: false,
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "2",
             intakeRef: "123",
-            dateTime: "2025-02-07T00:47:00",
-            taken: false,
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "3",
             intakeRef: "123",
-            dateTime: "2025-02-07T12:47:00",
-            taken: false,
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "4",
             intakeRef: "123",
-            dateTime: "2025-02-08T00:47:00",
-            taken: false,
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "5",
             intakeRef: "123",
-            dateTime: "2025-02-08T12:47:00",
-            taken: false,
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "6",
             intakeRef: "123",
-            dateTime: "2025-02-09T00:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "7",
             intakeRef: "123",
-            dateTime: "2025-02-09T12:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "8",
             intakeRef: "123",
-            dateTime: "2025-02-10T00:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "9",
             intakeRef: "123",
-            dateTime: "2025-02-10T12:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "10",
             intakeRef: "123",
-            dateTime: "2025-02-11T00:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "11",
             intakeRef: "123",
-            dateTime: "2025-02-11T12:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "12",
             intakeRef: "123",
-            dateTime: "2025-02-12T00:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "13",
             intakeRef: "123",
-            dateTime: "2025-02-12T12:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "14",
             intakeRef: "123",
-            dateTime: "2025-02-13T00:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "15",
             intakeRef: "123",
-            dateTime: "2025-02-13T12:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "16",
             intakeRef: "123",
-            dateTime: "2025-02-14T00:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "17",
             intakeRef: "123",
-            dateTime: "2025-02-14T12:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "18",
             intakeRef: "123",
-            dateTime: "2025-02-15T00:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "19",
             intakeRef: "123",
-            dateTime: "2025-02-15T12:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "20",
             intakeRef: "123",
-            dateTime: "2025-02-16T00:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "21",
             intakeRef: "123",
-            dateTime: "2025-02-16T12:47:00",
+            dateTime: `${new Date(
+              initialDate.setHours(initialDate.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
         ],
       },
       {
         id: "1234",
-        email: "123@123.com",
-        name: "Panadol",
+        email: `${userDB?.email}`,
+        name: "Metformin",
         dosage: "1",
-        frequency: "8",
-        dateTime: "2025-02-06T00:47:01",
+        frequency: 8,
+        dateTime: `${initialDate1.toISOString()}`,
         quantity: "10",
         withFoodWater: false,
         active: true,
@@ -217,72 +292,90 @@ export default function ProfileScreen() {
           {
             intakeId: "0",
             intakeRef: "1234",
-            dateTime: "2025-02-06T00:47:00",
-            taken: false,
+            dateTime: `${initialDate1.toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "1",
             intakeRef: "1234",
-            dateTime: "2025-02-06T08:47:00",
-            taken: false,
+            dateTime: `${new Date(
+              initialDate1.setHours(initialDate1.getHours() + 8)
+            ).toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "2",
             intakeRef: "1234",
-            dateTime: "2025-02-06T16:47:00",
-            taken: false,
+            dateTime: `${new Date(
+              initialDate1.setHours(initialDate1.getHours() + 8)
+            ).toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "3",
             intakeRef: "1234",
-            dateTime: "2025-02-07T00:47:00",
-            taken: false,
+            dateTime: `${new Date(
+              initialDate1.setHours(initialDate1.getHours() + 8)
+            ).toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "4",
             intakeRef: "1234",
-            dateTime: "2025-02-07T08:47:00",
-            taken: false,
+            dateTime: `${new Date(
+              initialDate1.setHours(initialDate1.getHours() + 8)
+            ).toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "5",
             intakeRef: "1234",
-            dateTime: "2025-02-07T16:47:00",
-            taken: false,
+            dateTime: `${new Date(
+              initialDate1.setHours(initialDate1.getHours() + 8)
+            ).toISOString()}`,
+            taken: true,
           },
           {
             intakeId: "6",
             intakeRef: "1234",
-            dateTime: "2025-02-08T00:47:00",
+            dateTime: `${new Date(
+              initialDate1.setHours(initialDate1.getHours() + 8)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "7",
             intakeRef: "1234",
-            dateTime: "2025-02-08T08:47:00",
+            dateTime: `${new Date(
+              initialDate1.setHours(initialDate1.getHours() + 8)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "8",
             intakeRef: "1234",
-            dateTime: "2025-02-09T00:47:00",
+            dateTime: `${new Date(
+              initialDate1.setHours(initialDate1.getHours() + 8)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "9",
             intakeRef: "1234",
-            dateTime: "2025-02-09T08:47:00",
+            dateTime: `${new Date(
+              initialDate1.setHours(initialDate1.getHours() + 8)
+            ).toISOString()}`,
             taken: false,
           },
         ],
       },
       {
         id: "12345",
-        email: "123@123.com",
-        name: "Nurofen Pain Relief",
+        email: `${userDB?.email}`,
+        name: "Atorvastatin",
         dosage: "1",
-        frequency: "8",
-        dateTime: "2025-02-06T00:47:02",
+        frequency: 8,
+        dateTime: `${initialDate2.toISOString()}`,
         quantity: "10",
         withFoodWater: true,
         active: true,
@@ -291,49 +384,139 @@ export default function ProfileScreen() {
           {
             intakeId: "0",
             intakeRef: "12345",
-            dateTime: "2025-02-06T00:47:00",
+            dateTime: `${initialDate2.toISOString()}`,
             taken: false,
           },
           {
             intakeId: "1",
             intakeRef: "12345",
-            dateTime: "2025-02-06T08:47:00",
+            dateTime: `${new Date(
+              initialDate2.setHours(initialDate2.getHours() + 8)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "2",
             intakeRef: "12345",
-            dateTime: "2025-02-06T16:47:00",
+            dateTime: `${new Date(
+              initialDate2.setHours(initialDate2.getHours() + 8)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "3",
             intakeRef: "12345",
-            dateTime: "2025-02-07T00:47:00",
+            dateTime: `${new Date(
+              initialDate2.setHours(initialDate2.getHours() + 8)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "4",
             intakeRef: "12345",
-            dateTime: "2025-02-07T08:47:00",
+            dateTime: `${new Date(
+              initialDate2.setHours(initialDate2.getHours() + 8)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "5",
             intakeRef: "12345",
-            dateTime: "2025-02-07T16:47:00",
+            dateTime: `${new Date(
+              initialDate2.setHours(initialDate2.getHours() + 8)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "6",
             intakeRef: "12345",
-            dateTime: "2025-02-08T00:47:00",
+            dateTime: `${new Date(
+              initialDate2.setHours(initialDate2.getHours() + 8)
+            ).toISOString()}`,
             taken: false,
           },
           {
             intakeId: "7",
             intakeRef: "12345",
-            dateTime: "2025-02-08T08:47:00",
+            dateTime: `${new Date(
+              initialDate2.setHours(initialDate2.getHours() + 8)
+            ).toISOString()}`,
+            taken: false,
+          },
+        ],
+      },
+      {
+        id: "123456",
+        email: `${userDB?.email}`,
+        name: "Amoxicillin",
+        dosage: "1",
+        frequency: 12,
+        dateTime: `${initialDate3.toISOString()}`,
+        quantity: "10",
+        withFoodWater: true,
+        active: false,
+        intakeRef: "123456",
+        intake: [
+          {
+            intakeId: "0",
+            intakeRef: "123456",
+            dateTime: `${initialDate3.toISOString()}`,
+            taken: true,
+          },
+          {
+            intakeId: "1",
+            intakeRef: "123456",
+            dateTime: `${new Date(
+              initialDate3.setHours(initialDate3.getHours() + 12)
+            ).toISOString()}`,
+            taken: true,
+          },
+          {
+            intakeId: "2",
+            intakeRef: "123456",
+            dateTime: `${new Date(
+              initialDate3.setHours(initialDate3.getHours() + 12)
+            ).toISOString()}`,
+            taken: true,
+          },
+          {
+            intakeId: "3",
+            intakeRef: "123456",
+            dateTime: `${new Date(
+              initialDate3.setHours(initialDate3.getHours() + 12)
+            ).toISOString()}`,
+            taken: true,
+          },
+          {
+            intakeId: "4",
+            intakeRef: "123456",
+            dateTime: `${new Date(
+              initialDate3.setHours(initialDate3.getHours() + 12)
+            ).toISOString()}`,
+            taken: true,
+          },
+          {
+            intakeId: "5",
+            intakeRef: "123456",
+            dateTime: `${new Date(
+              initialDate3.setHours(initialDate3.getHours() + 12)
+            ).toISOString()}`,
+            taken: true,
+          },
+          {
+            intakeId: "6",
+            intakeRef: "123456",
+            dateTime: `${new Date(
+              initialDate3.setHours(initialDate3.getHours() + 12)
+            ).toISOString()}`,
+            taken: true,
+          },
+          {
+            intakeId: "7",
+            intakeRef: "123456",
+            dateTime: `${new Date(
+              initialDate3.setHours(initialDate3.getHours() + 12)
+            ).toISOString()}`,
             taken: false,
           },
         ],
@@ -355,7 +538,7 @@ export default function ProfileScreen() {
     }
   };
 
-  const pickImage = async () => {
+  const handlePickImage = async () => {
     launchImageLibrary(
       {
         mediaType: "photo",
@@ -369,198 +552,326 @@ export default function ProfileScreen() {
           console.error("ImagePicker Error: ", response.errorMessage);
         } else if (response.assets && response.assets.length > 0) {
           const imageUri = response.assets[0].uri;
-          const path = `${RNFS.DocumentDirectoryPath}/profileImage.jpg`;
           try {
-            const exists = await RNFS.exists(path);
-            if (exists) {
-              await RNFS.unlink(path);
-              setProfileImage("");
-              console.log("Image deleted successfully");
-            }
+            await checkProfilePhoto();
+            setTimeout(() => {
+              if (profilePhotoExists) {
+                handleDeleteProfilePhoto();
+              }
+              checkProfilePhoto();
+              try {
+                console.log("fileAndroid: " + imageUri?.toString() || "", path);
+                const result = RNFS.copyFile(imageUri?.toString() || "", path);
+                console.log("result --> ", result);
+              } catch (error) {
+                console.log(error);
+              }
 
-            if (!userDB?.photo) {
-              await RNFS.copyFile(imageUri?.toString() || "", path);
-              setProfileImage(path);
-              console.log("Image saved successfully");
-            }
-
-            // if (!exists) {
-            //   // setUserImageProfile(path);
-            //   console.log("Image saved successfully");
-            // }
+              handleUpdateProfilePhoto("profileImage.jpg");
+            }, 399);
           } catch (error) {
             console.error("Error saving image:", error);
           }
-          // saveImageToLocalStorage(imageUri?.toString() || "");
         }
       }
     );
   };
 
-  // const saveImageToLocalStorage = async (imageUri: string) => {
-  //   const path = `${RNFS.DocumentDirectoryPath}/profileImage.jpg`;
-  //   try {
-  //     const exists = await RNFS.exists(path);
-  //     if (exists) {
-  //       deleteProfileImage();
-  //     }
+  const checkProfilePhoto = async () => {
+    try {
+      const exists = await RNFS.exists(path);
+      if (exists) {
+        setProfilePhotoExists(true);
+      } else {
+        setProfilePhotoExists(false);
+      }
+      console.log("profilePhotoExists---> " + profilePhotoExists);
+    } catch (error) {
+      console.error("Error checking profile photo:", error);
+    }
+  };
 
-  //     if (!exists) {
-  //       await RNFS.copyFile(imageUri, path);
-  //       setUserImageProfile(path);
-  //       console.log("Image saved successfully");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error saving image:", error);
-  //   }
-  // };
+  const handleUpdateProfilePhoto = (photo: string) => {
+    try {
+      console.log("photo", photo);
+      const userEmail = user?.email?.toString();
 
-  // const deleteProfileImage = async () => {
-  //   const path = `${RNFS.DocumentDirectoryPath}/profileImage.jpg`;
-  //   try {
-  //     const exists = await RNFS.exists(path);
-  //     if (exists) {
-  //       await RNFS.unlink(path);
-  //       setUserImageProfile(null);
-  //       console.log("Image deleted successfully");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error deleting image:", error);
-  //   }
-  // };
+      if (userEmail) {
+        const userData = {
+          name: name,
+          dob: dob,
+          photo: photo,
+        };
+        updateUser(userEmail, userData);
+      }
+    } catch (error) {
+      console.error("Error deleting image:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (userDB?.photo && userDB.photo.length > 3) {
+      setPhoto(userDB?.photo);
+    } else {
+      setPhoto("");
+    }
+
+    checkProfilePhoto();
+  }, [userDB, checkProfilePhoto]);
+
+  const handleProfilePhoto = async () => {
+    try {
+      const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
+      console.log("Files in Document Directory:", files);
+
+      // You can then iterate through the 'files' array
+      files.forEach((file) => {
+        console.log("File Name:", file.name);
+        console.log("File Path:", file.path);
+        console.log("File Size:", file.size);
+        console.log("------------------");
+      });
+    } catch (error) {
+      console.error("Error listing files:", error);
+    }
+    profilePhotoExists === true
+      ? Alert.alert(
+          "Select an option",
+          "Choose one of the following actions:",
+          [
+            {
+              text: "Pick Profile Photo",
+              onPress: () => handlePickImage(),
+            },
+            {
+              text: "Delete Profile Photo",
+              onPress: () => handleDeleteProfilePhoto(),
+              style: "destructive",
+            },
+            {
+              text: "Cancel",
+              onPress: () => console.log("Cancel Pressed"),
+              style: "cancel",
+            },
+          ],
+          { cancelable: false }
+        )
+      : Alert.alert(
+          "Select an option",
+          "Choose one of the following actions:",
+          [
+            {
+              text: "Pick Profile Photo",
+              onPress: () => handlePickImage(),
+            },
+            {
+              text: "Cancel",
+              onPress: () => console.log("Cancel Pressed"),
+              style: "cancel",
+            },
+          ],
+          { cancelable: false }
+        );
+  };
+
+  const handleDeleteProfilePhoto = async () => {
+    try {
+      handleUpdateProfilePhoto("");
+    } catch (error) {
+      console.error("Error deleting image:", error);
+    } finally {
+      await RNFS.unlink(path);
+      console.log("Image deleted successfully");
+    }
+  };
+
+  const handleAutosaveSwitch = async (newValue: boolean) => {
+    try {
+      setAutosave(newValue);
+      if (newValue) {
+        await AsyncStorage.setItem(`${user?.email}` + "-Autosave", "true");
+        console.log("Autosave enabled");
+      } else {
+        await AsyncStorage.removeItem(`${user?.email}` + "-Autosave");
+        console.log("Autosave disabled");
+      }
+    } catch (error) {
+      console.error("Error getting Autosave:", error);
+    }
+  };
+
+  const handleShowQtLeftSwitch = async (newValue: boolean) => {
+    try {
+      setShowQtLeft(newValue);
+      if (newValue) {
+        await AsyncStorage.setItem(`${user?.email}` + "-ShowQtLeft", "true");
+        console.log("ShowQtLeft enabled");
+      } else {
+        await AsyncStorage.removeItem(`${user?.email}` + "-ShowQtLeft");
+        console.log("ShowQtLeft disabled");
+      }
+    } catch (error) {
+      console.error("Error getting ShowQtLeft:", error);
+    }
+  };
+  const handleShowFindMedsMSwitch = async (newValue: boolean) => {
+    try {
+      setShowFindMedsM(newValue);
+      if (newValue) {
+        await AsyncStorage.setItem(`${user?.email}` + "-ShowFindMedsM", "true");
+        console.log("ShowFindMedsM enabled");
+      } else {
+        await AsyncStorage.removeItem(`${user?.email}` + "-ShowFindMedsM");
+        console.log("ShowFindMedsM disabled");
+      }
+    } catch (error) {
+      console.error("Error getting ShowFindMedsM:", error);
+    }
+  };
+  const handleShowFindMedsTSwitch = async (newValue: boolean) => {
+    try {
+      setShowFindMedsT(newValue);
+      if (newValue) {
+        await AsyncStorage.setItem(`${user?.email}` + "-ShowFindMedsT", "true");
+        console.log("ShowFindMedsT enabled");
+      } else {
+        await AsyncStorage.removeItem(`${user?.email}` + "-ShowFindMedsT");
+        console.log("ShowFindMedsT disabled");
+      }
+    } catch (error) {
+      console.error("Error getting ShowFindMedsT:", error);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setEditEnabled(!editEnabled);
+  };
+
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+    }
+  };
+
+  const handleDeleteAccount = () => {};
+
+  const ReportCard = () => {
+    return (
+      <>
+        <View style={styles.line} />
+        <View style={styles.containerReport}>
+          <Text style={styles.reportMainTitle}>Medication Report</Text>
+
+          {medications && medications.length > 0 ? (
+            <>
+              {medications
+                .filter((med) => med.active)
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((medication, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Text style={styles.reportMedName}>{medication.name}</Text>
+                    <View
+                      style={{
+                        width: "50%",
+                      }}
+                    >
+                      <ProgressBar
+                        progress={parseFloat(
+                          (
+                            (medication.intake.filter((intake) => intake.taken)
+                              .length *
+                              parseInt(medication.dosage)) /
+                            medication.intake.length
+                          ).toFixed(2)
+                        )}
+                        color={Colors.TEXT_200}
+                        style={{
+                          height: 10,
+                          borderRadius: 5,
+                          flex: 1,
+                          marginRight: 10,
+                        }}
+                      />
+                    </View>
+                  </View>
+                ))}
+            </>
+          ) : (
+            <Text>No medications found.</Text>
+          )}
+        </View>
+      </>
+    );
+  };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
+      {/* -------------- Profile -------------- */}
       <CustomHeader title={"Profile"} />
-
-      <View style={{ flex: 1, marginTop: 40 }}>
-        <View style={styles.containerProfile}>
-          <View
-            style={{
-              // paddingHorizontal: 20,
-              // paddingVertical: 10,
-              position: "absolute",
-              left: "4%",
-              top: "-20%",
-              // overflow: "hidden",
-              width: 100,
-              height: 100,
-            }}
-          >
-            <Image
-              style={
-                userDB?.photo
-                  ? {
-                      borderRadius: 100,
+      <View style={styles.containerProfile}>
+        <View style={styles.ctnTopProfile}>
+          <View style={styles.ctnTopProfileCol1}>
+            <TouchableOpacity onPress={() => handleProfilePhoto()}>
+              <View
+                style={{
+                  width: userDB?.photo ? 100 : 127,
+                  height: userDB?.photo ? 100 : 127,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: Colors.BORDERDISABLED,
+                }}
+              >
+                {!userDB?.photo && (
+                  <Image
+                    style={{
+                      width: 127,
+                      height: 127,
+                      tintColor: Colors.BORDERDISABLED,
+                    }}
+                    resizeMode={"cover"}
+                    source={Profile}
+                  />
+                )}
+                {userDB?.photo && userDB?.photo.length > 0 && (
+                  <Image
+                    style={{
                       width: 100,
                       height: 100,
-                      borderColor: Colors.BORDERDISABLED,
-                      borderWidth: 2,
-                      resizeMode: "cover",
-                    }
-                  : {
-                      backgroundColor: "#fff",
-                      resizeMode: "stretch",
-                      width: "100%",
-                      height: "100%",
-                      borderWidth: 2,
-                      borderColor: Colors.BORDERDISABLED,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      borderRadius: 100,
-                      tintColor: Colors.BORDERDISABLED,
-                    }
-              }
-              source={userDB?.photo ? { uri: profileImage } : Profile}
-            />
-          </View>
-          <View
-            style={{
-              paddingTop: 10,
-              paddingLeft: "30%",
-            }}
-          >
-            {editEnabled ? (
-              <>
-                <View style={{ flexDirection: "row" }}>
-                  <Text
-                    style={[
-                      styles.profileText,
-                      { fontFamily: "outfit-bold", fontSize: 20 },
-                    ]}
-                  >
-                    Name:
-                  </Text>
-                  <TextInput
-                    style={[
-                      styles.profileText,
-                      { fontFamily: "outfit-bold", fontSize: 20 },
-                      {
-                        backgroundColor: "#fff",
-                        width: "65%",
-                        borderRadius: 8,
-                      },
-                    ]}
-                    value={userDB?.name}
-                    onChangeText={setName}
+                    }}
+                    resizeMode={"cover"}
+                    source={{
+                      uri: `${Platform.OS === "android" && "file://"}${
+                        RNFS.DocumentDirectoryPath
+                      }/${userDB?.photo}`,
+                    }}
                   />
-                </View>
-                <View>
-                  <Text style={styles.profileText}>Email: {userDB?.email}</Text>
-                </View>
-                <View style={{ flexDirection: "row" }}>
-                  <Text style={styles.profileText}>Date of Birth:</Text>
-                  <TextInput
-                    style={[
-                      styles.profileText,
-                      {
-                        backgroundColor: "#fff",
-                        width: "52%",
-                        borderRadius: 8,
-                      },
-                    ]}
-                    value={userDB?.name}
-                    onChangeText={setName}
-                  />
-                </View>
-              </>
-            ) : (
-              <>
-                <Text
-                  style={[
-                    styles.profileText,
-                    { fontFamily: "outfit-bold", fontSize: 20 },
-                  ]}
-                >
-                  {userDB?.name}
-                </Text>
-                <Text style={styles.profileText}>Email: {userDB?.email}</Text>
-                <Text style={styles.profileText}>
-                  Date of Birth: {userDB?.dob ? userDB?.dob : "Not Entered"}
-                </Text>
-              </>
-            )}
+                )}
+              </View>
+            </TouchableOpacity>
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-around",
-              paddingTop: 10,
-            }}
-          >
-            <CustomButton
-              type={"ICON"}
-              icon={"gallery"}
-              iconColor={Colors.PRIMARY}
-              otherStyles={{
-                width: "40%",
-                padding: 5,
-                flexDirection: "row",
-              }}
-              onPress={() => {
-                pickImage();
-              }}
-            />
+          <View style={styles.ctnTopProfileCol2}>
+            <Text
+              style={[
+                styles.profileText,
+                { fontFamily: "outfit-bold", fontSize: 20 },
+              ]}
+            >
+              {userDB?.name}
+            </Text>
+            <Text style={styles.profileText}>{userDB?.email}</Text>
+            <Text style={styles.profileText}>
+              Date of Birth:{" "}
+              {userDB?.dob ? format(userDB?.dob, "dd/MM/yyyy") : "__/__/____"}
+            </Text>
+          </View>
+          <View style={styles.ctnTopProfileCol3}>
             <CustomButton
               type={"ICON"}
               icon={"editP"}
@@ -575,47 +886,163 @@ export default function ProfileScreen() {
                 setEditEnabled(!editEnabled);
               }}
             />
-          </View>
-        </View>
-      </View>
-      <ScrollView style={{ marginTop: -32 }}>
-        <View style={styles.containerBtn}>
-          <Text style={styles.title}>Settings</Text>
-          <View style={styles.switchContainer}>
-            <Text style={styles.switchText}>Enable Autosave</Text>
-            <Switch value={autosave} onValueChange={handleAutosaveSwitch} />
-          </View>
-          <View style={{ width: "60%", alignSelf: "center" }}>
-            <CustomButton
-              text="Delete all medicatons"
-              type="PRIMARY"
-              onPress={() => {
-                deleteMedication(user?.email || "");
-                fetchMeds(user?.email || "");
-              }}
-            />
-            <CustomButton
-              text="Load medicatons"
-              type="SECONDARY"
-              onPress={() => loadRandomData()}
+            <EditProfileModal
+              isVisible={editEnabled}
+              onClose={handleCloseModal}
+              date={selectedDate}
+              onDateChange={handleDateChange}
+              name={name}
             />
           </View>
         </View>
 
-        <View style={[styles.signoutBtn, styles.shadow]}>
-          <CustomButton
-            text="Log Out"
-            onPress={() => letUserSignOut()}
-            type="SECONDARY"
-          />
-          <CustomButton
-            type="SECONDARY"
-            text="Delete Account"
-            onPress={() => {}}
+        <ReportCard />
+      </View>
+      {/* -------------- Settings -------------- */}
+      <Text style={styles.title}>Settings</Text>
+      <View style={styles.containerBtn}>
+        <View style={styles.switchContainer}>
+          <Text style={styles.switchText}>Enable Autosave</Text>
+          <Switch
+            value={autosave}
+            onValueChange={handleAutosaveSwitch}
+            trackColor={{ true: Colors.TERTIARY }}
+            thumbColor={Colors.TEXT_100}
           />
         </View>
-      </ScrollView>
-    </View>
+        <View style={styles.line} />
+        <View style={styles.switchContainer}>
+          <Text style={styles.switchText}>Show Remaining on Instructions</Text>
+          <Switch
+            value={showQtLeft}
+            onValueChange={handleShowQtLeftSwitch}
+            trackColor={{
+              true: Colors.TERTIARY,
+            }}
+            thumbColor={Colors.TEXT_100}
+          />
+        </View>
+        <View style={styles.line} />
+        <View style={styles.switchContainer}>
+          <Text style={styles.switchText}>Show FindMeds on TodayMeds</Text>
+          <Switch
+            value={showFindMedsT}
+            onValueChange={handleShowFindMedsTSwitch}
+            trackColor={{
+              true: Colors.TERTIARY,
+            }}
+            thumbColor={Colors.TEXT_100}
+          />
+        </View>
+        <View style={styles.line} />
+        <View style={styles.switchContainer}>
+          <Text style={styles.switchText}>Show FindMeds on Medications</Text>
+          <Switch
+            value={showFindMedsM}
+            onValueChange={handleShowFindMedsMSwitch}
+            trackColor={{
+              true: Colors.TERTIARY,
+            }}
+            thumbColor={Colors.TEXT_100}
+          />
+        </View>
+        <View style={styles.line} />
+
+        <Text style={[styles.switchText, { padding: 10 }]}>
+          For testing purposes only
+        </Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
+          <CustomButton
+            type="ICON"
+            icon={"loadM"}
+            iconColor={Colors.TEXT_100}
+            onPress={() => loadRandomData()}
+            otherStyles={{
+              width: "45%",
+              flexDirection: "row",
+              borderWidth: 1,
+              borderColor: Colors.TEXT_100,
+              backgroundColor: "#fff",
+            }}
+            disabled={loadDisabled}
+          />
+          <CustomButton
+            type="ICON"
+            icon={"deleteM"}
+            iconColor={Colors.TAKEN_100}
+            onPress={() => {
+              deleteAllMedication(user?.email || "");
+              fetchMeds(user?.email || "");
+              setLoadDisabled(false);
+            }}
+            otherStyles={{
+              width: "45%",
+              flexDirection: "row",
+              borderWidth: 1,
+              borderColor: Colors.TEXT_100,
+              backgroundColor: "#fff",
+            }}
+            disabled={deleteDisabled}
+          />
+        </View>
+        {/* <CustomButton
+          type="SECONDARY"
+          text="Delete All AsyncStorage Data"
+          onPress={async () => {
+            try {
+              await AsyncStorage.clear();
+              console.log("All data cleared successfully");
+            } catch (e) {
+              // handle error here
+              console.error("Error clearing data:", e);
+            }
+          }}
+        /> */}
+        {/* <CustomButton
+          type="SECONDARY"
+          text="Trigger notification"
+          onPress={scheduleTimedNotification}
+        />
+        <CustomButton
+          type="SECONDARY"
+          text="Trigger notification"
+          onPress={logNotifications}
+        /> */}
+      </View>
+
+      <View style={[styles.signoutBtn, styles.shadow]}>
+        <CustomButton
+          text="Log Out"
+          onPress={() => letUserSignOut()}
+          type="SECONDARY"
+        />
+        <CustomButton
+          type="ALERT"
+          text="Delete Account"
+          onPress={() => {
+            Alert.alert(
+              "Delete User Account",
+              "Your account will be successfully deleted. Do you want to continue?",
+
+              [
+                {
+                  text: "Delete",
+                  onPress: deleteUser,
+                  style: "destructive",
+                },
+                {
+                  text: "Cancel",
+                  onPress: () => console.log("Cancel Pressed"),
+                  style: "cancel",
+                },
+              ],
+              { cancelable: false }
+            );
+          }}
+        />
+      </View>
+      <View style={{ marginBottom: "22%" }} />
+    </ScrollView>
   );
 }
 
@@ -623,18 +1050,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingHorizontal: 16,
   },
   containerProfile: {
-    flex: 0.8,
-    height: "20%",
-    flexDirection: "column",
+    flex: 1,
+    marginHorizontal: 16,
     backgroundColor: Colors.BACKGROUND_100,
-    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    alignContent: "center",
+  },
+  ctnTopProfile: {
+    flexDirection: "row",
+  },
+  ctnTopProfileCol1: {
+    flex: 26,
+    width: 100,
+    height: 100,
+    backgroundColor: "#fff",
+    borderRadius: 100,
+    borderColor: "silver",
     borderWidth: 1,
-    borderColor: Colors.BORDERDISABLED,
-    // marginBottom: -40,
-    // paddingBottom: 10,
+    marginHorizontal: 14,
+    marginVertical: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  ctnTopProfileCol2: {
+    flex: 60,
+    paddingTop: 35,
+  },
+  ctnTopProfileCol3: {
+    flex: 10,
   },
   profileText: {
     fontFamily: "outfit",
@@ -647,21 +1094,24 @@ const styles = StyleSheet.create({
     height: "40%",
     backgroundColor: Colors.BACKGROUND_100,
     borderRadius: 8,
-    padding: 10,
+    paddingHorizontal: 8,
     paddingBottom: 24,
+    marginHorizontal: 16,
   },
 
   title: {
-    fontSize: 18,
     fontFamily: "outfit-medium",
-    marginBottom: 20,
+    fontSize: 24,
+    color: Colors.PRIMARY,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   switchContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 10,
-    paddingBottom: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
   },
   switchText: {
     fontFamily: "outfit",
@@ -672,6 +1122,37 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     alignItems: "center",
   },
+  line: {
+    height: 0.6,
+    width: "96.5%",
+    backgroundColor: Colors.BORDERGRAY,
+    alignSelf: "center",
+  },
+  containerReport: {
+    backgroundColor: Colors.BACKGROUND_100,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  reportMainTitle: {
+    fontFamily: "outfit-medium",
+    fontSize: Platform.OS === "ios" ? 16 : 18,
+    color: Colors.TEXT_050,
+    textAlign: "center",
+    paddingBottom: 8,
+  },
+  reportTitle: {
+    fontFamily: "outfit-medium",
+    fontSize: Platform.OS === "ios" ? 15 : 17,
+    color: Colors.TEXT_050,
+    paddingBottom: 5,
+  },
+  reportMedName: {
+    fontFamily: "outfit",
+    paddingBottom: 4,
+    paddingLeft: 10,
+  },
+
   shadow: {
     shadowColor: "silver",
     shadowOffset: { width: 0, height: 1 },

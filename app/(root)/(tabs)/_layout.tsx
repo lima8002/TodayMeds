@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, Platform } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import RNFS from "react-native-fs";
@@ -22,34 +22,46 @@ const TabIcon = ({
 
   return (
     <View style={styles.container}>
-      {userDB?.photo && title === "Profile" ? (
-        <Image
-          source={{ uri: `${RNFS.DocumentDirectoryPath}/profileImage.jpg` }}
-          style={[
-            styles.icon,
-            {
-              borderRadius: 50,
-              borderWidth: 1,
-              borderColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY,
-              resizeMode: "cover",
-              width: 28,
-              height: 28,
-            },
-          ]}
-        />
-      ) : (
-        <Image
-          source={icon}
-          style={[
-            styles.icon,
-            { tintColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY },
-          ]}
-        />
-      )}
+      <Image
+        source={
+          !userDB?.photo || (icon && title != "Profile")
+            ? icon
+            : !userDB?.photo &&
+              userDB?.photo.length === 0 &&
+              title === "Profile"
+            ? require("@/assets/icons/person90.png")
+            : {
+                uri: `${Platform.OS === "android" && "file://"}${
+                  RNFS.DocumentDirectoryPath
+                }/${userDB?.photo}`,
+              }
+        }
+        style={[
+          styles.icon,
+          title === "Profile"
+            ? !userDB?.photo
+              ? {
+                  width: 30,
+                  height: 30,
+                  marginTop: -2,
+                  tintColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY,
+                }
+              : userDB?.photo && {
+                  borderRadius: 100,
+                  borderWidth: 1,
+                  borderColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY,
+                  tintColor: undefined,
+                }
+            : focused
+            ? { tintColor: Colors.LOGO_BACKGROUND }
+            : { tintColor: Colors.GRAY },
+        ]}
+      />
       <Text
         style={[
           styles.text,
           focused ? styles.textFocused : styles.textUnfocused,
+          { marginTop: title === "Profile" ? (!userDB?.photo ? 2 : 4) : 4 },
         ]}
       >
         {title}
@@ -116,9 +128,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   icon: {
-    width: 30,
-    height: 30,
-    resizeMode: "contain",
+    width: 26,
+    height: 26,
+    resizeMode: "cover",
+    overflow: "hidden",
   },
   text: {
     fontSize: 11,

@@ -79,19 +79,20 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderBottomWidth: 0.5,
     borderBottomColor: Colors.BORDERGRAY,
+    height: 45,
   },
   col1: {
     flex: 18,
     alignItems: "flex-end",
   },
   col1Modal: {
-    flex: 27,
+    flex: Platform.OS === "ios" ? 27 : 30,
   },
   col2: {
     flex: 52,
   },
   col2Modal: {
-    flex: 48,
+    flex: Platform.OS === "ios" ? 48 : 45,
     alignItems: "center",
   },
   col3: {

@@ -8,23 +8,33 @@ import {
   Platform,
   Dimensions,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { Intake, MedsDB } from "@/constants/Types";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { useRouter } from "expo-router";
+import RNFS from "react-native-fs";
 import DayCard from "@/components/meds/DayCard";
 import IntakeDetails from "@/components/meds/IntakeDetails";
 import EmptyMeds from "@/components/ui/EmptyMeds";
 import EmptyAgenda from "@/components/ui/EmptyAgenda";
 import AddMeds from "@/components/modals/AddMeds";
+import CustomButton from "@/components/ui/CustomButton";
 
 const { width } = Dimensions.get("window");
 
 function MainScreen() {
   const router = useRouter();
   const [greeting, setGreeting] = useState<string | null>(null);
-  const { getAllIntakes, user, userDB, medications } = useGlobalContext();
+  const {
+    getAllIntakes,
+    user,
+    userDB,
+    medications,
+    showQtLeft,
+    showFindMedsT,
+  } = useGlobalContext();
   const [todayIntakes, setTodayIntakes] = useState<Intake[]>([]);
   const [todayMeds, setTodayMeds] = useState<MedsDB[]>([]);
   const todayDate = new Date().getDate();
@@ -54,6 +64,8 @@ function MainScreen() {
       (intake) => new Date(intake.dateTime).getDate() === todayDate
     );
 
+    console.log(user?.email);
+
     setTodayMeds(dailyMeds);
     setTodayIntakes(dailyIntakes);
   }, [medications, getAllIntakes]);
@@ -68,35 +80,70 @@ function MainScreen() {
     );
   };
 
-  const renderMedItem = ({ item }: { item: MedsDB }) => (
-    <View
-      style={[
-        styles.cardContainer,
-        styles.shadow,
-        {
-          justifyContent: "flex-start",
-          alignItems: "flex-start",
-          marginHorizontal: 16,
-        },
-      ]}
-    >
-      <Text style={styles.medicationName}>{item.name}</Text>
-      <View style={styles.line} />
-      <Text style={styles.medicationDetails}>
-        Take {item.dosage} pill/tablet every {item.frequency} hour
-        {item.frequency > 1 ? "s" : ""}
-        {item.withFoodWater ? " with Food/Water." : "."}
-      </Text>
-    </View>
-  );
+  const renderMedItem = ({ item }: { item: MedsDB }) => {
+    let remaining =
+      (item.intake.length -
+        item.intake.filter((intake) => intake.taken === true).length) *
+      parseInt(item.dosage);
+
+    return (
+      <View
+        style={[
+          styles.cardContainer,
+          styles.shadow,
+          {
+            justifyContent: "flex-start",
+            alignItems: "flex-start",
+          },
+        ]}
+      >
+        <Text style={styles.medicationName}>{item.name}</Text>
+        <View style={styles.line} />
+        <Text style={styles.medicationDetails}>
+          Take {item.dosage} pill/tablet every {item.frequency} hour
+          {item.frequency > 1 ? "s" : ""}
+          {item.withFoodWater ? " with Food/Water." : "."}
+        </Text>
+        {showQtLeft ? (
+          <>
+            <View style={styles.line} />
+            <Text style={styles.medicationDetails}>
+              {remaining} pills/tablets remaining.
+            </Text>
+          </>
+        ) : null}
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>{greeting}</Text>
-        <Text style={styles.subTitle}>
-          Welcome, {userDB?.name ? userDB?.name : user?.email}!
-        </Text>
+        <View style={{ flexDirection: "row" }}>
+          {userDB?.photo !== undefined && userDB?.photo.length > 2 && (
+            <TouchableOpacity
+              onPress={() => router.push("/profile")}
+              style={styles.shadow}
+            >
+              <Image
+                source={{
+                  uri:
+                    `${Platform.OS === "android" && "file://"}${
+                      RNFS.DocumentDirectoryPath
+                    }/` + userDB?.photo,
+                }}
+                style={styles.profilePhoto}
+              />
+            </TouchableOpacity>
+          )}
+
+          <View style={{ flexDirection: "column" }}>
+            <Text style={styles.title}>{greeting}</Text>
+            <Text style={styles.subTitle}>
+              Welcome, {userDB?.name ? userDB?.name : user?.email}!
+            </Text>
+          </View>
+        </View>
       </View>
       <>
         <TouchableOpacity
@@ -120,6 +167,7 @@ function MainScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{
           paddingBottom: Platform.OS === "ios" ? 50 : 38,
+          marginHorizontal: 16,
         }}
         ListEmptyComponent={<EmptyMeds />}
         ListHeaderComponent={
@@ -136,6 +184,30 @@ function MainScreen() {
             <Text style={[styles.textMainTitle, { marginBottom: -19 }]}>
               Instructions
             </Text>
+          </View>
+        }
+        ListFooterComponent={
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-evenly" }}
+          >
+            {showFindMedsT && (
+              <CustomButton
+                type="ICON"
+                icon={"locationT"}
+                iconColor={Colors.TAKEN_200}
+                onPress={() => {
+                  Linking.openURL(
+                    "https://www.google.com/maps/search/?api=1&query=pharmacy+near+me"
+                  ).catch((err) => console.error("An error occurred", err));
+                }}
+                otherStyles={{
+                  width: "45%",
+                  flexDirection: "row",
+                  borderWidth: 1,
+                  borderColor: Colors.TEXT_100,
+                }}
+              />
+            )}
           </View>
         }
       />
@@ -158,6 +230,15 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
     paddingTop: "15%",
+    alignItems: "flex-start",
+  },
+  profilePhoto: {
+    width: 60,
+    height: 60,
+    borderRadius: 100,
+    marginLeft: 16,
+    borderWidth: 1,
+    borderColor: Colors.GRAY,
   },
   title: {
     paddingHorizontal: 12,
@@ -175,7 +256,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    padding: 16,
+    paddingVertical: 16,
   },
   textMainTitle: {
     fontFamily: "outfit-medium",

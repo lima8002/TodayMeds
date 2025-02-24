@@ -21,9 +21,7 @@ export default function RootLayout() {
         <ActivityIndicator size="small" color={Colors.PRIMARY} />
       </SafeAreaView>
     );
-  }
-
-  if (!isLoggedIn) return <Redirect href="/signin" />;
+  } else if (!isLoggedIn) return <Redirect href="/signin" />;
 
   return <Slot />;
 }

@@ -9,9 +9,10 @@ import {
   Animated,
   Platform,
   Alert,
-  LayoutAnimation,
   Modal,
   StatusBar,
+  Linking,
+  Easing,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
@@ -22,9 +23,10 @@ import CustomButton from "@/components/ui/CustomButton";
 import IntakeDetails from "@/components/meds/IntakeDetails";
 import EditMeds from "@/components/modals/EditMeds";
 import AddMeds from "@/components/modals/AddMeds";
+import EmptyMeds from "@/components/ui/EmptyMeds";
 
 const MedicationScreen = () => {
-  const { medications, updateMedication, deleteMedication, setScreenName } =
+  const { medications, updateMedication, deleteMedication, showFindMedsM } =
     useGlobalContext();
   const [selectedMedicationId, setSelectedMedicationId] = useState<
     string | null
@@ -35,6 +37,7 @@ const MedicationScreen = () => {
   const [currentItemId, setCurrentItemId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList<MedsDB> | null>(null);
   const animatedValues = useRef<{ [key: string]: Animated.Value }>({});
+  const expandAnimValues = useRef<{ [key: string]: Animated.Value }>({});
   const initialRender = useRef(false);
 
   useEffect(() => {
@@ -46,6 +49,9 @@ const MedicationScreen = () => {
     medications?.forEach((med) => {
       if (!animatedValues.current[med.id]) {
         animatedValues.current[med.id] = new Animated.Value(0);
+      }
+      if (!expandAnimValues.current[med.id]) {
+        expandAnimValues.current[med.id] = new Animated.Value(0);
       }
     });
   }, [medications]);
@@ -106,39 +112,49 @@ const MedicationScreen = () => {
     );
   };
 
-  const renderMedItem = ({ item }: { item: MedsDB }) => {
+  const renderMedItem = ({ item, index }: { item: MedsDB; index: number }) => {
     const rotateValue = animatedValues.current[item.id]?.interpolate({
       inputRange: [0, 1],
       outputRange: ["0deg", "90deg"],
     });
 
     const handlePress = () => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-
-      const newValue = selectedMedicationId === item.id ? 0 : 1;
-      setSelectedMedicationId(
-        item.id === selectedMedicationId ? null : item.id
-      );
+      const isSelected = selectedMedicationId === item.id;
+      setSelectedMedicationId(isSelected ? null : item.id);
 
       Animated.timing(animatedValues.current[item.id], {
-        toValue: newValue,
-        duration: 100,
+        toValue: isSelected ? 0 : 1,
+        duration: 200,
         useNativeDriver: true,
+      }).start();
+      Animated.timing(expandAnimValues.current[item.id], {
+        toValue: isSelected ? 0 : 1,
+        duration: 350,
+        easing: Easing.inOut(Easing.quad),
+        useNativeDriver: false,
       }).start();
 
       if (selectedMedicationId && selectedMedicationId !== item.id) {
         Animated.timing(animatedValues.current[selectedMedicationId], {
           toValue: 0,
-          duration: 100,
+          duration: 200,
           useNativeDriver: true,
         }).start();
+        Animated.timing(expandAnimValues.current[selectedMedicationId], {
+          toValue: 0,
+          duration: 350,
+          easing: Easing.in(Easing.quad),
+          useNativeDriver: false,
+        }).start();
       }
+
       flatListRef.current?.scrollToItem({ item, animated: true });
     };
 
     let remaining =
-      item.intake.length -
-      item.intake.filter((intake) => intake.taken === true).length;
+      (item.intake.length -
+        item.intake.filter((intake) => intake.taken === true).length) *
+      parseInt(item.dosage);
 
     return (
       <View style={styles.medicationContainer}>
@@ -235,105 +251,177 @@ const MedicationScreen = () => {
             )}
           </View>
 
-          {selectedMedicationId === item.id && (
-            <>
-              <View style={styles.buttonContainer}>
-                <CustomButton
-                  type={"ICON"}
-                  icon={"intake"}
-                  iconColor={Colors.PRIMARY}
-                  onPress={() => setModalIntakeVisible(!modalIntakeVisible)}
-                />
-                <Modal
-                  visible={modalIntakeVisible}
-                  transparent={true}
-                  animationType="fade"
+          <Animated.View
+            style={{
+              height: expandAnimValues.current[item.id]?.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 80],
+              }),
+              overflow: "hidden",
+            }}
+          >
+            {selectedMedicationId === item.id && (
+              <>
+                <View
+                  style={[
+                    styles.buttonContainer,
+                    showFindMedsM && { justifyContent: "center" },
+                  ]}
                 >
-                  <View style={styles.modalContainer}>
-                    <View style={styles.modalStyle}>
-                      <Text style={styles.modalTitle}>
-                        Intakes for {item.name}
-                      </Text>
-                      <View
-                        style={{ maxHeight: "80%", width: "100%", flex: 1 }}
-                      >
-                        <FlatList
-                          data={item.intake}
-                          keyExtractor={(item) => item.intakeId}
-                          contentContainerStyle={styles.modalIntake}
-                          renderItem={({ item }) => (
-                            <IntakeDetails
-                              intakeItem={item}
-                              medRef={item.intakeRef}
-                              type={"UNDO"}
-                            />
-                          )}
-                          ListHeaderComponent={
-                            <View
-                              style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                padding: 10,
-                              }}
-                            >
-                              <View style={styles.col1Modal}>
-                                <Text style={styles.modalTextDate}>Date</Text>
+                  <CustomButton
+                    type={"ICON"}
+                    icon={"intake"}
+                    iconColor={Colors.PRIMARY}
+                    onPress={() => setModalIntakeVisible(!modalIntakeVisible)}
+                  />
+                  <Modal
+                    visible={modalIntakeVisible}
+                    transparent={true}
+                    animationType="fade"
+                  >
+                    <View style={styles.modalContainer}>
+                      <View style={styles.modalStyle}>
+                        <Text style={styles.modalTitle}>
+                          Intakes for {item.name}
+                        </Text>
+                        <View
+                          style={{ maxHeight: "80%", width: "100%", flex: 1 }}
+                        >
+                          <FlatList
+                            data={item.intake}
+                            keyExtractor={(item) => item.intakeId}
+                            contentContainerStyle={styles.modalIntake}
+                            renderItem={({ item }) => (
+                              <IntakeDetails
+                                intakeItem={item}
+                                medRef={item.intakeRef}
+                                type={"UNDO"}
+                              />
+                            )}
+                            ListHeaderComponent={
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                  padding: 10,
+                                }}
+                              >
+                                <View style={styles.col1Modal}>
+                                  <Text style={styles.modalTextDate}>Date</Text>
+                                </View>
+                                <View style={styles.col2Modal}>
+                                  <Text style={styles.modalTextTime}>Time</Text>
+                                </View>
+                                <View style={styles.col3Modal}>
+                                  <Text style={styles.modalTextStatus}>
+                                    Status
+                                  </Text>
+                                </View>
                               </View>
-                              <View style={styles.col2Modal}>
-                                <Text style={styles.modalTextTime}>Time</Text>
-                              </View>
-                              <View style={styles.col3Modal}>
-                                <Text style={styles.modalTextStatus}>
-                                  Status
-                                </Text>
-                              </View>
-                            </View>
+                            }
+                          />
+                        </View>
+
+                        <CustomButton
+                          type="TERTIARY"
+                          text="Cancel"
+                          onPress={() =>
+                            setModalIntakeVisible(!modalIntakeVisible)
                           }
                         />
                       </View>
-
-                      <CustomButton
-                        type="TERTIARY"
-                        text="Cancel"
-                        onPress={() =>
-                          setModalIntakeVisible(!modalIntakeVisible)
-                        }
+                      <StatusBar
+                        animated={true}
+                        backgroundColor="rgba(0, 0, 0, 0.25)"
                       />
                     </View>
-                    <StatusBar
-                      animated={true}
-                      backgroundColor="rgba(0, 0, 0, 0.25)"
+                  </Modal>
+                  <CustomButton
+                    type={"ICON"}
+                    icon={"done"}
+                    iconColor={Colors.TAKEN_OK}
+                    onPress={() => handleDone(item.id, remaining)}
+                  />
+                  {showFindMedsM && (
+                    <CustomButton
+                      type={"ICON"}
+                      icon={"location"}
+                      iconColor={Colors.TAKEN_100}
+                      onPress={() => {
+                        Linking.openURL(
+                          "https://www.google.com/maps/search/?api=1&query=pharmacy+near+me"
+                        ).catch((err) =>
+                          console.error("An error occurred", err)
+                        );
+                      }}
                     />
-                  </View>
-                </Modal>
-                <CustomButton
-                  type={"ICON"}
-                  icon={"done"}
-                  iconColor={Colors.TAKEN_OK}
-                  onPress={() => handleDone(item.id, remaining)}
-                />
-                <CustomButton
-                  type={"ICON"}
-                  icon={"edit"}
-                  iconColor={Colors.PRIMARY}
-                  onPress={() => setModaEditVisible(!modalEditVisible)}
-                />
-                <EditMeds
-                  id={item.id}
-                  isVisible={modalEditVisible}
-                  onClose={() => setModaEditVisible(!modalEditVisible)}
-                />
+                  )}
+                  <CustomButton
+                    type={"ICON"}
+                    icon={"edit"}
+                    iconColor={Colors.PRIMARY}
+                    onPress={() => setModaEditVisible(!modalEditVisible)}
+                  />
+                  <EditMeds
+                    id={item.id}
+                    isVisible={modalEditVisible}
+                    onClose={() => setModaEditVisible(!modalEditVisible)}
+                  />
 
-                <CustomButton
-                  type={"ICON"}
-                  icon={"delete"}
-                  iconColor={Colors.TAKEN_100}
-                  onPress={() => handleDelete(item.id)}
-                />
-              </View>
-            </>
-          )}
+                  <CustomButton
+                    type={"ICON"}
+                    icon={"delete"}
+                    iconColor={Colors.TAKEN_100}
+                    onPress={() => handleDelete(item.id)}
+                  />
+                </View>
+              </>
+            )}
+          </Animated.View>
         </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderPastMedItem = ({ item }: { item: MedsDB }) => {
+    let remaining =
+      (item.intake.length -
+        item.intake.filter((intake) => intake.taken === true).length) *
+      parseInt(item.dosage);
+
+    let lastTaken = item.intake.filter((intake) => intake.taken === true)[
+      item.intake.filter((intake) => intake.taken === true).length - 1
+    ]?.dateTime;
+    return (
+      <View style={styles.medicationContainer}>
+        <View style={styles.medicationHeader}>
+          <Text style={styles.medicationName}>{item.name}</Text>
+        </View>
+
+        <View style={styles.medicationRow}>
+          <Text style={[styles.medicationText, { marginHorizontal: 0 }]}>
+            Start Date:
+          </Text>
+          <Text style={styles.medicationValue}>
+            {format(new Date(item.dateTime), "dd/MM/yyyy")}
+          </Text>
+        </View>
+
+        <View style={styles.medicationRow}>
+          <Text style={[styles.medicationText, { marginHorizontal: 0 }]}>
+            Last Taken:
+          </Text>
+          <Text style={styles.medicationValue}>
+            {lastTaken ? format(new Date(lastTaken), "dd/MM/yyyy") : "---"}
+          </Text>
+        </View>
+
+        <View style={[styles.medicationRow, { marginBottom: 0 }]}>
+          <Text style={[styles.medicationText, { marginHorizontal: 0 }]}>
+            Remaining:
+          </Text>
+          <Text style={styles.medicationValue}>{remaining}</Text>
+        </View>
       </View>
     );
   };
@@ -361,6 +449,26 @@ const MedicationScreen = () => {
         renderItem={renderMedItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        ListEmptyComponent={
+          <View style={{ paddingTop: "10%" }}>
+            <EmptyMeds screenOptions="meds" />
+          </View>
+        }
+        ListFooterComponent={
+          <FlatList
+            // ref={flatListRef2}
+            data={medications.filter((med) => !med.active)}
+            renderItem={renderPastMedItem}
+            keyExtractor={(item) => item.id}
+            ListHeaderComponent={
+              medications.filter((med) => !med.active).length > 0 ? (
+                <Text style={styles.pastMedsTitle}>Past medications</Text>
+              ) : (
+                <></>
+              )
+            }
+          />
+        }
       />
     </View>
   );
@@ -371,11 +479,11 @@ export default MedicationScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.BACKGROUND_100,
+    backgroundColor: "#fff",
     height: "70%",
   },
   listContent: {
-    paddingHorizontal: 16,
+    marginHorizontal: 16,
     paddingBottom: 80,
   },
   // add button
@@ -411,8 +519,9 @@ const styles = StyleSheet.create({
     tintColor: "#fff",
   },
   medicationContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.BACKGROUND_100,
     padding: 20,
+    paddingHorizontal: 16,
     marginBottom: 16,
     borderRadius: 12,
     shadowColor: Colors.SHADOW,
@@ -433,7 +542,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.BORDERGRAY,
   },
   medicationName: {
-    fontSize: Platform.OS === "ios" ? 16 : 18,
+    fontSize: Platform.OS === "ios" ? 18 : 20,
     color: Colors.TEXT,
     fontFamily: "outfit-medium",
   },
@@ -486,6 +595,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 16,
     paddingTop: 8,
     borderTopWidth: 0.5,
@@ -543,5 +653,11 @@ const styles = StyleSheet.create({
   },
   col3Modal: {
     flex: 25,
+  },
+  pastMedsTitle: {
+    fontFamily: "outfit-medium",
+    fontSize: 24,
+    color: Colors.PRIMARY,
+    paddingVertical: 10,
   },
 });
