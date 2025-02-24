@@ -102,12 +102,12 @@ TodayMeds is a mobile application developed using React Native with Firebase, do
 ## App screens
 
 Android:
-<div align="text-align: justify;"  >
+<div align="center"  >
    <a href="#todaymeds">
-     <img src="assets/images/ssa1.png" alt="Logo" width="170" height="377" />&nbsp;
-     <img src="assets/images/ssa2.png" alt="Logo" width="170" height="377" />&nbsp;
-     <img src="assets/images/ssa3.png" alt="Logo" width="170" height="377" />&nbsp;
-     <img src="assets/images/ssa4.png" alt="Logo" width="170" height="377" />
+     <img src="assets/images/ssa1.png" alt="Logo" width="194" height="432" />&nbsp;
+     <img src="assets/images/ssa2.png" alt="Logo" width="194" height="432" />&nbsp;
+     <img src="assets/images/ssa3.png" alt="Logo" width="194" height="432" />&nbsp;
+     <img src="assets/images/ssa4.png" alt="Logo" width="194" height="432" />
    </a>
 </div>
 <br/>
@@ -120,10 +120,10 @@ Android:
 iOS:
 <div align="center" >
    <a href="#todaymeds">
-     <img src="assets/images/ssi1.png" alt="Logo" width="245" height="531" />&nbsp;
-     <img src="assets/images/ssi2.png" alt="Logo" width="245" height="531" />&nbsp;
-     <img src="assets/images/ssi3.png" alt="Logo" width="245" height="531" />&nbsp;
-     <img src="assets/images/ssi4.png" alt="Logo" width="245" height="531" />
+     <img src="assets/images/ssi1.png" alt="Logo" width="194" height="419" />&nbsp;
+     <img src="assets/images/ssi2.png" alt="Logo" width="194" height="419" />&nbsp;
+     <img src="assets/images/ssi3.png" alt="Logo" width="194" height="419" />&nbsp;
+     <img src="assets/images/ssi4.png" alt="Logo" width="194" height="419" />
    </a>
 </div>
 
