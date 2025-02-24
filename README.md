@@ -104,10 +104,10 @@ TodayMeds is a mobile application developed using React Native with Firebase, do
 Android:
 <div align="text-align: justify;"  >
    <a href="#todaymeds">
-     <img src="assets/images/ssa1.png" alt="Logo" width="245" height="545" />&nbsp;
-     <img src="assets/images/ssa2.png" alt="Logo" width="245" height="545" />&nbsp;
-     <img src="assets/images/ssa3.png" alt="Logo" width="245" height="545" />&nbsp;
-     <img src="assets/images/ssa4.png" alt="Logo" width="245" height="545" />
+     <img src="assets/images/ssa1.png" alt="Logo" width="170" height="377" />&nbsp;
+     <img src="assets/images/ssa2.png" alt="Logo" width="170" height="377" />&nbsp;
+     <img src="assets/images/ssa3.png" alt="Logo" width="170" height="377" />&nbsp;
+     <img src="assets/images/ssa4.png" alt="Logo" width="170" height="377" />
    </a>
 </div>
 <br/>
