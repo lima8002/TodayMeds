@@ -14,8 +14,6 @@ import { Colors } from "@/constants/Colors";
 import { Intake, MedsDB } from "@/constants/Types";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { useRouter } from "expo-router";
-import RNFS from "react-native-fs";
-import DayCard from "@/components/meds/DayCard";
 import IntakeDetails from "@/components/meds/IntakeDetails";
 import EmptyMeds from "@/components/ui/EmptyMeds";
 import EmptyAgenda from "@/components/ui/EmptyAgenda";
@@ -125,7 +123,7 @@ function MainScreen() {
               onPress={() => router.push("/profile")}
               style={styles.shadow}
             >
-              <Image
+              {/* <Image
                 source={{
                   uri:
                     `${Platform.OS === "android" && "file://"}${
@@ -133,7 +131,7 @@ function MainScreen() {
                     }/` + userDB?.photo,
                 }}
                 style={styles.profilePhoto}
-              />
+              /> */}
             </TouchableOpacity>
           )}
 

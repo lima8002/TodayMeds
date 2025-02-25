@@ -17,7 +17,6 @@ import { Colors } from "@/constants/Colors";
 import { launchImageLibrary } from "react-native-image-picker";
 import { format, parseISO } from "date-fns";
 import { ProgressBar } from "react-native-paper";
-import RNFS from "react-native-fs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomButton from "@/components/ui/CustomButton";
 import CustomHeader from "@/components/ui/CustomHeader";
@@ -44,9 +43,9 @@ export default function ProfileScreen() {
     deleteUser,
   } = useGlobalContext();
   const [editEnabled, setEditEnabled] = useState<boolean>(false);
-  const path = `${Platform.OS === "android" && "file://"}${
-    RNFS.DocumentDirectoryPath
-  }/profileImage.jpg`;
+  // const path = `${Platform.OS === "android" && "file://"}${
+  //   RNFS.DocumentDirectoryPath
+  // }/profileImage.jpg`;
 
   const [name, setName] = useState<string>(userDB?.name || "");
   const [dob, setDob] = useState<string>(userDB?.dob || "");
@@ -72,472 +71,6 @@ export default function ProfileScreen() {
     }
   }, [medications]);
 
-  const loadRandomData = async () => {
-    const initialDate = new Date();
-    const initialDate1 = new Date();
-    const initialDate2 = new Date();
-    const initialDate3 = new Date();
-
-    // const initialDate = new Date("2023-05-24T03:06:50.000Z");
-    // const initialDate1 = new Date("2023-05-24T03:06:50.000Z");
-    // const initialDate2 = new Date("2023-05-24T03:06:50.000Z");
-    // const initialDate3 = new Date("2023-05-24T03:06:50.000Z");
-    initialDate.setDate(initialDate.getDate() - 3);
-
-    initialDate1.setDate(initialDate1.getDate() - 2);
-
-    initialDate3.setDate(initialDate3.getDate() - 25);
-
-    const medsToAdd: MedsDB[] = [
-      {
-        id: "123",
-        email: `${userDB?.email}`,
-        name: "Lisinopril",
-        dosage: "1",
-        frequency: 12,
-        dateTime: `${initialDate.toISOString()}`,
-        quantity: "22",
-        withFoodWater: false,
-        active: true,
-        intakeRef: "123",
-        intake: [
-          {
-            intakeId: "0",
-            intakeRef: "123",
-            dateTime: `${initialDate.toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "1",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "2",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "3",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "4",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "5",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "6",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "7",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "8",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "9",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "10",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "11",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "12",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "13",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "14",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "15",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "16",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "17",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "18",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "19",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "20",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "21",
-            intakeRef: "123",
-            dateTime: `${new Date(
-              initialDate.setHours(initialDate.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-        ],
-      },
-      {
-        id: "1234",
-        email: `${userDB?.email}`,
-        name: "Metformin",
-        dosage: "1",
-        frequency: 8,
-        dateTime: `${initialDate1.toISOString()}`,
-        quantity: "10",
-        withFoodWater: false,
-        active: true,
-        intakeRef: "1234",
-        intake: [
-          {
-            intakeId: "0",
-            intakeRef: "1234",
-            dateTime: `${initialDate1.toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "1",
-            intakeRef: "1234",
-            dateTime: `${new Date(
-              initialDate1.setHours(initialDate1.getHours() + 8)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "2",
-            intakeRef: "1234",
-            dateTime: `${new Date(
-              initialDate1.setHours(initialDate1.getHours() + 8)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "3",
-            intakeRef: "1234",
-            dateTime: `${new Date(
-              initialDate1.setHours(initialDate1.getHours() + 8)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "4",
-            intakeRef: "1234",
-            dateTime: `${new Date(
-              initialDate1.setHours(initialDate1.getHours() + 8)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "5",
-            intakeRef: "1234",
-            dateTime: `${new Date(
-              initialDate1.setHours(initialDate1.getHours() + 8)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "6",
-            intakeRef: "1234",
-            dateTime: `${new Date(
-              initialDate1.setHours(initialDate1.getHours() + 8)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "7",
-            intakeRef: "1234",
-            dateTime: `${new Date(
-              initialDate1.setHours(initialDate1.getHours() + 8)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "8",
-            intakeRef: "1234",
-            dateTime: `${new Date(
-              initialDate1.setHours(initialDate1.getHours() + 8)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "9",
-            intakeRef: "1234",
-            dateTime: `${new Date(
-              initialDate1.setHours(initialDate1.getHours() + 8)
-            ).toISOString()}`,
-            taken: false,
-          },
-        ],
-      },
-      {
-        id: "12345",
-        email: `${userDB?.email}`,
-        name: "Atorvastatin",
-        dosage: "1",
-        frequency: 8,
-        dateTime: `${initialDate2.toISOString()}`,
-        quantity: "10",
-        withFoodWater: true,
-        active: true,
-        intakeRef: "12345",
-        intake: [
-          {
-            intakeId: "0",
-            intakeRef: "12345",
-            dateTime: `${initialDate2.toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "1",
-            intakeRef: "12345",
-            dateTime: `${new Date(
-              initialDate2.setHours(initialDate2.getHours() + 8)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "2",
-            intakeRef: "12345",
-            dateTime: `${new Date(
-              initialDate2.setHours(initialDate2.getHours() + 8)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "3",
-            intakeRef: "12345",
-            dateTime: `${new Date(
-              initialDate2.setHours(initialDate2.getHours() + 8)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "4",
-            intakeRef: "12345",
-            dateTime: `${new Date(
-              initialDate2.setHours(initialDate2.getHours() + 8)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "5",
-            intakeRef: "12345",
-            dateTime: `${new Date(
-              initialDate2.setHours(initialDate2.getHours() + 8)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "6",
-            intakeRef: "12345",
-            dateTime: `${new Date(
-              initialDate2.setHours(initialDate2.getHours() + 8)
-            ).toISOString()}`,
-            taken: false,
-          },
-          {
-            intakeId: "7",
-            intakeRef: "12345",
-            dateTime: `${new Date(
-              initialDate2.setHours(initialDate2.getHours() + 8)
-            ).toISOString()}`,
-            taken: false,
-          },
-        ],
-      },
-      {
-        id: "123456",
-        email: `${userDB?.email}`,
-        name: "Amoxicillin",
-        dosage: "1",
-        frequency: 12,
-        dateTime: `${initialDate3.toISOString()}`,
-        quantity: "10",
-        withFoodWater: true,
-        active: false,
-        intakeRef: "123456",
-        intake: [
-          {
-            intakeId: "0",
-            intakeRef: "123456",
-            dateTime: `${initialDate3.toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "1",
-            intakeRef: "123456",
-            dateTime: `${new Date(
-              initialDate3.setHours(initialDate3.getHours() + 12)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "2",
-            intakeRef: "123456",
-            dateTime: `${new Date(
-              initialDate3.setHours(initialDate3.getHours() + 12)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "3",
-            intakeRef: "123456",
-            dateTime: `${new Date(
-              initialDate3.setHours(initialDate3.getHours() + 12)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "4",
-            intakeRef: "123456",
-            dateTime: `${new Date(
-              initialDate3.setHours(initialDate3.getHours() + 12)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "5",
-            intakeRef: "123456",
-            dateTime: `${new Date(
-              initialDate3.setHours(initialDate3.getHours() + 12)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "6",
-            intakeRef: "123456",
-            dateTime: `${new Date(
-              initialDate3.setHours(initialDate3.getHours() + 12)
-            ).toISOString()}`,
-            taken: true,
-          },
-          {
-            intakeId: "7",
-            intakeRef: "123456",
-            dateTime: `${new Date(
-              initialDate3.setHours(initialDate3.getHours() + 12)
-            ).toISOString()}`,
-            taken: false,
-          },
-        ],
-      },
-    ];
-
-    try {
-      for (const med of medsToAdd) {
-        const newMed: MedsDB = {
-          ...med,
-          intake: med.intake.map((intake) => ({ ...intake })),
-        };
-        await onAddNewMedToDB(newMed);
-      }
-      console.log("Random medications added successfully!");
-      fetchMeds(user?.email || "");
-    } catch (error) {
-      console.error("Error adding random medications:", error);
-    }
-  };
-
   const handlePickImage = async () => {
     launchImageLibrary(
       {
@@ -560,9 +93,9 @@ export default function ProfileScreen() {
               }
               checkProfilePhoto();
               try {
-                console.log("fileAndroid: " + imageUri?.toString() || "", path);
-                const result = RNFS.copyFile(imageUri?.toString() || "", path);
-                console.log("result --> ", result);
+                // console.log("fileAndroid: " + imageUri?.toString() || "", path);
+                // const result = RNFS.copyFile(imageUri?.toString() || "", path);
+                // console.log("result --> ", result);
               } catch (error) {
                 console.log(error);
               }
@@ -579,12 +112,12 @@ export default function ProfileScreen() {
 
   const checkProfilePhoto = async () => {
     try {
-      const exists = await RNFS.exists(path);
-      if (exists) {
-        setProfilePhotoExists(true);
-      } else {
-        setProfilePhotoExists(false);
-      }
+      // const exists = await RNFS.exists(path);
+      // if (exists) {
+      //   setProfilePhotoExists(true);
+      // } else {
+      //   setProfilePhotoExists(false);
+      // }
       console.log("profilePhotoExists---> " + profilePhotoExists);
     } catch (error) {
       console.error("Error checking profile photo:", error);
@@ -620,20 +153,20 @@ export default function ProfileScreen() {
   }, [userDB, checkProfilePhoto]);
 
   const handleProfilePhoto = async () => {
-    try {
-      const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
-      console.log("Files in Document Directory:", files);
+    // try {
+    //   const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
+    //   console.log("Files in Document Directory:", files);
 
-      // You can then iterate through the 'files' array
-      files.forEach((file) => {
-        console.log("File Name:", file.name);
-        console.log("File Path:", file.path);
-        console.log("File Size:", file.size);
-        console.log("------------------");
-      });
-    } catch (error) {
-      console.error("Error listing files:", error);
-    }
+    //   // You can then iterate through the 'files' array
+    //   files.forEach((file) => {
+    //     console.log("File Name:", file.name);
+    //     console.log("File Path:", file.path);
+    //     console.log("File Size:", file.size);
+    //     console.log("------------------");
+    //   });
+    // } catch (error) {
+    //   console.error("Error listing files:", error);
+    // }
     profilePhotoExists === true
       ? Alert.alert(
           "Select an option",
@@ -680,7 +213,7 @@ export default function ProfileScreen() {
     } catch (error) {
       console.error("Error deleting image:", error);
     } finally {
-      await RNFS.unlink(path);
+      // await RNFS.unlink(path);
       console.log("Image deleted successfully");
     }
   };
@@ -839,7 +372,7 @@ export default function ProfileScreen() {
                     source={Profile}
                   />
                 )}
-                {userDB?.photo && userDB?.photo.length > 0 && (
+                {/* {userDB?.photo && userDB?.photo.length > 0 && (
                   <Image
                     style={{
                       width: 100,
@@ -852,7 +385,7 @@ export default function ProfileScreen() {
                       }/${userDB?.photo}`,
                     }}
                   />
-                )}
+                )} */}
               </View>
             </TouchableOpacity>
           </View>
@@ -952,7 +485,7 @@ export default function ProfileScreen() {
           For testing purposes only
         </Text>
         <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
-          <CustomButton
+          {/* <CustomButton
             type="ICON"
             icon={"loadM"}
             iconColor={Colors.TEXT_100}
@@ -965,7 +498,7 @@ export default function ProfileScreen() {
               backgroundColor: "#fff",
             }}
             disabled={loadDisabled}
-          />
+          /> */}
           <CustomButton
             type="ICON"
             icon={"deleteM"}

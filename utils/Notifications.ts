@@ -64,7 +64,7 @@ export const scheduleNotifications = async (medsData: Partial<MedsDB>) => {
             title: "TodayMeds",
             body: `${medsData.name}: Take ${medsData.dosage} ${
               medsData.dosage === "1" ? "pill/tablet." : "pills/tablets."
-            }\n${medsData.withFoodWater && "Take with Food/Water."}`,
+            }${medsData.withFoodWater ? "\nTake with Food/Water." : ""}`,
             sound: true,
             priority: "high",
             interruptionLevel: "critical",

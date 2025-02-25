@@ -2,7 +2,6 @@ import { Tabs } from "expo-router";
 import { View, Text, Image, StyleSheet, Platform } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
-import RNFS from "react-native-fs";
 
 import pills from "@/assets/icons/pills.png";
 import calendar from "@/assets/icons/calendar.png";
@@ -31,9 +30,9 @@ const TabIcon = ({
               title === "Profile"
             ? require("@/assets/icons/person90.png")
             : {
-                uri: `${Platform.OS === "android" && "file://"}${
-                  RNFS.DocumentDirectoryPath
-                }/${userDB?.photo}`,
+                // uri: `${Platform.OS === "android" && "file://"}${
+                //   RNFS.DocumentDirectoryPath
+                // }/${userDB?.photo}`,
               }
         }
         style={[
