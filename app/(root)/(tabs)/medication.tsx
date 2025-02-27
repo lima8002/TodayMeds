@@ -17,7 +17,7 @@ import {
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { MedsDB } from "@/constants/Types";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
 import CustomHeader from "@/components/ui/CustomHeader";
 import CustomButton from "@/components/ui/CustomButton";
 import IntakeDetails from "@/components/meds/IntakeDetails";
@@ -34,7 +34,6 @@ const MedicationScreen = () => {
   const [modalIntakeVisible, setModalIntakeVisible] = useState<boolean>(false);
   const [modalEditVisible, setModaEditVisible] = useState<boolean>(false);
   const [modalAddVisible, setModalAddVisible] = useState<boolean>(false);
-  const [currentItemId, setCurrentItemId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList<MedsDB> | null>(null);
   const animatedValues = useRef<{ [key: string]: Animated.Value }>({});
   const expandAnimValues = useRef<{ [key: string]: Animated.Value }>({});

@@ -25,18 +25,30 @@ const setupNotificationListeners = () => {
 
     if (actionId === "MARK_AS_TAKEN") {
       try {
+        console.log(
+          "Notification data:",
+          JSON.stringify(notificationData, null, 2)
+        );
         const intakeId = notificationData.intakeId as string;
         const medId = notificationData.medsId as string;
-        await onUpdateIntake(medId, intakeId, false);
+
+        if (!medId || !intakeId) {
+          console.error("Missing medId or intakeId:", { medId, intakeId });
+          return;
+        }
+
+        console.log("Updating intake with:", { medId, intakeId });
+        await onUpdateIntake(medId, intakeId, true);
+        console.log("Intake updated successfully");
+
+        const notificationId = response.notification.request.identifier;
+        await Notifications.cancelScheduledNotificationAsync(notificationId);
+        console.log(
+          `Cancelled notification ${notificationId} after marking as taken`
+        );
       } catch (error) {
         console.error("Error saving taken status:", error);
       }
-
-      const notificationId = response.notification.request.identifier;
-      await Notifications.cancelScheduledNotificationAsync(notificationId);
-      console.log(
-        `Cancelled notification ${notificationId} after marking as taken`
-      );
     }
   });
 };
@@ -73,6 +85,7 @@ export const scheduleNotifications = async (medsData: Partial<MedsDB>) => {
               intakeRef: medsData.intakeRef,
               intakeId: medsData.intake[i].intakeId,
             },
+            categoryIdentifier: "medication",
           },
           trigger: {
             type: SchedulableTriggerInputTypes.DATE,

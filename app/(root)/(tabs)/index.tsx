@@ -32,6 +32,7 @@ function MainScreen() {
     medications,
     showQtLeft,
     showFindMedsT,
+    photoProfile,
   } = useGlobalContext();
   const [todayIntakes, setTodayIntakes] = useState<Intake[]>([]);
   const [todayMeds, setTodayMeds] = useState<MedsDB[]>([]);
@@ -118,20 +119,17 @@ function MainScreen() {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <View style={{ flexDirection: "row" }}>
-          {userDB?.photo !== undefined && userDB?.photo.length > 2 && (
+          {photoProfile && photoProfile.length > 2 && (
             <TouchableOpacity
               onPress={() => router.push("/profile")}
               style={styles.shadow}
             >
-              {/* <Image
+              <Image
                 source={{
-                  uri:
-                    `${Platform.OS === "android" && "file://"}${
-                      RNFS.DocumentDirectoryPath
-                    }/` + userDB?.photo,
+                  uri: photoProfile,
                 }}
                 style={styles.profilePhoto}
-              /> */}
+              />
             </TouchableOpacity>
           )}
 

@@ -11,8 +11,6 @@ import {
   Platform,
 } from "react-native";
 import { useGlobalContext } from "@/context/GlobalProvider";
-import { onAddNewMedToDB } from "@/utils/FirebaseHelper";
-import { MedsDB } from "@/constants/Types";
 import { Colors } from "@/constants/Colors";
 import { launchImageLibrary } from "react-native-image-picker";
 import { format, parseISO } from "date-fns";
@@ -22,6 +20,7 @@ import CustomButton from "@/components/ui/CustomButton";
 import CustomHeader from "@/components/ui/CustomHeader";
 import EditProfileModal from "@/components/modals/EditProfileModal";
 import Profile from "@/assets/icons/person90.png";
+import * as FileSystem from "expo-file-system";
 
 export default function ProfileScreen() {
   const {
@@ -41,132 +40,128 @@ export default function ProfileScreen() {
     showFindMedsT,
     setShowFindMedsT,
     deleteUser,
+    photoProfile,
+    setPhotoProfile,
   } = useGlobalContext();
+  const photoPath = `${FileSystem.documentDirectory}profileImage.jpg`;
   const [editEnabled, setEditEnabled] = useState<boolean>(false);
-  // const path = `${Platform.OS === "android" && "file://"}${
-  //   RNFS.DocumentDirectoryPath
-  // }/profileImage.jpg`;
-
+  const [testMeds, setTestMeds] = useState<boolean>(true);
   const [name, setName] = useState<string>(userDB?.name || "");
   const [dob, setDob] = useState<string>(userDB?.dob || "");
-  const [photo, setPhoto] = useState<string>("");
   const [profilePhotoExists, setProfilePhotoExists] = useState<boolean>();
   const [selectedDate, setSelectedDate] = useState(
     (userDB?.dob && userDB?.dob.length > 0 && parseISO(userDB?.dob)) ||
       new Date()
   );
-  const [loadDisabled, setLoadDisabled] = useState<boolean>(false);
-  const [deleteDisabled, setDeleteDisabled] = useState<boolean>(true);
 
   useEffect(() => {
-    const checkIfLoaded = medications.some((medication) =>
-      ["Lisinopril", "Metformin", "Atorvastatin", "Amoxicillin"].includes(
-        medication.name
-      )
-    );
-
-    if (checkIfLoaded) {
-      setLoadDisabled(true);
-      setDeleteDisabled(false);
-    }
-  }, [medications]);
-
-  const handlePickImage = async () => {
-    launchImageLibrary(
-      {
-        mediaType: "photo",
-        includeBase64: true,
-        selectionLimit: 1,
-      },
-      async (response) => {
-        if (response.didCancel) {
-          console.log("User cancelled image picker");
-        } else if (response.errorMessage) {
-          console.error("ImagePicker Error: ", response.errorMessage);
-        } else if (response.assets && response.assets.length > 0) {
-          const imageUri = response.assets[0].uri;
-          try {
-            await checkProfilePhoto();
-            setTimeout(() => {
-              if (profilePhotoExists) {
-                handleDeleteProfilePhoto();
-              }
-              checkProfilePhoto();
-              try {
-                // console.log("fileAndroid: " + imageUri?.toString() || "", path);
-                // const result = RNFS.copyFile(imageUri?.toString() || "", path);
-                // console.log("result --> ", result);
-              } catch (error) {
-                console.log(error);
-              }
-
-              handleUpdateProfilePhoto("profileImage.jpg");
-            }, 399);
-          } catch (error) {
-            console.error("Error saving image:", error);
+    const checkPhoto = async () => {
+      try {
+        if (userDB?.photo) {
+          const fileInfo = await FileSystem.getInfoAsync(userDB.photo);
+          if (fileInfo.exists && fileInfo.uri) {
+            setProfilePhotoExists(true);
+            setPhotoProfile(fileInfo.uri);
+          } else {
+            setProfilePhotoExists(false);
+            setPhotoProfile("");
+            handleUpdateProfilePhoto("");
           }
         }
+      } catch (error) {
+        console.error("Error checking profile photo:", error);
+        setProfilePhotoExists(false);
       }
-    );
-  };
+    };
 
-  const checkProfilePhoto = async () => {
+    checkPhoto();
+  }, [userDB?.photo]);
+
+  const handlePickImage = async () => {
     try {
-      // const exists = await RNFS.exists(path);
-      // if (exists) {
-      //   setProfilePhotoExists(true);
-      // } else {
-      //   setProfilePhotoExists(false);
-      // }
-      console.log("profilePhotoExists---> " + profilePhotoExists);
-    } catch (error) {
-      console.error("Error checking profile photo:", error);
-    }
-  };
+      const response = await launchImageLibrary({
+        mediaType: "photo",
+        includeBase64: false,
+        selectionLimit: 1,
+        quality: 1,
+      });
 
-  const handleUpdateProfilePhoto = (photo: string) => {
-    try {
-      console.log("photo", photo);
-      const userEmail = user?.email?.toString();
+      if (response.didCancel) {
+        console.log("User cancelled image picker");
+        return;
+      }
 
-      if (userEmail) {
-        const userData = {
-          name: name,
-          dob: dob,
-          photo: photo,
-        };
-        updateUser(userEmail, userData);
+      if (response.errorMessage) {
+        console.error("ImagePicker Error: ", response.errorMessage);
+        return;
+      }
+
+      if (response.assets && response.assets.length > 0) {
+        const imageUri = response.assets[0].uri;
+        if (!imageUri) return;
+
+        if (profilePhotoExists) {
+          await handleDeleteProfilePhoto();
+        }
+
+        let finalUri = imageUri;
+        if (Platform.OS === "ios" && !imageUri.startsWith("file://")) {
+          finalUri = `file://${imageUri}`;
+        }
+
+        await FileSystem.copyAsync({
+          from: finalUri,
+          to: photoPath,
+        });
+
+        const fileInfo = await FileSystem.getInfoAsync(photoPath);
+        if (!fileInfo.exists) {
+          throw new Error("Failed to copy image to destination");
+        }
+
+        setProfilePhotoExists(true);
+        const timestamp = `?t=${new Date().getTime()}`;
+        await handleUpdateProfilePhoto(`${photoPath}${timestamp}`);
       }
     } catch (error) {
-      console.error("Error deleting image:", error);
+      console.error("Error handling image pick:", error);
+      Alert.alert("Error", "Failed to save profile photo. Please try again.");
     }
   };
 
-  useEffect(() => {
-    if (userDB?.photo && userDB.photo.length > 3) {
-      setPhoto(userDB?.photo);
-    } else {
-      setPhoto("");
-    }
+  const handleUpdateProfilePhoto = async (photoUri: string) => {
+    try {
+      const userEmail = user?.email;
+      if (!userEmail) return;
 
-    checkProfilePhoto();
-  }, [userDB, checkProfilePhoto]);
+      const userData = {
+        name,
+        dob,
+        photo: photoUri,
+      };
+      await updateUser(userEmail, userData);
+      setPhotoProfile(photoUri);
+    } catch (error) {
+      console.error("Error updating profile photo:", error);
+      Alert.alert("Error", "Failed to update profile");
+    }
+  };
+
+  const handleDeleteProfilePhoto = async () => {
+    try {
+      const fileInfo = await FileSystem.getInfoAsync(photoPath);
+      if (fileInfo.exists) {
+        await FileSystem.deleteAsync(photoPath);
+      }
+      setProfilePhotoExists(false);
+      await handleUpdateProfilePhoto("");
+    } catch (error) {
+      console.error("Error deleting profile photo:", error);
+      Alert.alert("Error", "Failed to delete profile photo");
+    }
+  };
 
   const handleProfilePhoto = async () => {
-    // try {
-    //   const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
-    //   console.log("Files in Document Directory:", files);
-
-    //   // You can then iterate through the 'files' array
-    //   files.forEach((file) => {
-    //     console.log("File Name:", file.name);
-    //     console.log("File Path:", file.path);
-    //     console.log("File Size:", file.size);
-    //     console.log("------------------");
-    //   });
-    // } catch (error) {
-    //   console.error("Error listing files:", error);
-    // }
     profilePhotoExists === true
       ? Alert.alert(
           "Select an option",
@@ -207,17 +202,6 @@ export default function ProfileScreen() {
         );
   };
 
-  const handleDeleteProfilePhoto = async () => {
-    try {
-      handleUpdateProfilePhoto("");
-    } catch (error) {
-      console.error("Error deleting image:", error);
-    } finally {
-      // await RNFS.unlink(path);
-      console.log("Image deleted successfully");
-    }
-  };
-
   const handleAutosaveSwitch = async (newValue: boolean) => {
     try {
       setAutosave(newValue);
@@ -247,6 +231,7 @@ export default function ProfileScreen() {
       console.error("Error getting ShowQtLeft:", error);
     }
   };
+
   const handleShowFindMedsMSwitch = async (newValue: boolean) => {
     try {
       setShowFindMedsM(newValue);
@@ -261,6 +246,7 @@ export default function ProfileScreen() {
       console.error("Error getting ShowFindMedsM:", error);
     }
   };
+
   const handleShowFindMedsTSwitch = async (newValue: boolean) => {
     try {
       setShowFindMedsT(newValue);
@@ -286,7 +272,19 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleDeleteAccount = () => {};
+  const handleTestMeds = () => {
+    // "Lisinopril", "Metformin", "Atorvastatin", "Amoxicillin"
+    if (testMeds) {
+      // load 4 medications here
+      // custom dates
+      // if it's a past date, chenge to taken
+      console.log("Load here");
+      setTestMeds(!testMeds);
+    } else {
+      console.log("Delete here");
+      setTestMeds(!testMeds);
+    }
+  };
 
   const ReportCard = () => {
     return (
@@ -354,14 +352,27 @@ export default function ProfileScreen() {
             <TouchableOpacity onPress={() => handleProfilePhoto()}>
               <View
                 style={{
-                  width: userDB?.photo ? 100 : 127,
-                  height: userDB?.photo ? 100 : 127,
+                  width: !photoProfile ? 127 : 100,
+                  height: !photoProfile ? 127 : 100,
                   borderRadius: 8,
                   borderWidth: 1,
                   borderColor: Colors.BORDERDISABLED,
                 }}
               >
-                {!userDB?.photo && (
+                {photoProfile && photoProfile.length > 0 && (
+                  <Image
+                    style={{
+                      width: 100,
+                      height: 100,
+                    }}
+                    resizeMode={"cover"}
+                    source={{
+                      uri: photoProfile,
+                    }}
+                    key={profilePhotoExists ? "photo-exists" : "no-photo"}
+                  />
+                )}
+                {!photoProfile && (
                   <Image
                     style={{
                       width: 127,
@@ -372,20 +383,6 @@ export default function ProfileScreen() {
                     source={Profile}
                   />
                 )}
-                {/* {userDB?.photo && userDB?.photo.length > 0 && (
-                  <Image
-                    style={{
-                      width: 100,
-                      height: 100,
-                    }}
-                    resizeMode={"cover"}
-                    source={{
-                      uri: `${Platform.OS === "android" && "file://"}${
-                        RNFS.DocumentDirectoryPath
-                      }/${userDB?.photo}`,
-                    }}
-                  />
-                )} */}
               </View>
             </TouchableOpacity>
           </View>
@@ -479,68 +476,46 @@ export default function ProfileScreen() {
             thumbColor={Colors.TEXT_100}
           />
         </View>
-        <View style={styles.line} />
+        {/* <View style={styles.line} /> */}
 
-        <Text style={[styles.switchText, { padding: 10 }]}>
+        {/* <Text style={[styles.switchText, { padding: 10 }]}>
           For testing purposes only
         </Text>
         <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
-          {/* <CustomButton
-            type="ICON"
-            icon={"loadM"}
-            iconColor={Colors.TEXT_100}
-            onPress={() => loadRandomData()}
-            otherStyles={{
-              width: "45%",
-              flexDirection: "row",
-              borderWidth: 1,
-              borderColor: Colors.TEXT_100,
-              backgroundColor: "#fff",
-            }}
-            disabled={loadDisabled}
-          /> */}
-          <CustomButton
-            type="ICON"
-            icon={"deleteM"}
-            iconColor={Colors.TAKEN_100}
-            onPress={() => {
-              deleteAllMedication(user?.email || "");
-              fetchMeds(user?.email || "");
-              setLoadDisabled(false);
-            }}
-            otherStyles={{
-              width: "45%",
-              flexDirection: "row",
-              borderWidth: 1,
-              borderColor: Colors.TEXT_100,
-              backgroundColor: "#fff",
-            }}
-            disabled={deleteDisabled}
-          />
-        </View>
-        {/* <CustomButton
-          type="SECONDARY"
-          text="Delete All AsyncStorage Data"
-          onPress={async () => {
-            try {
-              await AsyncStorage.clear();
-              console.log("All data cleared successfully");
-            } catch (e) {
-              // handle error here
-              console.error("Error clearing data:", e);
-            }
-          }}
-        /> */}
-        {/* <CustomButton
-          type="SECONDARY"
-          text="Trigger notification"
-          onPress={scheduleTimedNotification}
-        />
-        <CustomButton
-          type="SECONDARY"
-          text="Trigger notification"
-          onPress={logNotifications}
-        /> */}
+          {testMeds ? (
+            <CustomButton
+              type="ICON"
+              icon={"loadM"}
+              iconColor={Colors.TEXT_100}
+              onPress={handleTestMeds}
+              otherStyles={{
+                width: "45%",
+                flexDirection: "row",
+                borderWidth: 1,
+                borderColor: Colors.TEXT_100,
+                backgroundColor: "#fff",
+              }}
+            />
+          ) : (
+            <CustomButton
+              type="ICON"
+              icon={"deleteM"}
+              iconColor={Colors.TAKEN_100}
+              onPress={
+                handleTestMeds
+                // deleteAllMedication(user?.email || "");
+                // fetchMeds(user?.email || "");
+              }
+              otherStyles={{
+                width: "45%",
+                flexDirection: "row",
+                borderWidth: 1,
+                borderColor: Colors.TEXT_100,
+                backgroundColor: "#fff",
+              }}
+            />
+          )}
+        </View> */}
       </View>
 
       <View style={[styles.signoutBtn, styles.shadow]}>
@@ -628,7 +603,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.BACKGROUND_100,
     borderRadius: 8,
     paddingHorizontal: 8,
-    paddingBottom: 24,
+    // paddingBottom: 24,
     marginHorizontal: 16,
   },
 

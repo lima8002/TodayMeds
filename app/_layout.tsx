@@ -4,7 +4,6 @@ import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import GlobalProvider from "@/context/GlobalProvider";
 import * as Notifications from "expo-notifications";
-import "./global.css";
 import { Alert, Linking } from "react-native";
 import { setupNotificationCategories } from "@/utils/Notifications";
 

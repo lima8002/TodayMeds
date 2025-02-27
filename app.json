@@ -15,7 +15,8 @@
         "light": "./assets/images/app-icon.png"
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to set your profile picture."
       }
     },
     "android": {

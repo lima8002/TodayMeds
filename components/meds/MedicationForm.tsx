@@ -84,7 +84,7 @@ function MedicationForm({
       return;
     }
     const medicationData = {
-      id: Date.now().toString(),
+      id: initialValues?.id || Date.now().toString(),
       name,
       dosage: finalDosage,
       frequency,
@@ -267,7 +267,6 @@ function MedicationForm({
             <View style={styles.pickerContainer}>
               <DatePicker
                 date={dateTime}
-                // minuteInterval={15}
                 onDateChange={(date) => {
                   setTmpDateTime(date);
                 }}

@@ -21,7 +21,7 @@ import {
 import { User } from "firebase/auth";
 import { Intake, MedsDB, UserDB } from "../constants/Types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
+import * as FileSystem from "expo-file-system";
 import {
   checkAndDeleteNotifications,
   deleteAllNotifications,
@@ -68,6 +68,8 @@ interface GlobalContextType {
   setShowFindMedsT: React.Dispatch<React.SetStateAction<boolean>>;
   showFindMedsM: boolean;
   setShowFindMedsM: React.Dispatch<React.SetStateAction<boolean>>;
+  photoProfile: string | null;
+  setPhotoProfile: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -86,6 +88,9 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [showQtLeft, setShowQtLeft] = useState<boolean>(false);
   const [showFindMedsT, setShowFindMedsT] = useState<boolean>(false);
   const [showFindMedsM, setShowFindMedsM] = useState<boolean>(false);
+  const [photoProfile, setPhotoProfile] = useState<string | null>(
+    userDB?.photo || ""
+  );
 
   useEffect(() => {
     const unsubscribeAuth = AuthenticatedUser(async (authUser) => {
@@ -101,6 +106,21 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       }
       setIsLoading(false);
     });
+
+    const checkProfilePhoto = async () => {
+      try {
+        if (userDB?.photo) {
+          const fileInfo = await FileSystem.getInfoAsync(userDB.photo);
+          if (fileInfo.exists && fileInfo.uri) {
+            setPhotoProfile(fileInfo.uri);
+          } else {
+            setPhotoProfile("");
+          }
+        }
+      } catch (error) {
+        console.error("Error checking profile photo:", error);
+      }
+    };
 
     const getSettingsValues = async () => {
       try {
@@ -124,6 +144,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         console.error("Error getting Autosave:", error);
       }
     };
+    checkProfilePhoto();
     getSettingsValues();
     return () => unsubscribeAuth();
   }, []);
@@ -141,6 +162,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       const result = await onGetUser(userEmail);
       if (result !== null) {
         setUserDB(result);
+        setPhotoProfile(result.photo);
       } else {
         console.warn("No user found for email:", userEmail);
       }
@@ -343,6 +365,8 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     setShowFindMedsM,
     showFindMedsT,
     setShowFindMedsT,
+    photoProfile,
+    setPhotoProfile,
   };
 
   return (

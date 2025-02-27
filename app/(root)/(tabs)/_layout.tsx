@@ -17,35 +17,31 @@ const TabIcon = ({
   icon: any;
   title: string;
 }) => {
-  const { userDB } = useGlobalContext();
+  const { photoProfile } = useGlobalContext();
 
   return (
     <View style={styles.container}>
       <Image
         source={
-          !userDB?.photo || (icon && title != "Profile")
+          !photoProfile || (icon && title != "Profile")
             ? icon
-            : !userDB?.photo &&
-              userDB?.photo.length === 0 &&
-              title === "Profile"
+            : !photoProfile && photoProfile.length === 0 && title === "Profile"
             ? require("@/assets/icons/person90.png")
             : {
-                // uri: `${Platform.OS === "android" && "file://"}${
-                //   RNFS.DocumentDirectoryPath
-                // }/${userDB?.photo}`,
+                uri: photoProfile,
               }
         }
         style={[
           styles.icon,
           title === "Profile"
-            ? !userDB?.photo
+            ? !photoProfile
               ? {
                   width: 30,
                   height: 30,
                   marginTop: -2,
                   tintColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY,
                 }
-              : userDB?.photo && {
+              : photoProfile && {
                   borderRadius: 100,
                   borderWidth: 1,
                   borderColor: focused ? Colors.LOGO_BACKGROUND : Colors.GRAY,
@@ -60,7 +56,7 @@ const TabIcon = ({
         style={[
           styles.text,
           focused ? styles.textFocused : styles.textUnfocused,
-          { marginTop: title === "Profile" ? (!userDB?.photo ? 2 : 4) : 4 },
+          { marginTop: title === "Profile" ? (!photoProfile ? 2 : 4) : 4 },
         ]}
       >
         {title}
