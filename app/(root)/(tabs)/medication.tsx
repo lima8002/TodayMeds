@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { useMedsContext } from "@/context/MedsProvider";
 import { MedsDB } from "@/constants/Types";
 import { format } from "date-fns";
 import CustomHeader from "@/components/ui/CustomHeader";
@@ -26,8 +27,8 @@ import AddMeds from "@/components/modals/AddMeds";
 import EmptyMeds from "@/components/ui/EmptyMeds";
 
 const MedicationScreen = () => {
-  const { medications, updateMedication, deleteMedication, showFindMedsM } =
-    useGlobalContext();
+  const { medications, updateMedication, deleteMedication } = useMedsContext();
+  const { showFindMedsM } = useGlobalContext();
   const [selectedMedicationId, setSelectedMedicationId] = useState<
     string | null
   >(null);

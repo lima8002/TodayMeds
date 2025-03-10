@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, SectionList, Platform } from "react-native";
-import { useGlobalContext } from "@/context/GlobalProvider";
+import { useMedsContext } from "@/context/MedsProvider";
 import { Colors } from "@/constants/Colors";
 import { Intake } from "@/constants/Types";
 import CustomHeader from "@/components/ui/CustomHeader";
@@ -9,7 +9,7 @@ import IntakeDetails from "@/components/meds/IntakeDetails";
 import EmptyAgenda from "@/components/ui/EmptyAgenda";
 
 const AgendaScreen = () => {
-  const { getAllIntakes, medications } = useGlobalContext();
+  const { getAllIntakes, medications } = useMedsContext();
   const allIntakes = getAllIntakes();
 
   const groupIntakes = (intakes: Intake[]) => {

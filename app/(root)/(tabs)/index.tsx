@@ -13,6 +13,9 @@ import {
 import { Colors } from "@/constants/Colors";
 import { Intake, MedsDB } from "@/constants/Types";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { useUserContext } from "@/context/UserProvider";
+import { useAuthContext } from "@/context/AuthProvider";
+import { useMedsContext } from "@/context/MedsProvider";
 import { useRouter } from "expo-router";
 import IntakeDetails from "@/components/meds/IntakeDetails";
 import EmptyMeds from "@/components/ui/EmptyMeds";
@@ -24,16 +27,11 @@ const { width } = Dimensions.get("window");
 
 function MainScreen() {
   const router = useRouter();
+  const { user } = useAuthContext();
+  const { userDB, photoProfile } = useUserContext();
+  const { medications, getAllIntakes } = useMedsContext();
+  const { showQtLeft, showFindMedsT } = useGlobalContext();
   const [greeting, setGreeting] = useState<string | null>(null);
-  const {
-    getAllIntakes,
-    user,
-    userDB,
-    medications,
-    showQtLeft,
-    showFindMedsT,
-    photoProfile,
-  } = useGlobalContext();
   const [todayIntakes, setTodayIntakes] = useState<Intake[]>([]);
   const [todayMeds, setTodayMeds] = useState<MedsDB[]>([]);
   const todayDate = new Date().getDate();

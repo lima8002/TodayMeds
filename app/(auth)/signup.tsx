@@ -7,18 +7,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Button,
   Modal,
 } from "react-native";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { router } from "expo-router";
-
+import { CreateUser } from "@/utils/FirebaseHelper";
+import { Colors } from "@/constants/Colors";
+import { useAuthContext } from "@/context/AuthProvider";
 import CustomInput from "@/components/ui/CustomInput";
 import CustomButton from "@/components/ui/CustomButton";
 import EMAIL_REGEX from "@/constants/EmailRegex";
-import { CreateUser } from "@/utils/FirebaseHelper";
-import { Colors } from "@/constants/Colors";
-import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface SignUpFormData {
   name: string;
@@ -35,7 +33,7 @@ const SignUp: React.FC = () => {
     getValues,
   } = useForm<SignUpFormData>();
   const [isModalLoading, setModalIsLoading] = useState(false);
-  const { setIsLoggedIn } = useGlobalContext();
+  const { setIsLoggedIn } = useAuthContext();
 
   const onRegisterPressed: SubmitHandler<SignUpFormData> = (data) => {
     setModalIsLoading(true);

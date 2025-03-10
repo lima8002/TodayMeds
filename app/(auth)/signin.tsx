@@ -5,7 +5,6 @@ import {
   Image,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   Modal,
@@ -13,12 +12,12 @@ import {
 } from "react-native";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Redirect, useRouter } from "expo-router";
+import { SignInUser } from "@/utils/FirebaseHelper";
+import { useAuthContext } from "@/context/AuthProvider";
 import { Colors } from "@/constants/Colors";
 import CustomInput from "@/components/ui/CustomInput";
 import CustomButton from "@/components/ui/CustomButton";
 import EMAIL_REGEX from "@/constants/EmailRegex";
-import { SignInUser } from "@/utils/FirebaseHelper";
-import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface SignInFormData {
   email: string;
@@ -27,7 +26,7 @@ interface SignInFormData {
 
 const SignIn: React.FC = () => {
   const router = useRouter();
-  const { isLoading, isLoggedIn } = useGlobalContext();
+  const { isLoading, isLoggedIn } = useAuthContext();
   const [isModalLoading, setModalIsLoading] = useState<boolean>(false);
 
   const {

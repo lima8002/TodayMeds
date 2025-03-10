@@ -1,8 +1,7 @@
 import { Tabs } from "expo-router";
-import { View, Text, Image, StyleSheet, Platform } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { Colors } from "@/constants/Colors";
-import { useGlobalContext } from "@/context/GlobalProvider";
-
+import { useUserContext } from "@/context/UserProvider";
 import pills from "@/assets/icons/pills.png";
 import calendar from "@/assets/icons/calendar.png";
 import person from "@/assets/icons/person.png";
@@ -17,7 +16,7 @@ const TabIcon = ({
   icon: any;
   title: string;
 }) => {
-  const { photoProfile } = useGlobalContext();
+  const { photoProfile } = useUserContext();
 
   return (
     <View style={styles.container}>

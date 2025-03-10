@@ -1,13 +1,12 @@
-import { ActivityIndicator } from "react-native";
 import React from "react";
-import { useGlobalContext } from "@/context/GlobalProvider";
-
+import { ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, Slot } from "expo-router";
 import { Colors } from "@/constants/Colors";
+import { useAuthContext } from "@/context/AuthProvider";
 
 export default function RootLayout() {
-  const { isLoading, isLoggedIn } = useGlobalContext();
+  const { isLoading, isLoggedIn } = useAuthContext();
 
   if (isLoading) {
     return (

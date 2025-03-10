@@ -2,10 +2,13 @@ import React, { useEffect } from "react";
 import { SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
-import GlobalProvider from "@/context/GlobalProvider";
-import * as Notifications from "expo-notifications";
 import { Alert, Linking } from "react-native";
 import { setupNotificationCategories } from "@/utils/Notifications";
+import * as Notifications from "expo-notifications";
+import AuthProvider from "@/context/AuthProvider";
+import UserProvider from "@/context/UserProvider";
+import MedsProvider from "@/context/MedsProvider";
+import GlobalProvider from "@/context/GlobalProvider";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -64,9 +67,15 @@ export default function RootLayout() {
     return null;
   }
   return (
-    <GlobalProvider>
-      <Stack screenOptions={{ headerShown: false, animation: "fade" }} />
-      <StatusBar style="dark" />
-    </GlobalProvider>
+    <AuthProvider>
+      <UserProvider>
+        <MedsProvider>
+          <GlobalProvider>
+            <Stack screenOptions={{ headerShown: false, animation: "fade" }} />
+            <StatusBar style="dark" />
+          </GlobalProvider>
+        </MedsProvider>
+      </UserProvider>
+    </AuthProvider>
   );
 }

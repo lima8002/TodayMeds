@@ -21,27 +21,24 @@ import CustomHeader from "@/components/ui/CustomHeader";
 import EditProfileModal from "@/components/modals/EditProfileModal";
 import Profile from "@/assets/icons/person90.png";
 import * as FileSystem from "expo-file-system";
+import { useAuthContext } from "@/context/AuthProvider";
+import { useMedsContext } from "@/context/MedsProvider";
+import { useUserContext } from "@/context/UserProvider";
 
 export default function ProfileScreen() {
+  const { user, letUserSignOut } = useAuthContext();
+  const { userDB, updateUser, deleteUser, photoProfile, setPhotoProfile } =
+    useUserContext();
+  const { deleteAllMedication, medications, fetchMeds } = useMedsContext();
   const {
-    letUserSignOut,
-    deleteAllMedication,
-    user,
-    userDB,
-    medications,
-    fetchMeds,
     autosave,
     setAutosave,
-    updateUser,
     showQtLeft,
     setShowQtLeft,
     showFindMedsM,
     setShowFindMedsM,
     showFindMedsT,
     setShowFindMedsT,
-    deleteUser,
-    photoProfile,
-    setPhotoProfile,
   } = useGlobalContext();
   const photoPath = `${FileSystem.documentDirectory}profileImage.jpg`;
   const [editEnabled, setEditEnabled] = useState<boolean>(false);
