@@ -1,3 +1,5 @@
+# 🚨🚨🚨 ---- CURRENTLY REFACTORING CODE AS OF TODAY, MARCH 10, 2025. SOME THINGS MIGHT NOT WORK AS EXPECTED. ---- 🚨🚨🚨
+
 <!-- BUILT WITH -->
 
 ![React Native](https://img.shields.io/badge/React%20Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
