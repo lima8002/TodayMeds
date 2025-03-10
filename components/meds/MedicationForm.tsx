@@ -59,6 +59,8 @@ function MedicationForm({
     }
   }, [initialValues]);
 
+  console.log(tempFrequency);
+
   const handleSubmit = () => {
     const finalDosage =
       selectedDosage === "Other" ? otherDosage : selectedDosage;
@@ -214,7 +216,7 @@ function MedicationForm({
                         ? number.toString() + " hour"
                         : number.toString() + " hours"
                     }
-                    value={number}
+                    value={number.toString()}
                     color="#000"
                   />
                 ))}
