@@ -8,11 +8,11 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import { useGlobalContext } from "@/context/GlobalProvider";
 import { Colors } from "@/constants/Colors";
+import { StatusBar } from "expo-status-bar";
+import { useMedsContext } from "@/context/MedsProvider";
 import MedicationForm from "@/components/meds/MedicationForm";
 import CustomHeader from "@/components/ui/CustomHeader";
-import { StatusBar } from "expo-status-bar";
 
 interface ModalProps {
   id: string;
@@ -21,7 +21,7 @@ interface ModalProps {
 }
 
 function EditMeds({ id, isVisible, onClose }: ModalProps) {
-  const { medications, updateMedication } = useGlobalContext();
+  const { medications, updateMedication } = useMedsContext();
   const [needNewIntake, setNeedNewIntake] = useState<boolean>(false);
   const [currentId] = useState<string>(id.toString());
   const medication = medications.find((med) => med.id === id);

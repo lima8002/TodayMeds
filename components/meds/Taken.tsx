@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Image, Platform, StyleSheet } from "react-native";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { useMedsContext } from "@/context/MedsProvider";
 import { Colors } from "@/constants/Colors";
 import { Intake } from "@/constants/Types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -13,14 +14,9 @@ interface TakenProps {
 }
 
 const Taken: React.FC<TakenProps> = ({ intakeRef, intakeId, type }) => {
-  const {
-    medications,
-    updateIntake,
-    autosave,
-    getAllIntakes,
-    setAutosave,
-    updateMedication,
-  } = useGlobalContext();
+  const { medications, updateIntake, getAllIntakes, updateMedication } =
+    useMedsContext();
+  const { autosave, setAutosave } = useGlobalContext();
 
   const medication = medications.find((med) => med.intakeRef === intakeRef);
 

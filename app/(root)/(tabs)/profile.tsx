@@ -15,15 +15,15 @@ import { Colors } from "@/constants/Colors";
 import { launchImageLibrary } from "react-native-image-picker";
 import { format, parseISO } from "date-fns";
 import { ProgressBar } from "react-native-paper";
+import { useAuthContext } from "@/context/AuthProvider";
+import { useMedsContext } from "@/context/MedsProvider";
+import { useUserContext } from "@/context/UserProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomButton from "@/components/ui/CustomButton";
 import CustomHeader from "@/components/ui/CustomHeader";
 import EditProfileModal from "@/components/modals/EditProfileModal";
 import Profile from "@/assets/icons/person90.png";
 import * as FileSystem from "expo-file-system";
-import { useAuthContext } from "@/context/AuthProvider";
-import { useMedsContext } from "@/context/MedsProvider";
-import { useUserContext } from "@/context/UserProvider";
 
 export default function ProfileScreen() {
   const { user, letUserSignOut } = useAuthContext();

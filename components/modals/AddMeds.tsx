@@ -1,5 +1,5 @@
 // add.tsx
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   StyleSheet,
@@ -9,10 +9,10 @@ import {
   Modal,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
-import { useGlobalContext } from "@/context/GlobalProvider";
+import { StatusBar } from "expo-status-bar";
+import { useMedsContext } from "@/context/MedsProvider";
 import CustomHeader from "@/components/ui/CustomHeader";
 import MedicationForm from "@/components/meds/MedicationForm";
-import { StatusBar } from "expo-status-bar";
 
 interface ModalProps {
   isVisible: boolean;
@@ -20,7 +20,7 @@ interface ModalProps {
 }
 
 function AddMeds({ isVisible, onClose }: ModalProps) {
-  const { addMedication } = useGlobalContext();
+  const { addMedication } = useMedsContext();
 
   const handleClose = () => {
     onClose();

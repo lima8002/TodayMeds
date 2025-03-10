@@ -49,8 +49,8 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         console.error("Error getting Autosave:", error);
       }
     };
-    getSettingsValues();
-  }, []);
+    if (user?.email) getSettingsValues();
+  }, [user?.email]);
 
   const contextValue: GlobalContextType = {
     autosave,

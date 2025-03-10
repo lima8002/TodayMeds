@@ -36,6 +36,7 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const getUserDetails = async () => {
+      console.log("email:  ", user?.email);
       await fetchUser(user?.email || "");
     };
 
@@ -53,10 +54,11 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         console.error("Error checking profile photo:", error);
       }
     };
-
-    getUserDetails();
-    checkProfilePhoto();
-  }, []);
+    if (user?.email) {
+      getUserDetails();
+      checkProfilePhoto();
+    }
+  }, [user]);
 
   const fetchUser = async (userEmail: string) => {
     try {

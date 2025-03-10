@@ -9,10 +9,10 @@ import {
   Platform,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
-import { useGlobalContext } from "@/context/GlobalProvider";
+import { StatusBar } from "expo-status-bar";
+import { useUserContext } from "@/context/UserProvider";
 import CustomButton from "@/components/ui/CustomButton";
 import DatePicker from "react-native-date-picker";
-import { StatusBar } from "expo-status-bar";
 
 type EditProfileModalProps = {
   isVisible: boolean;
@@ -28,7 +28,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   date,
   onDateChange,
 }) => {
-  const { userDB, updateUser } = useGlobalContext();
+  const { userDB, updateUser } = useUserContext();
   const [name, setName] = useState<string>();
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, Platform, StyleSheet, View } from "react-native";
-import { useGlobalContext } from "@/context/GlobalProvider";
+import { useMedsContext } from "@/context/MedsProvider";
 import { Colors } from "@/constants/Colors";
 import { Intake } from "@/constants/Types";
 import Taken from "./Taken";
@@ -12,7 +12,7 @@ interface IntakeProps {
 }
 
 const IntakeDetails: React.FC<IntakeProps> = ({ intakeItem, medRef, type }) => {
-  const { medications } = useGlobalContext();
+  const { medications } = useMedsContext();
 
   const medication = medications.find((med) => med.intakeRef === medRef);
 

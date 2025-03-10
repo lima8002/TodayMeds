@@ -49,8 +49,8 @@ const MedsProvider: React.FC<MedsProviderProps> = ({ children }) => {
     const getMedsDetails = async () => {
       await fetchMeds(user?.email || "");
     };
-    getMedsDetails();
-  }, []);
+    if (user?.email) getMedsDetails();
+  }, [user]);
 
   const fetchMeds = async (userEmail: string) => {
     try {
